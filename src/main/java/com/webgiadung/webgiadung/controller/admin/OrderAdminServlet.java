@@ -1,6 +1,6 @@
 package com.webgiadung.webgiadung.controller.admin;
 
-import com.webgiadung.webgiadung.dao.OrderAdminDao;
+import com.webgiadung.webgiadung.dao.OrderDao;
 import com.webgiadung.webgiadung.model.OrderAdmin;
 import jakarta.servlet.*;
 import jakarta.servlet.http.*;
@@ -14,7 +14,7 @@ public class OrderAdminServlet extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         // 1. Lấy tất cả đơn hàng từ DB
-        OrderAdminDao orderAdminDao = new OrderAdminDao(); List<OrderAdmin> orders = orderAdminDao.getAllOrders();
+        OrderDao orderAdminDao = new OrderDao();; List<OrderAdmin> orders = orderAdminDao.getAllOrders();
         // 2. Đặt attribute để JSP hiển thị
         request.setAttribute("orders", orders);
         // 3. Forward sang JSP quản lý đơn hàng Admin

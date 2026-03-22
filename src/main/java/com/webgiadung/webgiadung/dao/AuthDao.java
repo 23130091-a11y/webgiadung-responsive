@@ -49,9 +49,10 @@ public class AuthDao extends BaseDao {
 
         get().useHandle(h ->
                 h.createUpdate(
-                                "INSERT INTO users (email, password, phone, role, status) " +
-                                        "VALUES (:email, :password, :phone, :role, :status)"
+                                "INSERT INTO users (name, email, password, phone, role, status) " +
+                                        "VALUES (:name, :email, :password, :phone, :role, :status)"
                         )
+                        .bind("name",user.getName() )
                         .bind("email", user.getEmail())
                         .bind("password", user.getPassword())
                         .bind("phone", user.getPhone())
