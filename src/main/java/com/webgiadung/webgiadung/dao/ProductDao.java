@@ -17,7 +17,7 @@ public class ProductDao extends BaseDao {
         );
     }
 
-    // Lấy chi tiết 1 sản phẩm kèm các bảng phụ
+    // Lấy chi tiết 1 sản phẩm kèm các bảng phụ///////////////////////////
     public Product getProduct(int id) {
         return get().withHandle(h -> {
             Product product = h.createQuery("""
@@ -26,14 +26,11 @@ public class ProductDao extends BaseDao {
                         name,
                         image,
                         price_first AS firstPrice,
-                        price_total AS totalPrice,
                         discounts_id AS discountsId,
                         categories_id AS categoriesId,
                         brands_id AS brandsId,
-                        keywords_id AS keywordsId,
-                        post,
                         quantity,
-                        quantity_saled AS quantitySaled,
+                        sold_quantity AS quantitySaled,
                         created_at AS createdAt,
                         updated_at AS updatedAt
                     FROM products
@@ -82,12 +79,12 @@ public class ProductDao extends BaseDao {
             return product;
         });
     }
-
+/// ////////////////////
     public int insert(Product p) {
         return get().withHandle(h -> {
             return h.createUpdate(
-                            "INSERT INTO products (name, image, price_first, price_total, " +
-                                    "brands_id, keywords_id, categories_id, post, quantity, created_at, updated_at) " +
+                            "INSERT INTO products (name, image, price_first, " +
+                                    "brands_id, categories_id, quantity, created_at, updated_at) " +
                                     "VALUES (:name, :image, :totalPrice,:totalPrice, " +
                                     ":brandsId, :keywordsId, :categoriesId, :post, :quantity, NOW(), NOW())"
                     )
@@ -293,89 +290,87 @@ public class ProductDao extends BaseDao {
                         .list()
         );
     }
+/// ///////
+public Product getProductFullInfo(int id) {
+    return get().withHandle(handle -> {
+        Product product = handle.createQuery("""
+        SELECT 
+            p.id, p.name, p.image, 
+            p.price_first AS firstPrice, 
+            p.discounts_id AS discountsId, 
+            p.categories_id AS categoriesId, 
+            p.brands_id AS brandsId, 
+            p.quantity, 
+            p.sold_quantity AS soldQuantity, 
+            p.created_at AS createdAt, 
+            p.updated_at AS updatedAt,
+            b.name AS brandName
+        FROM products p
+        LEFT JOIN brands b ON p.brands_id = b.id
+        WHERE p.id = :id
+    """)
+                .bind("id", id)
+                .mapToBean(Product.class)
+                .findOne()
+                .orElse(null);
 
-    public Product getProductFullInfo(int id) {
-        return get().withHandle(handle -> {
-            Product product = handle.createQuery("""
+        if (product != null) {
+            // Lấy list descriptions
+            List<ProductDescriptions> descriptions = handle.createQuery("""
             SELECT 
-                p.id, p.name, p.image, 
-                p.price_first AS firstPrice, 
-                p.price_total AS totalPrice, 
-                p.discounts_id AS discountsId, 
-                p.categories_id AS categoriesId, 
-                p.brands_id AS brandsId, 
-                p.keywords_id AS keywordsId, 
-                p.post, p.quantity, 
-                p.quantity_saled AS quantitySaled, 
-                p.created_at AS createdAt, 
-                p.updated_at AS updatedAt,
-                
-                b.name AS brandName,
-                k.name AS keywordName
-
-            FROM products p
-            LEFT JOIN brands b ON p.brands_id = b.id
-            LEFT JOIN keywords k ON p.keywords_id = k.id
-            
-            WHERE p.id = :id
+                id, attr_name, value, 
+                product_id AS productId, 
+                created_at AS createdAt, 
+                updated_at AS updatedAt
+            FROM product_descriptions
+            WHERE product_id = :pid
         """)
-                    .bind("id", id)
-                    .mapToBean(Product.class)
-                    .findOne()
-                    .orElse(null);
-            // Các phần logic lấy list con bên dưới giữ nguyên
-            if (product != null) {
+                    .bind("pid", id)
+                    .mapToBean(ProductDescriptions.class)
+                    .list();
 
-                List<ProductDescriptions> descriptions = handle.createQuery("""
-                SELECT 
-                    id, title, description, 
-                    products_id AS productId, 
-                    created_at AS createdAt, 
-                    updated_at AS updatedAt
-                FROM products_description 
-                WHERE products_id = :pid
+            // Lấy list details
+            List<ProductDetails> details = handle.createQuery("""
+            SELECT 
+                id, image, title, description, 
+                product_id AS productId, 
+                created_at AS createdAt, 
+                updated_at AS updatedAt
+            FROM product_details 
+            WHERE product_id = :pid
+        """)
+                    .bind("pid", id)
+                    .mapToBean(ProductDetails.class)
+                    .list();
+            List<Keywords> keywords = handle.createQuery("""
+                SELECT k.* FROM keywords k
+                JOIN product_keywords pk ON k.id = pk.keyword_id
+                WHERE pk.product_id = :pid
             """)
-                        .bind("pid", id)
-                        .mapToBean(ProductDescriptions.class)
-                        .list();
+                    .bind("pid", id)
+                    .mapToBean(Keywords.class)
+                    .list();
 
-                List<ProductDetails> details = handle.createQuery("""
-                SELECT 
-                    id, image, title, description, 
-                    products_id AS productId, 
-                    created_at AS createdAt, 
-                    updated_at AS updatedAt
-                FROM products_detail 
-                WHERE products_id = :pid
-            """)
-                        .bind("pid", id)
-                        .mapToBean(ProductDetails.class)
-                        .list();
+            product.setDescriptions(descriptions);
+            product.setDetails(details);
+            product.setKeywords(keywords);
+        }
 
-                product.setDescriptions(descriptions);
-                product.setDetails(details);
-            }
-
-            return product;
-        });
-    }
-
+        return product;
+    });
+}
+/// /////
     public boolean updateProduct(Product product) {
         return get().inTransaction(handle -> {
-            // 1. CẬP NHẬT BẢNG CHÍNH (products)
-            // Lưu ý: Không cập nhật cột 'discount' theo yêu cầu
             int rowsUpdated = handle.createUpdate("""
             UPDATE products SET 
                 name = :name,
                 image = :image,
                 price_first = :firstPrice,
-                price_total = :totalPrice, 
                 categories_id = :categoriesId,
                 brands_id = :brandsId,
-                keywords_id = :keywordsId,
-                post = :post,
                 quantity = :quantity,
-                quantity_saled = :quantitySaled,
+                sold_quantity = :quantitySaled,
                 updated_at = NOW()             
             WHERE id = :id
         """)
@@ -384,7 +379,6 @@ public class ProductDao extends BaseDao {
 
             if (rowsUpdated == 0) return false;
 
-            // --- 2. XỬ LÝ DESCRIPTIONS (Thông minh) ---
             if (product.getDescriptions() != null) {
                 // Bước A: Lấy danh sách ID hiện có trong DB
                 List<Integer> existingIds = handle.createQuery("SELECT id FROM products_description WHERE products_id = :pid")
@@ -392,13 +386,12 @@ public class ProductDao extends BaseDao {
                         .mapTo(Integer.class)
                         .list();
 
-                // Bước B: Lấy danh sách ID từ form gửi lên (chỉ lấy các ID > 0)
                 List<Integer> incomingIds = product.getDescriptions().stream()
                         .map(ProductDescriptions::getId)
                         .filter(id -> id > 0)
                         .collect(Collectors.toList());
 
-                // Bước C: Xóa các dòng có trong DB nhưng KHÔNG có trong form gửi lên (User đã xóa dòng đó)
+
                 List<Integer> idsToDelete = existingIds.stream()
                         .filter(id -> !incomingIds.contains(id))
                         .collect(Collectors.toList());
@@ -409,7 +402,6 @@ public class ProductDao extends BaseDao {
                             .execute();
                 }
 
-                // Bước D: Loop để Update hoặc Insert
                 for (ProductDescriptions desc : product.getDescriptions()) {
                     if (desc.getId() > 0 && existingIds.contains(desc.getId())) {
                         // Cập nhật dòng cũ
@@ -436,7 +428,6 @@ public class ProductDao extends BaseDao {
                 }
             }
 
-            // --- 3. XỬ LÝ DETAILS (Tương tự Description) ---
             if (product.getDetails() != null) {
                 List<Integer> existingDetailIds = handle.createQuery("SELECT id FROM products_detail WHERE products_id = :pid")
                         .bind("pid", product.getId())
@@ -489,7 +480,7 @@ public class ProductDao extends BaseDao {
             return true;
         });
     }
-
+///   ///////////
     public boolean deleteProduct(int id) {
         return get().inTransaction(handle -> {
 
@@ -537,20 +528,18 @@ public class ProductDao extends BaseDao {
             return rows;
         });
     }
-
+/// ///
     public List<Product> searchWithFilters(String keyword, String[] brands, String[] priceRanges, String categoryId) {
         return get().withHandle(h -> {
             StringBuilder sql = new StringBuilder("""
         SELECT 
             p.id, p.name, p.image, p.post, p.quantity,
             p.price_first AS firstPrice, 
-            p.price_total AS totalPrice, 
             p.discounts_id AS discountsId, 
            (COALESCE(d.discount, 0) * 1.0) AS discountPercent,
             p.categories_id AS categoriesId, 
             p.brands_id AS brandsId, 
-            p.keywords_id AS keywordsId, 
-            p.quantity_saled AS quantitySaled, 
+            p.sold_quantity AS quantitySaled, 
             p.created_at AS createdAt, 
             p.updated_at AS updatedAt
         FROM products p

@@ -52,7 +52,7 @@ public class AuthDao extends BaseDao {
                                 "INSERT INTO users (name, email, password, phone, role, status) " +
                                         "VALUES (:name, :email, :password, :phone, :role, :status)"
                         )
-                        .bind("name",user.getName() )
+                        .bind("name", user.getName()) // Bổ sung dòng này
                         .bind("email", user.getEmail())
                         .bind("password", user.getPassword())
                         .bind("phone", user.getPhone())
