@@ -1,6 +1,6 @@
 package com.webgiadung.webgiadung.controller.admin;
 
-import com.webgiadung.webgiadung.dao.OrderAdminDao;
+import com.webgiadung.webgiadung.dao.OrderDao;
 import com.webgiadung.webgiadung.model.OrderAdmin;
 import jakarta.servlet.*;
 import jakarta.servlet.http.*;
@@ -14,7 +14,7 @@ public class OrderSearchServlet extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         String keyword = request.getParameter("keyword");
-        OrderAdminDao orderAdminDao = new OrderAdminDao();
+        OrderDao orderAdminDao = new OrderDao();
         List<OrderAdmin> orders;
 
         if (keyword == null || keyword.trim().isEmpty()) {

@@ -1,5 +1,6 @@
 package com.webgiadung.webgiadung.dao;
 
+import com.webgiadung.webgiadung.model.OrderAdmin;
 import com.webgiadung.webgiadung.model.Cart;
 import com.webgiadung.webgiadung.model.CartItem;
 import com.webgiadung.webgiadung.model.User;
@@ -149,6 +150,72 @@ public class OrderDao extends BaseDao {
                         .bind("order_id", orderId)
                         .mapToMap()
                         .list()
+        );
+    }
+    public List<OrderAdmin> getAllOrders() {
+        return get().withHandle(handle ->
+                handle.createQuery(
+                        "SELECT o.id, u.name AS customer_name, " +
+                                "o.status_transport, o.status_payment, o.created_at, o.total_price " +
+                                "FROM orders o " +
+                                "JOIN users u ON o.user_id = u.id " +
+                                "ORDER BY o.created_at DESC"
+                ).mapToBean(OrderAdmin.class).list()
+        );
+    }
+
+    public List<OrderAdmin> searchOrders(String keyword) {
+        String searchPattern = "%" + (keyword == null ? "" : keyword.trim()) + "%";
+
+        return get().withHandle(handle ->
+                handle.createQuery(
+                                "SELECT o.id, " +
+                                        "u.name AS customer_name, " +
+                                        "o.status_transport, " +
+                                        "o.status_payment, " +
+                                        "o.created_at, " +
+                                        "o.total_price " +
+                                        "FROM orders o " +
+                                        "JOIN users u ON o.user_id = u.id " +
+                                        "WHERE CAST(o.id AS CHAR) LIKE :kw " +
+                                        "OR u.name LIKE :kw " +
+                                        "ORDER BY o.created_at DESC"
+                        )
+                        .bind("kw", searchPattern)
+                        .mapToBean(OrderAdmin.class)
+                        .list()
+        );
+    }
+
+    public void deleteOrders(List<Integer> orderIds) {
+        if (orderIds == null || orderIds.isEmpty()) return;
+
+        get().useHandle(handle ->
+                handle.createUpdate("DELETE FROM orders WHERE id IN (<ids>)")
+                        .bindList("ids", orderIds)
+                        .execute()
+        );
+    }
+
+    public void updateStatusTransport(int orderId, int statusTransport) {
+        get().useHandle(handle ->
+                handle.createUpdate(
+                                "UPDATE orders SET status_transport = :status WHERE id = :id"
+                        )
+                        .bind("status", statusTransport)
+                        .bind("id", orderId)
+                        .execute()
+        );
+    }
+
+    public void updateStatusPayment(int orderId, int statusPayment) {
+        get().useHandle(handle ->
+                handle.createUpdate(
+                                "UPDATE orders SET status_payment = :status WHERE id = :id"
+                        )
+                        .bind("status", statusPayment)
+                        .bind("id", orderId)
+                        .execute()
         );
     }
 }

@@ -1,6 +1,6 @@
 package com.webgiadung.webgiadung.controller.admin;
 
-import com.webgiadung.webgiadung.dao.OrderAdminDao;
+import com.webgiadung.webgiadung.dao.OrderDao;
 import jakarta.servlet.*;
 import jakarta.servlet.http.*;
 import jakarta.servlet.annotation.*;
@@ -16,7 +16,7 @@ public class OrderUpdateStatusServlet extends HttpServlet {
 
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        OrderAdminDao orderAdminDao = new OrderAdminDao();
+        OrderDao orderAdminDao = new OrderDao();
         int orderId = Integer.parseInt(request.getParameter("orderId"));
         String type = request.getParameter("type");
         int status = Integer.parseInt(request.getParameter("status"));

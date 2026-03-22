@@ -1,6 +1,5 @@
 package com.webgiadung.webgiadung.controller;
 
-import com.webgiadung.webgiadung.dao.CartItemDao;
 import com.webgiadung.webgiadung.dao.OrderDao;
 import com.webgiadung.webgiadung.model.Cart;
 import com.webgiadung.webgiadung.model.CartItem;
@@ -159,21 +158,6 @@ public class CheckoutController extends HttpServlet {
 
         try {
             orderDao.placeOrder(user, orderCart, shipFee);
-
-            Integer cartId = (Integer) session.getAttribute("CART_ID");
-            if (cartId != null) {
-                CartItemDao itemDao = new CartItemDao();
-                if (idsParam != null && !idsParam.isBlank()) {
-                    for (String p : idsParam.split(",")) {
-                        try {
-                            int pid = Integer.parseInt(p.trim());
-                            itemDao.deleteItem(cartId, pid);
-                        } catch (Exception ignored) {}
-                    }
-                } else {
-                    itemDao.clearCartItems(cartId);
-                }
-            }
 
             if (idsParam != null && !idsParam.isBlank()) {
                 for (String p : idsParam.split(",")) {
