@@ -26,7 +26,6 @@ public class ProductDao extends BaseDao {
                         name,
                         image,
                         price_first AS firstPrice,
-                        price_total AS totalPrice,
                         discounts_id AS discountsId,
                         categories_id AS categoriesId,
                         brands_id AS brandsId,
@@ -86,7 +85,7 @@ public class ProductDao extends BaseDao {
     public int insert(Product p) {
         return get().withHandle(h -> {
             return h.createUpdate(
-                            "INSERT INTO products (name, image, price_first, price_total, " +
+                            "INSERT INTO products (name, image, price_first, " +
                                     "brands_id, keywords_id, categories_id, post, quantity, created_at, updated_at) " +
                                     "VALUES (:name, :image, :totalPrice,:totalPrice, " +
                                     ":brandsId, :keywordsId, :categoriesId, :post, :quantity, NOW(), NOW())"
@@ -300,7 +299,6 @@ public class ProductDao extends BaseDao {
             SELECT 
                 p.id, p.name, p.image, 
                 p.price_first AS firstPrice, 
-                p.price_total AS totalPrice, 
                 p.discounts_id AS discountsId, 
                 p.categories_id AS categoriesId, 
                 p.brands_id AS brandsId, 
@@ -369,7 +367,6 @@ public class ProductDao extends BaseDao {
                 name = :name,
                 image = :image,
                 price_first = :firstPrice,
-                price_total = :totalPrice, 
                 categories_id = :categoriesId,
                 brands_id = :brandsId,
                 keywords_id = :keywordsId,
@@ -384,7 +381,6 @@ public class ProductDao extends BaseDao {
 
             if (rowsUpdated == 0) return false;
 
-            // --- 2. XỬ LÝ DESCRIPTIONS (Thông minh) ---
             if (product.getDescriptions() != null) {
                 // Bước A: Lấy danh sách ID hiện có trong DB
                 List<Integer> existingIds = handle.createQuery("SELECT id FROM products_description WHERE products_id = :pid")
@@ -392,13 +388,12 @@ public class ProductDao extends BaseDao {
                         .mapTo(Integer.class)
                         .list();
 
-                // Bước B: Lấy danh sách ID từ form gửi lên (chỉ lấy các ID > 0)
                 List<Integer> incomingIds = product.getDescriptions().stream()
                         .map(ProductDescriptions::getId)
                         .filter(id -> id > 0)
                         .collect(Collectors.toList());
 
-                // Bước C: Xóa các dòng có trong DB nhưng KHÔNG có trong form gửi lên (User đã xóa dòng đó)
+
                 List<Integer> idsToDelete = existingIds.stream()
                         .filter(id -> !incomingIds.contains(id))
                         .collect(Collectors.toList());
@@ -409,7 +404,6 @@ public class ProductDao extends BaseDao {
                             .execute();
                 }
 
-                // Bước D: Loop để Update hoặc Insert
                 for (ProductDescriptions desc : product.getDescriptions()) {
                     if (desc.getId() > 0 && existingIds.contains(desc.getId())) {
                         // Cập nhật dòng cũ
@@ -436,7 +430,6 @@ public class ProductDao extends BaseDao {
                 }
             }
 
-            // --- 3. XỬ LÝ DETAILS (Tương tự Description) ---
             if (product.getDetails() != null) {
                 List<Integer> existingDetailIds = handle.createQuery("SELECT id FROM products_detail WHERE products_id = :pid")
                         .bind("pid", product.getId())
@@ -544,7 +537,6 @@ public class ProductDao extends BaseDao {
         SELECT 
             p.id, p.name, p.image, p.post, p.quantity,
             p.price_first AS firstPrice, 
-            p.price_total AS totalPrice, 
             p.discounts_id AS discountsId, 
            (COALESCE(d.discount, 0) * 1.0) AS discountPercent,
             p.categories_id AS categoriesId, 
