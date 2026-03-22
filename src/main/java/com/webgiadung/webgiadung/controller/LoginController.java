@@ -68,8 +68,6 @@ public class LoginController extends HttpServlet {
             response.sendRedirect(request.getContextPath() + redirect);
             return;
         }
-
-        // Điều hướng theo vai trò (Role)
         if (user.getRole() == 1) { // 1 là Admin
             response.sendRedirect(request.getContextPath() + "/admin/customers");
         } else { // 0 là User

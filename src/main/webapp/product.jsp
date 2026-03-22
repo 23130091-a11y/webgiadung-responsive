@@ -82,7 +82,7 @@
                             <div class="content-details__separate"></div>
                             <div class="content-sold">
                                 <span class="content-sold__text">Đã bán</span>
-                                <span class="content-feedback__level">${product.quantitySaled}</span>
+                                <span class="content-feedback__level">${product.soldQuantity}</span>
                             </div>
                             <div class="content-details__separate"></div>
                             <div class="content-sold">
@@ -107,39 +107,17 @@
                             <span class="content-details__desc">Giá</span>
                             <span class="content-details__price"><fmt:formatNumber value="${product.totalPrice}" type="number"/> đ</span>
                         </div>
-                        <c:if test="${not empty product.descriptionsList}">
-                            <c:forEach items="${product.descriptionsList}" var="desc">
-                                <div class="content-details__desc-wrap">
-                                    <span class="content-details__desc"><strong>${desc.title}</strong></span>
 
-                                    <span class="content-details__info">${desc.description}</span>
+                        <c:if test="${not empty product.descriptions}">
+                            <c:forEach items="${product.descriptions}" var="desc">
+                                <div class="content-details__desc-wrap">
+                                    <span class="content-details__desc"><strong>${desc.attrName}</strong></span>
+
+                                    <span class="content-details__info">${desc.value}</span>
                                 </div>
                             </c:forEach>
                         </c:if>
-                       <%--
-                        <!-- Attributes -->
-                        <c:forEach items="${product.attributes}" var="attr">
-                            <div class="content-details__desc-wrap">
-                                <span class="content-details__desc">${attr.attrName}</span>
-                                <span class="content-details__info">${attr.attrValue}</span>
-                            </div>
-                        </c:forEach>
 
-                        <!-- Options -->
-                        <c:if test="${not empty product.options}">
-                            <div class="content-details__desc-wrap content-details__option">
-                                <span class="content-details__desc">Tùy chọn</span>
-                                <div class="group-option">
-                                    <c:forEach items="${product.options}" var="opt">
-                                        <label class="radio" for="opt${opt.id}">
-                                            <input type="radio" name="type" id="opt${opt.id}" value="${opt.optionValue}" />
-                                                ${opt.optionName}
-                                        </label>
-                                    </c:forEach>
-                                </div>
-                            </div>
-                        </c:if>
-                        --%>
                         <div class="content-details__desc-wrap content-details__option">
                             <span class="content-details__desc">Số lượng</span>
                             <div class="content-quantity">
@@ -176,8 +154,8 @@
                 <div class="row small-gutter product-desc__inner">
                     <div class="col l-9 m-12 c-12">
                         <div class="product-desc__content">
-                            <c:if test="${not empty product.detailsList}">
-                                <c:forEach items="${product.detailsList}" var="detail">
+                            <c:if test="${not empty product.details}">
+                                <c:forEach items="${product.details}" var="detail">
                                     <h2 class="product-desc__name">${detail.title}</h2>
 
                                     <p class="product-desc__text">${detail.description}
@@ -318,7 +296,7 @@
                                     </figure>
 
                                     <article class="product-review__content-wrapper">
-                                        <h3 class="product-review__author">${rv.authorName}</h3>
+                                        <h3 class="product-review__author">${rv.userId }</h3>
 
                                         <div class="rating">
                                             <c:forEach var="i" begin="1" end="5">
