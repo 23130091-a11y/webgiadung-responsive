@@ -1343,8 +1343,13 @@
 
                                     <div class="add-product-form__row" style="align-items: center;">
                                         <div class="add-product-form__field" style="flex: 1;">
-                                            <label class="add-product-form__label">Ảnh đại diện:</label>
-                                            <input type="file" name="productImage" class="add-product-form__input" accept="image/*" required>
+                                            <label class="add-product-form__label">Ảnh đại diện (Thêm từng ảnh):</label>
+                                            <div class="add-product-input-group">
+                                                <input type="file" id="mainImgTemp" class="add-product-form__input" accept="image/*">
+                                                <button type="button" class="bton btn--primary" onclick="addMainImage()">Thêm ảnh</button>
+                                            </div>
+
+                                            <div id="mainImageStatusList" class="added-items-list" style="margin-top: 10px;"></div>
                                         </div>
                                         <div class="add-product-form__field" style="width: 100px;">
                                             <label class="add-product-form__label">Post ngay:</label>
@@ -2411,29 +2416,25 @@
             }
         });
 
-        // Gán nội dung khởi tạo
         quill.setText('Nội dung');
     });
 
-    // --- XỬ LÝ HIỂN THỊ CỬA SỔ NHẬP (MODAL) ---
 
     function openModal(id) {
         const modal = document.getElementById(id);
         if (modal) {
-            modal.style.display = 'flex'; // Hiển thị modal
+            modal.style.display = 'flex';
         }
     }
 
     function closeModal(id) {
         const modal = document.getElementById(id);
         if (modal) {
-            modal.style.display = 'none'; // Ẩn modal
         }
-        // Khi đóng, reset lại thanh chọn về mặc định để tránh bị kẹt ở chữ "Thêm mới"
+
         if (id === 'brandModal') document.getElementById('brandSelect').value = '';
         if (id === 'tagModal') document.getElementById('tagSelect').value = '';
 
-        // <--- MỚI THÊM: Reset select danh mục khi đóng modal
         if (id === 'cateModal') document.getElementById('cateSelect').value = '';
     }
 
@@ -2443,14 +2444,13 @@
         }
     }
 
-    // 1. Chức năng lưu Nhãn hiệu (Brand)
     function saveNewBrand() {
         const form = document.getElementById('addBrandFormQuick');
         if(!form) return;
 
         const formData = new FormData(form);
 
-        fetch('/DoAnWeb/api/add-brands', {
+        fetch('/WebGiaDung/api/add-brands', {
             method: 'POST',
             body: formData
         })
@@ -2479,7 +2479,6 @@
             });
     }
 
-    // 2. Chức năng lưu Từ khóa (Tag/Keyword)
     function saveNewTag() {
         const tagName = document.getElementById('newTagName').value;
         const tagDesc = document.getElementById('newTagDesc').value;
@@ -2493,7 +2492,7 @@
         params.append('tagName', tagName);
         params.append('tagDesc', tagDesc);
 
-        fetch('/DoAnWeb/api/add-tag', {
+        fetch('/WebGiaDung/api/add-tag', {
             method: 'POST',
             headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
             body: params
@@ -2515,7 +2514,7 @@
             .catch(error => console.error('Error:', error));
     }
 
-    // 3. Chức năng lưu Danh mục (Category) <--- MỚI THÊM: Code giống hệt Brand
+
     function saveNewCategory() {
         const cateName = document.getElementById('newCateName').value;
         const cateDesc = document.getElementById('newCateDesc').value;
@@ -2524,7 +2523,7 @@
         params.append('cateName', cateName);
         params.append('cateDesc', cateDesc);
 
-        fetch('/DoAnWeb/api/add-category', {
+        fetch('/WebGiaDung/api/add-category', {
             method: 'POST',
             headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
             body: params
@@ -2548,7 +2547,47 @@
             .catch(error => console.error('Error:', error));
     }
 
-    // --- QUẢN LÝ MÔ TẢ (DESCRIPTIONS) ---
+    function removeItem(id) {
+        var element = document.getElementById(id);
+        if (element) {
+            element.remove();
+        }
+    }
+
+    function addMainImage() {
+        var fileInput = document.getElementById('mainImgTemp');
+
+        if (!fileInput.files || fileInput.files.length === 0) {
+            alert("Vui lòng chọn một file ảnh trước!");
+            return;
+        }
+
+        var list = document.getElementById('mainImageStatusList');
+        var file = fileInput.files[0];
+
+        var itemId = 'main-img-' + Date.now();
+
+        var newFileInput = fileInput.cloneNode();
+        newFileInput.style.display = 'none';
+        newFileInput.name = "productImages[]";
+
+        var html = '<div class="added-item" id="' + itemId + '">' +
+            '<span>' +
+            '<i class="fas fa-image"></i> ' +
+            '<strong>Ảnh:</strong> ' + file.name +
+            '</span>' +
+            '<button type="button" onclick="removeItem(\'' + itemId + '\')" class="btn-remove">Xóa</button>' +
+            '</div>';
+
+        var wrapper = document.createElement('div');
+        wrapper.innerHTML = html;
+        var itemDiv = wrapper.firstElementChild;
+
+        itemDiv.appendChild(newFileInput);
+        list.appendChild(itemDiv);
+
+        fileInput.value = '';
+    }
     function addDescription() {
         const title = document.getElementById('descTitle').value;
         const content = document.getElementById('descContent').value;
@@ -2573,7 +2612,6 @@
         document.getElementById('descContent').value = '';
     }
 
-    // --- QUẢN LÝ CHI TIẾT (DETAILS - CÓ ẢNH) ---
     function addDetail() {
         const fileInput = document.getElementById('detailImg');
         const title = document.getElementById('detailTitle').value;
@@ -2617,10 +2655,9 @@
     }
 
     document.addEventListener("DOMContentLoaded", function() {
-        // Lưu ý: bỏ dấu '/' ở đầu nếu file JS chạy từ trang cùng cấp thư mục api
-        fetchData('/DoAnWeb/api/brands', 'brandSelect', '-- Chọn nhãn hiệu --');
-        fetchData('/DoAnWeb/api/keywords', 'tagSelect', '-- Chọn từ khóa --');
-        fetchData('/DoAnWeb/api/categories', 'cateSelect', '-- Chọn danh mục --');
+        fetchData('/WebGiaDung/api/brands', 'brandSelect', '-- Chọn nhãn hiệu --');
+        fetchData('/WebGiaDung/api/keywords', 'tagSelect', '-- Chọn từ khóa --');
+        fetchData('/WebGiaDung/api/categories', 'cateSelect', '-- Chọn danh mục --');
     });
 
     function fetchData(url, selectId, defaultText) {
@@ -2656,43 +2693,37 @@
         const form = document.getElementById('addProductFormInline');
         if (!form || !form.reportValidity()) return;
 
-        // 1. Thu thập ID từ các thẻ Select
         const brandID = document.getElementById('brandSelect').value;
         const tagID = document.getElementById('tagSelect').value;
-        const cateID = document.getElementById('cateSelect').value; // <--- MỚI THÊM: Lấy ID danh mục
+        const cateID = document.getElementById('cateSelect').value;
 
-        // Validate thêm cateID
         if (!brandID || brandID === 'add-new' ||
             !tagID || tagID === 'add-new' ||
-            !cateID || cateID === 'add-new') { // <--- MỚI THÊM
+            !cateID || cateID === 'add-new') {
             alert("Vui lòng chọn Nhãn hiệu, Danh mục và Từ khóa hợp lệ!");
             return;
         }
 
-        // 2. Tạo đối tượng FormData từ Form chính
         const formData = new FormData(form);
 
-        // 3. Xử lý logic Checkbox
+
         const postCheckbox = document.getElementById('postStatus');
         const isPostValue = (postCheckbox && postCheckbox.checked) ? "1" : "0";
         formData.set('postStatus', isPostValue);
 
-        // 4. Ép ID Brand, Tag, Category vào dữ liệu gửi đi
         formData.set('brandID', brandID);
         formData.set('tagID', tagID);
         formData.set('cateID', cateID);
 
-        // 5. Lấy nội dung từ Quill Editor
         const editorContent = document.querySelector('#editor .ql-editor');
         if (editorContent) {
             formData.append('productFullDescription', editorContent.innerHTML);
         }
 
-        // Gửi dữ liệu qua API
         console.log("Đang tiến hành lưu sản phẩm và dữ liệu liên quan...");
 
         try {
-            const response = await fetch('/DoAnWeb/api/add-product', {
+            const response = await fetch('/WebGiaDung/api/add-product', {
                 method: 'POST',
                 body: formData
             });
@@ -2717,8 +2748,7 @@
     var contextPath = '${pageContext.request.contextPath}';
 
     document.addEventListener("DOMContentLoaded", function () {
-        // 1. Tải danh mục bên trái
-        fetch('DoAnWeb/api/categories-list')
+        fetch('WebGiaDung/api/categories-list')
             .then(res => res.json())
             .then(data => renderCategoriesExact(data))
             .catch(err => console.error(err));
@@ -2889,27 +2919,25 @@
         });
     }
 
-    // --- 1. HÀM XỬ LÝ CLICK NÚT "XEM" ---
+
     function viewProduct(id) {
         console.log("Đang xem sản phẩm ID: " + id);
 
-        // BƯỚC 1: CHUYỂN ĐỔI GIAO DIỆN (Logic của bạn)
-        // Ẩn tất cả các section khác (Giả sử bạn đã có hàm này)
         if (typeof hideAllSections === 'function') {
             hideAllSections();
         }
 
-        // Lấy thẻ container chi tiết (ID trùng với trong HTML bạn đã viết)
+
         var sectionProductDetail = document.getElementById('viewProductModal');
 
         if (sectionProductDetail) {
-            // Áp dụng CSS như bạn yêu cầu để nó hiện ra như một trang con
+
             sectionProductDetail.style.display = "block";
             sectionProductDetail.style.position = "static";
             sectionProductDetail.style.backgroundColor = "transparent";
             sectionProductDetail.style.padding = "0"; // Hoặc padding tùy ý
 
-            // Cuộn lên đầu trang
+
             window.scrollTo({ top: 0, behavior: "smooth" });
         } else {
             console.error("Không tìm thấy div id='viewProductModal'");
@@ -2924,10 +2952,10 @@
             .then(data => {
                 if (data.error) {
                     alert(data.error);
-                    // Nếu lỗi thì quay lại danh sách
+
                     backToList();
                 } else {
-                    // BƯỚC 3: ĐỔ DỮ LIỆU VÀO HTML
+
                     fillProductModal(data);
                 }
             })
@@ -2937,7 +2965,7 @@
             });
     }
 
-    // --- 2. HÀM ĐỔ DỮ LIỆU VÀO HTML (RENDER) ---
+
     function fillProductModal(p) {
         '${pageContext.request.contextPath}';
 
@@ -3045,15 +3073,15 @@
         document.getElementById('edit-discount').addEventListener('input', calculateNewPrice);
     });
 
-    // --- 1. HÀM CLICK NÚT SỬA (GỌI API) ---
+
     document.addEventListener("DOMContentLoaded", function () {
-        // Tải danh mục, brand, keyword khi trang vừa load
+
         if(typeof loadProducts === "function") loadProducts(0);
         loadBrandOptions();
         loadKeywordOptions();
     });
 
-    // Hàm hiển thị Form sửa
+
     function editProduct(id) {
         console.log("Bắt đầu sửa sản phẩm ID: " + id);
 
@@ -3078,7 +3106,7 @@
             return;
         }
 
-        // 2. Gọi API lấy dữ liệu chi tiết
+
         fetch(contextPath + '/api/product-detail?id=' + id)
             .then(res => {
                 if (!res.ok) throw new Error("Lỗi server " + res.status);
@@ -3097,7 +3125,6 @@
             });
     }
 
-    // --- 2. HÀM ĐỔ DỮ LIỆU VÀO FORM (ĐÃ CẬP NHẬT LOGIC ID) ---
     function fillEditForm(p) {
         console.log("Dữ liệu nhận được:", p);
 
@@ -3154,7 +3181,6 @@
 
     var isUpdating = false;
 
-    // --- HÀM TÍNH TOÁN GIÁ (Helper) ---
     function calculateNewPrice() {
         var oldPrice = parseFloat(document.getElementById('edit-oldPrice').value) || 0;
         var discount = parseFloat(document.getElementById('edit-discount').value) || 0;
@@ -3279,7 +3305,6 @@
         container.appendChild(div);
     }
 
-    // Thêm dòng chi tiết (CÓ THAM SỐ ID)
     function addDetailRow(id = 0, title = "", content = "", imageName = "") {
         var container = document.getElementById('edit-v-detailList');
         var imgSrc = imageName ? (contextPath + '/assets/img/details/' + imageName) : (contextPath + '/assets/img/no-image.png');
@@ -3311,7 +3336,6 @@
         container.appendChild(div);
     }
 
-    // Preview ảnh chi tiết
     function previewDetailImage(input) {
         if (input.files && input.files[0]) {
             var reader = new FileReader();
@@ -3354,7 +3378,6 @@
         if(listSection) listSection.style.display = 'block';
     }
 
-    // --- HÀM LOAD SELECT OPTION ---
     function loadBrandOptions() {
         fetch(contextPath + '/api/brands')
             .then(res => res.json())
@@ -3387,23 +3410,20 @@
     function deleteProduct(id) {
         if(confirm('Bạn có chắc muốn xóa sản phẩm này? Hành động này không thể hoàn tác.')) {
 
-            // SỬA ĐOẠN NÀY: Không dùng FormData nữa
-            // Dùng URLSearchParams hoặc chuỗi string đơn giản
 
             fetch(contextPath + '/admin/product-delete', {
                 method: 'POST',
                 headers: {
-                    // Báo cho server biết đây là form data bình thường
+
                     'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8'
                 },
-                // Gửi dữ liệu dạng key=value
+
                 body: 'id=' + id
             })
                 .then(response => response.json())
                 .then(data => {
                     if (data.status === 'success') {
                         alert("Đã xóa sản phẩm thành công!");
-                        // Reload lại bảng (gọi lại hàm load ban đầu của bạn)
                         loadProducts(0);
                     } else {
                         alert("Lỗi: " + data.message);
@@ -3425,7 +3445,7 @@
 
     async function loadCategories() {
         try {
-            const response = await fetch(window.location.origin + '/DoAnWeb/api/categories');
+            const response = await fetch(window.location.origin + '/WebGiaDung/api/categories');
             const data = await response.json();
             const select = document.querySelector('select[name="applyCategories"]');
             if (select) {
@@ -3437,7 +3457,6 @@
         } catch (err) { console.error("Lỗi load categories:", err); }
     }
 
-    // 2. Hàm xử lý ẩn hiện Select Danh mục dựa trên Radio được chọn
     function setupScopeToggle() {
         const radios = document.querySelectorAll('input[name="applyScope"]');
         const scopeBox = document.getElementById('scopeCategory');
@@ -3448,7 +3467,7 @@
                     scopeBox.style.display = 'block';
                 } else {
                     scopeBox.style.display = 'none';
-                    // Reset select về 0 nếu người dùng quay lại chọn "Tất cả"
+
                     const select = document.querySelector('select[name="applyCategories"]');
                     if (select) select.value = "0";
                 }
@@ -3456,7 +3475,6 @@
         });
     }
 
-    // 3. Hàm xử lý gửi Form (Fix lỗi lưu 2 lần và xử lý id_cate)
     function setupFormSubmit() {
         const form = document.getElementById('addEventForm');
         if (!form) return;
@@ -3465,7 +3483,6 @@
             e.preventDefault();
             e.stopImmediatePropagation();
 
-            // TỰ ĐỘNG LẤY CONTEXT PATH (Sửa lỗi JasperException)
             const contextPath = window.location.pathname.substring(0, window.location.pathname.indexOf("/", 1));
             const url = contextPath + '/admin/add-discount';
 
@@ -3487,7 +3504,6 @@
                     body: formData // Servlet dùng @MultipartConfig nên gửi FormData là chuẩn
                 });
 
-                // Đọc response dưới dạng text trước để check nếu là lỗi 500 (trang HTML lỗi)
                 const responseText = await response.text();
                 let result;
                 try {
@@ -3794,12 +3810,10 @@
         } catch (err) {
             alert("Lỗi: " + err.message);
         }
-    } // Đã đóng ngoặc hàm editDiscount
-
-    // --- HÀM LOAD CATEGORIES (GIỮ NGUYÊN) ---
+    }
     async function loadEditCategories() {
         try {
-            const response = await fetch(window.location.origin + '/DoAnWeb/api/categories');
+            const response = await fetch(window.location.origin + '/WebGiaDung/api/categories');
             const data = await response.json();
             const select = document.getElementById('editApplyCategories');
             if (select) {
@@ -3809,7 +3823,6 @@
         } catch (err) { console.error(err); }
     }
 
-    // --- HÀM LƯU (GIỮ NGUYÊN LOGIC NHƯNG THÊM CHECK TRỐNG) ---
     async function saveDiscountUpdate() {
         const form = document.getElementById('editEventForm');
         const discountId = form.dataset.currentId;
@@ -3817,7 +3830,6 @@
         const sDate = document.getElementById('edit-startDate').value;
         const eDate = document.getElementById('edit-endDate').value;
 
-        // Nếu ngày trống, báo lỗi ngay tại đây thay vì để Controller báo lỗi Parse
         if (!sDate || !eDate) {
             alert("Vui lòng không để trống ngày tháng!");
             return;

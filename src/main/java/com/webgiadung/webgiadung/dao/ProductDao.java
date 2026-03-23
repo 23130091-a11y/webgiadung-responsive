@@ -84,9 +84,9 @@ public class ProductDao extends BaseDao {
         return get().withHandle(h -> {
             return h.createUpdate(
                             "INSERT INTO products (name, image, price_first, " +
-                                    "brands_id, categories_id, quantity, created_at, updated_at) " +
-                                    "VALUES (:name, :image, :totalPrice,:totalPrice, " +
-                                    ":brandsId, :keywordsId, :categoriesId, :post, :quantity, NOW(), NOW())"
+                                    "brands_id, categories_id, is_visible,quantity, created_at, updated_at) " +
+                                    "VALUES (:name, :image, :firstPrice, " +
+                                    ":brandsId, :categoriesId, :isVisible, :quantity, NOW(), NOW())"
                     )
                     .bindBean(p)
                     .executeAndReturnGeneratedKeys("id")

@@ -29,7 +29,15 @@ public class KeywordService {
             return -1;
         }
     }
-
+    public boolean addKeywordToProduct(int productId, int keywordId) {
+        try {
+            keywordsDao.insertProductKeyword(productId, keywordId);
+            return true;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
     public int updateKeyword(int id, String name, String description) {
         if (name == null || name.trim().isEmpty()) {
             return -1;
