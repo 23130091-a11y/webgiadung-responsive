@@ -35,8 +35,6 @@
     padding: 0 8px;
 }
 
-
-
 /* Sau đăng nhập, CSS user */
 .navbar-user {
     display: flex;
@@ -74,7 +72,6 @@
     transform-origin: calc(100% - 16px) top;
     animation: scaleUp ease-in 0.3s;
     will-change: opacity, transform;
-    /* Nói cho trình duyệt biết cái nào sẽ thay đổi trong animation */
     z-index: 1;
 }
 
@@ -126,10 +123,7 @@
     border-top: 1px solid rgba(0, 0, 0, 0.1);
 }
 
-/* ---------------------------------------------------- */
-
-
-/* --- Style Header  --- */
+/* Style Header */
 .header-checkout {
     border-bottom: 2px solid var(--primary-color);
     background-color: var(--white-color);
@@ -145,7 +139,6 @@
     font-size: 0;
 }
 
-/*  LOGO (a.logo và img) */
 .header-checkout-content a.logo {
     margin-right: 0;
     padding: 0;
@@ -164,7 +157,6 @@
     padding-left: 6px;
 }
 
-/* --- Style Chung cho Checkout Section --- */
 .checkout-section {
     background-color: var(--white-color);
     padding: 25px;
@@ -187,7 +179,6 @@
     margin-right: 8px;
 }
 
-/* --- 1. Địa chỉ Nhận hàng (Shipping Info) --- */
 .current-address {
     padding: 10px 0;
     border-left: 3px solid var(--primary-color);
@@ -218,7 +209,6 @@
     font-size: 1.3rem;
 }
 
-/* --- 2. Phương thức Vận chuyển (Shipping Method) --- */
 .shipping-options {
     display: flex;
     flex-direction: column;
@@ -268,7 +258,6 @@
     flex-shrink: 0;
 }
 
-/* --- 3. Phương thức Thanh toán (Payment Method) --- */
 .payment-options {
     display: flex;
     flex-wrap: wrap;
@@ -296,7 +285,6 @@
     font-weight: 500;
 }
 
-/* --- 4. Ghi chú và Input khác --- */
 .note-section textarea {
     width: 100%;
     padding: 10px 12px;
@@ -312,8 +300,6 @@
     border-color: var(--primary-color);
 }
 
-
-/* --- 5. Tóm tắt Đơn hàng (Order Summary - Giao diện Sticky) --- */
 .sticky-summary {
     position: sticky;
     top: 20px;
@@ -367,7 +353,6 @@
     color: #333;
 }
 
-/* --- Tính toán Chi phí --- */
 .summary-line {
     display: flex;
     justify-content: space-between;
@@ -412,9 +397,6 @@
     font-size: 1.6rem;
     font-weight: 600;
 
-    /* NỀN CAM CHO NÚT ĐẶT HÀNG */
-    background-color: #E06A1C;
-    color: var(--white-color, #fff);
     border: none;
     border-radius: 4px;
     cursor: pointer;
@@ -424,227 +406,471 @@
 .btn-place-order:hover {
     opacity: 0.9;
 }
-/* ================= MODAL: Chọn/Thêm địa chỉ nhận hàng ================= */
 
 .modal {
-  position: fixed;
-  inset: 0;
-  z-index: 9999;
-  display: none;
+    position: fixed;
+    inset: 0;
+    z-index: 9999;
+    display: none;
 }
+
 .modal.is-open { display: block; }
 
 .modal__overlay {
-  position: absolute;
-  inset: 0;
-  background: rgba(0, 0, 0, 0.35);
+    position: absolute;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.35);
 }
 
 .modal__body {
-  position: relative;
-  z-index: 2;
-  width: 760px;
-  max-width: 95vw;
-  max-height: 85vh;
-  overflow: auto;
-  background: var(--white-color, #fff);
-  border-radius: 12px;
-  padding: 18px;
-  margin: 8vh auto 0 auto;
-  box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+    position: relative;
+    z-index: 2;
+    width: 760px;
+    max-width: 95vw;
+    max-height: 85vh;
+    overflow: auto;
+    background: var(--white-color, #fff);
+    border-radius: 12px;
+    padding: 18px;
+    margin: 8vh auto 0 auto;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.2);
 }
 
 /* Header modal */
 .addr-modal__header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 10px;
-}
-.addr-modal__title {
-  margin: 0;
-  font-size: 1.8rem;
-  font-weight: 600;
-  color: #333;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 10px;
 }
 
-/* Nút đóng */
-.addr-modal__close {
-  padding: 8px 12px;
-  border: 1px solid #ddd;
-  background: #fff;
-  border-radius: 8px;
-  cursor: pointer;
-  font-size: 1.4rem;
+.addr-modal__title {
+    margin: 0;
+    font-size: 1.8rem;
+    font-weight: 600;
+    color: #333;
 }
+
+.addr-modal__close {
+    padding: 8px 12px;
+    border: 1px solid #ddd;
+    background: #fff;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 1.4rem;
+}
+
 .addr-modal__close:hover { background: #fafafa; }
 
-/* ========== LIST ĐỊA CHỈ ========== */
 .addr-list { margin-top: 14px; }
 
 .addr-empty {
-  margin: 0;
-  padding: 10px 0;
-  color: #666;
-  font-size: 1.4rem;
+    margin: 0;
+    padding: 10px 0;
+    color: #666;
+    font-size: 1.4rem;
 }
 
 .addr-item{
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  padding: 14px 16px;
-  border: 1px solid #eee;
-  border-radius: 12px;
-  cursor: pointer;
-  margin-bottom: 12px;
-  background: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 14px 16px;
+    border: 1px solid #eee;
+    border-radius: 12px;
+    cursor: pointer;
+    margin-bottom: 12px;
+    background: #fff;
 }
 
 .addr-item:hover {
-  border-color: #ddd;
-  background: #fafafa;
+    border-color: #ddd;
+    background: #fafafa;
 }
 
-/* highlight item được chọn (Chrome mới OK) */
 .addr-item:has(input[type="radio"]:checked) {
-  border-color: var(--primary-color);
-  background-color: #fff8f8;
-  box-shadow: 0 0 0 0.1px var(--primary-color);
+    border-color: var(--primary-color);
+    background-color: #fff8f8;
+    box-shadow: 0 0 0 0.1px var(--primary-color);
 }
 
-/* radio */
 .addr-item__left{
-  display: flex;
-  align-items: flex-start;
-  gap: 12px;
-  flex: 1;
-  min-width: 0;
-}
-.addr-item input[type="radio"] {
-  margin: 4px 0 0 0;   /* sát top, không lệch */
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    flex: 1;
+    min-width: 0;
 }
 
-/* info */
-.addr-item__info{
-  line-height: 1.35;
-  font-size: 1.4rem;
-  color: #333;
+.addr-item input[type="radio"] {
+    margin: 4px 0 0 0;
 }
+
+.addr-item__info{
+    line-height: 1.35;
+    font-size: 1.4rem;
+    color: #333;
+}
+
 .addr-item__info strong { font-weight: 600; }
 
-/* Badge mặc định */
 .addr-badge-default {
-  margin-left: 8px;
-  font-size: 1.2rem;
-  padding: 2px 6px;
-  border: 1px solid var(--primary-color);
-  color: var(--primary-color);
-  border-radius: 6px;
+    margin-left: 8px;
+    font-size: 1.2rem;
+    padding: 2px 6px;
+    border: 1px solid var(--primary-color);
+    color: var(--primary-color);
+    border-radius: 6px;
 }
 
-/* nút Xóa */
 .addr-del{
-  padding: 8px 14px;
-  border-radius: 12px;
-  border: 1px solid #ddd;
-  background: #fff;
-  cursor: pointer;
-  font-size: 1.4rem;
-  flex-shrink: 0;
-}
-.addr-del:hover{
-  border-color: #ff9f2a;
+    padding: 8px 14px;
+    border-radius: 12px;
+    border: 1px solid #ddd;
+    background: #fff;
+    cursor: pointer;
+    font-size: 1.4rem;
+    flex-shrink: 0;
 }
 
-/* ========== ACTIONS (NÚT CHỌN / LƯU) ========== */
+.addr-del:hover{
+    border-color: #ff9f2a;
+}
+
 .addr-actions{
-  display: flex;
-  justify-content: flex-end;
-  gap: 10px;
-  margin-top: 10px;
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    margin-top: 10px;
 }
 
 .addr-btn{
-  padding: 10px 14px;
-  border-radius: 10px;
-  cursor: pointer;
-  font-size: 1.4rem;
-  border: 1px solid #ddd;
-  background: #fff;
+    padding: 10px 14px;
+    border-radius: 10px;
+    cursor: pointer;
+    font-size: 1.4rem;
+    border: 1px solid #ddd;
+    background: #fff;
 }
 
 .addr-btn--primary{
-  border-color: var(--primary-color);
-  background: var(--primary-color);
-  color: #fff;
+    border-color: var(--primary-color);
+    background: var(--primary-color);
+    color: #fff;
 }
+
 .addr-btn--primary:hover { opacity: 0.95; }
 
-/* ========== FORM THÊM ĐỊA CHỈ ========== */
 .addr-form { margin-top: 10px; }
 
 .addr-form label{
-  display: block;
-  font-size: 1.3rem;
-  color: #333;
-  margin-bottom: 6px;
+    display: block;
+    font-size: 1.3rem;
+    color: #333;
+    margin-bottom: 6px;
 }
 
 .addr-form input{
-  width: 100%;
-  padding: 10px 12px;
-  border: 1px solid #ddd;
-  border-radius: 8px;
-  font-size: 1.4rem;
-  outline: none;
+    width: 100%;
+    padding: 10px 12px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    font-size: 1.4rem;
+    outline: none;
 }
+
 .addr-form input:focus { border-color: var(--primary-color); }
 
 .addr-form__grid{
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 14px 16px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px 16px;
 }
-.addr-form__grid .full{ grid-column: 1 / -1; }
 
-/* ✅ Checkbox mặc định: full hàng + sát chữ */
-.addr-form__grid .addr-default{
-  grid-column: 1 / -1;
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
+.addr-form__grid .full {
+    grid-column: 1 / -1;
 }
+
+.addr-form__grid .addr-default {
+    grid-column: 1 / -1;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+}
+
 .addr-form__grid .addr-default input{ margin: 0 !important; }
 .addr-form__grid .addr-default label{
-  display: inline;       /* quan trọng: không còn block */
-  margin: 0;
-  white-space: nowrap;   /* tránh rớt hàng */
-  cursor: pointer;
-  line-height: 1.2;
-}
-.addr-form input:not([type="checkbox"]):not([type="radio"]) {
-  width: 100%;
-  padding: 10px 12px;
-  border: 1px solid #ddd;
-  border-radius: 8px;
-  font-size: 1.4rem;
-  outline: none;
-}
-.addr-form__grid .addr-default input[type="checkbox"]{
-  width: auto;           /* quan trọng */
-  padding: 0;
-  margin: 0;
+    display: inline;
+    margin: 0;
+    white-space: nowrap;
+    cursor: pointer;
+    line-height: 1.2;
 }
 
-/* Mobile */
-@media (max-width: 600px) {
-  .modal__body {
-    width: 94vw;
-    margin-top: 6vh;
-    padding: 14px;
-  }
-  .addr-form__grid { grid-template-columns: 1fr; }
-  .addr-form__grid .full { grid-column: 1; }
+.addr-form input:not([type="checkbox"]):not([type="radio"]) {
+    width: 100%;
+    padding: 10px 12px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    font-size: 1.4rem;
+    outline: none;
+}
+
+.addr-form__grid .addr-default input[type="checkbox"]{
+    width: auto;
+    padding: 0;
+    margin: 0;
+}
+
+/* modal thay đổi địa chỉ */
+.address-modal {
+    display: none;
+    position: fixed;
+    z-index: 999;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.4);
+    align-items: center;
+    justify-content: center;
+}
+
+.address-modal.is-open {
+    display: flex;
+}
+
+.address-modal__container {
+    background: #fff;
+    width: 600px;
+    max-width: 95%;
+    padding: 24px;
+    border-radius: 3px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    animation: fadeInDown 0.3s ease;
+}
+
+.address-modal__header {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 20px;
+}
+
+.address-modal__title {
+    font-size: 1.8rem;
+    color: #333;
+}
+
+.address-modal__close {
+    font-size: 2.4rem;
+    cursor: pointer;
+    color: #999;
+}
+
+/* css form */
+.address-form__row {
+    display: flex;
+    margin: 0 -6px 12px -6px;
+}
+
+.address-form__group {
+    flex: 1;
+    padding: 0 6px;
+}
+
+.address-form__group--third {
+    flex: 0 0 33.33%;
+}
+
+.address-form__input, .address-form__select, .address-form__textarea {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 2px;
+    outline: none;
+    font-size: 1.4rem;
+}
+
+.address-form__textarea {
+    height: 80px;
+    resize: none;
+}
+
+.address-form__footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    margin-top: 20px;
+}
+
+@keyframes fadeInDown {
+    from { opacity: 0; transform: translateY(-20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* nút */
+.btn--back {
+    --height: 42px;
+
+    border-radius: 4px;
+}
+
+.btn--complete,
+.btn--cancel {
+    --height: 50px;
+
+    border-radius: 4px;
+}
+
+.btn--cancel {
+    background: #ccc;
+}
+
+.btn--complete {
+    min-width: 130px;
+}
+
+/* css phần list địa chỉ */
+.address-list-content {
+    max-height: 400px; /* Giới hạn chiều cao nếu nhiều địa chỉ */
+    overflow-y: auto;
+    margin-bottom: 20px;
+    padding-right: 5px;
+}
+
+/* Tùy chỉnh thanh cuộn cho đẹp */
+.address-list-content::-webkit-scrollbar {
+    width: 6px;
+}
+.address-list-content::-webkit-scrollbar-thumb {
+    background: #e0e0e0;
+    border-radius: 10px;
+}
+
+.addr-item {
+    display: flex;
+    align-items: flex-start;
+    padding: 16px 0;
+    border-bottom: 1px solid #f0f0f0;
+    transition: background 0.2s ease;
+}
+
+.addr-item:last-child {
+    border-bottom: none;
+}
+
+/* Ẩn radio gốc để custom hoặc để gọn */
+.addr-radio {
+    margin-top: 5px;
+    margin-right: 12px;
+    cursor: pointer;
+    accent-color: var(--primary-color);
+    width: 18px;
+    height: 18px;
+}
+
+.addr-item-label {
+    flex: 1;
+    cursor: pointer;
+    display: block;
+}
+
+.addr-header {
+    margin-bottom: 6px;
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.name {
+    font-size: 1.6rem;
+    font-weight: 600;
+    color: #222;
+}
+
+.divider {
+    color: #ccc;
+    font-weight: 300;
+}
+
+.phone {
+    font-size: 1.4rem;
+    color: #666;
+}
+
+/* Badge Mặc định */
+.badge-default {
+    font-size: 1.1rem;
+    color: var(--primary-color);
+    border: 1px solid var(--primary-color);
+    padding: 1px 5px;
+    border-radius: 2px;
+    margin-left: 5px;
+    text-transform: capitalize;
+}
+
+.addr-detail {
+    font-size: 1.4rem;
+    color: #757575;
+    line-height: 1.4;
+    margin: 4px 0 0 0;
+}
+
+/* Hiệu ứng khi được chọn (Checked) */
+.addr-item:has(.addr-radio:checked) {
+    background-color: #fffcfb; /* Màu nền nhẹ khi chọn */
+}
+
+.btn {
+    min-width: 140px;
+    height: 40px;
+    padding: 0 12px;
+    border: 1px solid transparent;
+    border-radius: 2px;
+    font-size: 1.4rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: opacity 0.2s;
+}
+
+.btn:hover {
+    opacity: 0.9;
+}
+
+.btn--light {
+    background: #fff;
+    border-color: rgba(0,0,0,.09);
+    color: #555;
+}
+
+.btn--light:hover {
+    background: #f8f8f8;
+    border-color: rgba(0,0,0,.2);
+}
+
+.btn--default-color {
+    background: var(--primary-color);
+    color: #fff;
+}
+
+.btn--cancel {
+    background: #fff;
+    color: #555;
+    border: 1px solid #ddd;
+}
+
+.address-form__footer {
+    padding-top: 20px;
+    border-top: 1px solid #f0f0f0;
+}
+
+/* Checkbox phần địa chỉ mới */
+#addressAddView label {
+    font-size: 1.4rem;
+    color: #666;
+    user-select: none;
 }

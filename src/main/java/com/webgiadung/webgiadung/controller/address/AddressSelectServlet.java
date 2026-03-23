@@ -36,8 +36,6 @@ public class AddressSelectServlet extends HttpServlet {
 
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        req.setCharacterEncoding("UTF-8");
-        resp.setCharacterEncoding("UTF-8");
         resp.setContentType("application/json");
 
         User u = (User) req.getSession().getAttribute("user");
@@ -48,13 +46,16 @@ public class AddressSelectServlet extends HttpServlet {
 
         String idStr = req.getParameter("addressId");
         int id;
-        try { id = Integer.parseInt(idStr); }
+        try {
+            id = Integer.parseInt(idStr);
+        }
         catch (Exception e){
             resp.getWriter().write("{\"ok\":false,\"msg\":\"invalid\"}");
             return;
         }
 
         UserAddressDao dao = new UserAddressDao();
+
         UserAddress selected = dao.findById(u.getId(), id).orElse(null);
         if (selected == null) {
             resp.getWriter().write("{\"ok\":false,\"msg\":\"not_found\"}");

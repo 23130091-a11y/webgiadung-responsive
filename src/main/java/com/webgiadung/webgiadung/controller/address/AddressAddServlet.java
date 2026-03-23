@@ -55,8 +55,6 @@ public class AddressAddServlet extends HttpServlet {
 
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        req.setCharacterEncoding("UTF-8");
-        resp.setCharacterEncoding("UTF-8");
         resp.setContentType("application/json");
 
         User u = (User) req.getSession().getAttribute("user");
@@ -68,7 +66,7 @@ public class AddressAddServlet extends HttpServlet {
         String fullName = req.getParameter("fullName");
         String phone = req.getParameter("phone");
         String address = req.getParameter("address");
-        int makeDefault = "1".equals(req.getParameter("makeDefault")) ? 1 : 0;
+        int isDefault = Integer.parseInt(req.getParameter("isDefault"));
 
         if (fullName == null || fullName.isBlank() ||
                 phone == null || phone.isBlank() ||
@@ -85,19 +83,19 @@ public class AddressAddServlet extends HttpServlet {
         newAddr.setFullName(fullName.trim());
         newAddr.setPhone(phone.trim());
         newAddr.setAddress(address.trim());
-        newAddr.setIsDefault(makeDefault); // makeDefault thường là 0 hoặc 1
+        newAddr.setIsDefault(isDefault);
 
         // Gọi hàm insert với đối tượng vừa tạo
         int newId = dao.insert(newAddr);
 
-        // sau khi insert -> lấy list mới
+        // sau khi insert -> lấy list mới để cập nhật UI
         List<UserAddress> addresses = dao.listByUser(u.getId());
 
-        // chọn luôn địa chỉ vừa thêm
-        UserAddress selected = null;
-        for (UserAddress a : addresses) {
-            if (a.getId() == newId) { selected = a; break; }
-        }
+        // tìm địa chỉ vừa tạo
+        UserAddress selected = addresses.stream()
+                .filter(a -> a.getId() == newId)
+                .findFirst()
+                .orElse(null);
 
         req.getSession().setAttribute("SELECTED_ADDR_ID", newId);
 
