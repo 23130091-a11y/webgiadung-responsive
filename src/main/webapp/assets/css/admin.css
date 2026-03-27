@@ -21,6 +21,9 @@
 .manage-detail:target {
     display: block;
 }
+.admin-section {
+    display: none;
+}
 
 /* Navbar header */
 .navbar__greeting {

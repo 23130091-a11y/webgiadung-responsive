@@ -84,7 +84,7 @@
                                 <a href="#product" class="manage-nav__link manage-nav__link--active">Sản phẩm</a>
                             </li>
                             <li class="manage-nav__item">
-                                <a href="#order" class="manage-nav__link">Đơn hàng</a>
+                                <a href="${pageContext.request.contextPath}/order-admin" class="manage-nav__link">Đơn hàng</a>
                             </li>
                         </ul>
 
@@ -1725,38 +1725,88 @@
         sectionEventEdit.style.display = "none";
 
     }
-    // Mở đúng tab theo controller
-    const serverTab = "${tab}"; // controller đang set "customers"
 
-    window.addEventListener("DOMContentLoaded", () => {
-        if (!serverTab) return; // nếu không có tab thì thôi
+    const serverTab = "${tab}";
 
+    function setActiveMenu(targetKey) {
+        menuLinks.forEach(link => link.classList.remove("manage-nav__link--active"));
+
+        menuLinks.forEach(link => {
+            const href = link.getAttribute("href") || "";
+
+            if (targetKey === "config" && href === "#config") {
+                link.classList.add("manage-nav__link--active");
+            }
+            if (targetKey === "news" && href === "#news") {
+                link.classList.add("manage-nav__link--active");
+            }
+            if (targetKey === "product" && href === "#product") {
+                link.classList.add("manage-nav__link--active");
+            }
+            if (targetKey === "order" && href.includes("/order-admin")) {
+                link.classList.add("manage-nav__link--active");
+            }
+            if (targetKey === "customers" && href.includes("/admin/customers")) {
+                link.classList.add("manage-nav__link--active");
+            }
+        });
+    }
+
+    function openMainSection(targetKey) {
         hideAllSections();
 
-        if (serverTab === "customers") {
+        if (targetKey === "customers") {
             sectionCustomer.style.display = "block";
-        } else if (serverTab === "product") {
+        } else if (targetKey === "product") {
             sectionProduct.style.display = "block";
-        } else if (serverTab === "order") {
+        } else if (targetKey === "order") {
             sectionOrder.style.display = "block";
+        } else if (targetKey === "news") {
+            sectionNews.style.display = "block";
+            showNewsDefault();
         } else {
             sectionConfig.style.display = "block";
         }
+
+        setActiveMenu(targetKey);
+    }
+
+    window.addEventListener("DOMContentLoaded", () => {
+        if (serverTab && serverTab.trim() !== "") {
+            openMainSection(serverTab);
+            return;
+        }
+
+        const hash = window.location.hash;
+
+        if (hash === "#config") {
+            openMainSection("config");
+        } else if (hash === "#news") {
+            openMainSection("news");
+        } else if (hash === "#product") {
+            openMainSection("product");
+        } else if (hash === "#order") {
+            openMainSection("order");
+        } else {
+            openMainSection("product"); // mặc định mở product
+        }
     });
-    // Click menu
+
+
     menuLinks.forEach(link => {
         link.addEventListener("click", function (e) {
             const href = this.getAttribute("href") || "";
+
             if (!href.startsWith("#")) return;
+
             e.preventDefault();
             const targetId = href.substring(1);
-            hideAllSections(); // ẩn tất cả trước
 
-            if (targetId === "config") sectionConfig.style.display = "block";
-            if (targetId === "product") sectionProduct.style.display = "block";
-            if (targetId === "order") sectionOrder.style.display = "block";
-            if (targetId === "customer") sectionCustomer.style.display = "block";
-            if (targetId === "news") showNewsDefault();
+            if (targetId === "config") openMainSection("config");
+            if (targetId === "news") openMainSection("news");
+            if (targetId === "product") openMainSection("product");
+            if (targetId === "order") openMainSection("order");
+            if (targetId === "customer" || targetId === "customers") openMainSection("customers");
         });
     });
     productMenuButtons.forEach(btn => {
