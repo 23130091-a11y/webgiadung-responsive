@@ -81,6 +81,13 @@
                             </li>
 
                             <li class="manage-nav__item">
+                                <a href="${pageContext.request.contextPath}/admin/purchase-history"
+                                   class="manage-nav__link ${tab == 'purchaseHistory' ? 'manage-nav__link--active' : ''}">
+                                    Lịch sử mua hàng
+                                </a>
+                            </li>
+
+                            <li class="manage-nav__item">
                                 <a href="#product" class="manage-nav__link manage-nav__link--active">Sản phẩm</a>
                             </li>
                             <li class="manage-nav__item">
@@ -1515,6 +1522,102 @@
                         </div>
                     </div>
 
+                    <section id="purchase-history" class="admin-section">
+                        <h2 class="manage__heading">Thống kê lịch sử mua hàng theo khách</h2>
+
+                        <div class="purchase-history-card">
+                            <form class="customer-search" method="get" action="${pageContext.request.contextPath}/admin/purchase-history">
+                                <input type="text"
+                                       name="q"
+                                       class="customer-search__input"
+                                       placeholder="Nhập tên, email hoặc số điện thoại khách hàng"
+                                       value="${q}">
+                                <button type="submit" class="customer-search__btn">Tìm kiếm</button>
+                            </form>
+
+                            <div class="customer-table-wrap">
+                                <table class="customer-table">
+                                    <thead>
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>Khách hàng</th>
+                                        <th>Email</th>
+                                        <th>SĐT</th>
+                                        <th>Số đơn</th>
+                                        <th>Tổng chi tiêu</th>
+                                        <th>Đơn gần nhất</th>
+                                        <th>Thao tác</th>
+                                    </tr>
+                                    </thead>
+                                    <tbody>
+                                    <c:forEach var="item" items="${purchaseStats}">
+                                        <tr>
+                                            <td>${item.userId}</td>
+                                            <td>${item.customerName}</td>
+                                            <td>${item.email}</td>
+                                            <td>${empty item.phone ? '-' : item.phone}</td>
+                                            <td>${item.totalOrders}</td>
+                                            <td>${item.totalSpent}</td>
+                                            <td>${empty item.lastOrderDate ? '-' : item.lastOrderDate}</td>
+                                            <td>
+                                                <a href="${pageContext.request.contextPath}/admin/purchase-history?userId=${item.userId}"
+                                                   class="btn btn--default-color">
+                                                    Xem chi tiết
+                                                </a>
+                                            </td>
+                                        </tr>
+                                    </c:forEach>
+
+                                    <c:if test="${empty purchaseStats}">
+                                        <tr>
+                                            <td colspan="8" class="purchase-history-empty">Không có dữ liệu khách hàng</td>
+                                        </tr>
+                                    </c:if>
+                                    </tbody>
+                                </table>
+                            </div>
+
+                            <c:if test="${selectedUserId > 0}">
+                                <div class="purchase-history-detail">
+                                    <h3 class="purchase-history-detail__title">Chi tiết đơn hàng của khách ID: ${selectedUserId}</h3>
+
+                                    <div class="customer-table-wrap">
+                                        <table class="customer-table">
+                                            <thead>
+                                            <tr>
+                                                <th>Mã đơn</th>
+                                                <th>Khách hàng</th>
+                                                <th>Trạng thái giao hàng</th>
+                                                <th>Trạng thái thanh toán</th>
+                                                <th>Ngày tạo</th>
+                                                <th>Tổng tiền</th>
+                                            </tr>
+                                            </thead>
+                                            <tbody>
+                                            <c:forEach var="o" items="${selectedOrders}">
+                                                <tr>
+                                                    <td>${o.id}</td>
+                                                    <td>${o.customerName}</td>
+                                                    <td>${o.statusTransport}</td>
+                                                    <td>${o.statusPayment}</td>
+                                                    <td>${o.createdAt}</td>
+                                                    <td>${o.totalPrice}</td>
+                                                </tr>
+                                            </c:forEach>
+
+                                            <c:if test="${empty selectedOrders}">
+                                                <tr>
+                                                    <td colspan="6" class="purchase-history-empty">Khách này chưa có đơn hàng</td>
+                                                </tr>
+                                            </c:if>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </c:if>
+                        </div>
+                    </section>
+
                     <section id="order" class="manage-detail">
                         <h2 class="manage__heading">Đơn hàng</h2>
 
@@ -1562,6 +1665,7 @@
     const sectionAdd = document.getElementById("add-product");
     const sectionOrder = document.getElementById("order");
     const sectionCustomer = document.getElementById("customer");
+    const sectionPurchaseHistory = document.getElementById("purchase-history");
     const sectionCustomerDetail = document.getElementById("customer-detail");
     const sectionCustomerEdit = document.getElementById("customer-edit");
     const sectionNews = document.getElementById("news");
@@ -1615,6 +1719,7 @@
         sectionOrder.style.display = "none";
         sectionConfig.style.display = "none";
         sectionCustomer.style.display = "none";
+        sectionPurchaseHistory.style.display = "none";
         sectionCustomerDetail.style.display = "none";
         sectionCustomerEdit.style.display = "none";
         sectionNews.style.display = "none";
@@ -1658,6 +1763,8 @@
 
         if (targetKey === "customers") {
             sectionCustomer.style.display = "block";
+        } else if (serverTab === "purchaseHistory") {
+            sectionPurchaseHistory.style.display = "block";
         } else if (targetKey === "product") {
             sectionProduct.style.display = "block";
         } else if (targetKey === "order") {
@@ -1803,7 +1910,7 @@
             }
         });
     });
-    // 1. Khi bấm nút "Thêm sự kiện giảm giá" (Nút xanh ở trang quản lý sự kiện)
+
     if (btnAddEventTrigger) {
         btnAddEventTrigger.addEventListener("click", () => {
             hideAllSections();
@@ -1813,23 +1920,23 @@
     }
 
     function backToEventList() {
-        // Ẩn trang thêm sự kiện
+
         sectionEventAdd.style.display = "none";
 
-        // Hiển thị lại trang Sản phẩm (cha)
+
         sectionProduct.style.display = "block";
 
-        // Kích hoạt hiển thị Tab Sự kiện bên trong trang Sản phẩm
+
         sectionProductEvent.style.display = "block";
         sectionProductList.style.display = "none";
         sectionEventView.style.display = "none";
         sectionEventEdit.style.display = "none";
 
-        // Ẩn sidebar vì trang sự kiện của bạn không dùng sidebar
+
         const sidebar = document.querySelector(".product-sidebar");
         if (sidebar) sidebar.style.display = "none";
 
-        // Cập nhật trạng thái Active cho menu con
+
         productMenuButtons.forEach(btn => {
             if (btn.getAttribute("data-target") === "product-event") {
                 btn.classList.add("active");
@@ -1841,7 +1948,7 @@
         window.scrollTo({ top: 0, behavior: "smooth" });
     }
 
-    // 3. Xử lý Radio "Phạm vi áp dụng" để ẩn hiện nội dung theo dòng
+
     const scopeRadios = document.querySelectorAll('input[name="applyScope"]');
     const boxCategory = document.getElementById('scopeCategory');
     const boxSpecific = document.getElementById('scopeSpecific');
@@ -1850,11 +1957,11 @@
         radio.addEventListener('change', (e) => {
             const val = e.target.value;
 
-            // Ẩn tất cả trước
+
             boxCategory.style.display = "none";
             boxSpecific.style.display = "none";
 
-            // Hiện theo lựa chọn
+
             if (val === "category") {
                 boxCategory.style.display = "block";
             } else if (val === "specific") {
@@ -1862,7 +1969,7 @@
             }
         });
     });
-    // --- XỬ LÝ CHỌN SLIDE CHO SỰ KIỆN ---
+
     if (slideSelect) {
 
         selectedBox.addEventListener('click', (e) => {

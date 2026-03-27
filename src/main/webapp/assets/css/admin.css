@@ -2802,3 +2802,27 @@
         align-items: stretch;
     }
 }
+.purchase-history-card {
+    background: #fff;
+    border-radius: 8px;
+    padding: 16px;
+    border: 1px solid #e5e5e5;
+}
+
+.purchase-history-detail {
+    margin-top: 24px;
+}
+
+.purchase-history-detail__title {
+    font-size: 1.8rem;
+    font-weight: 700;
+    margin-bottom: 12px;
+    color: var(--text-color);
+}
+
+.purchase-history-empty {
+    text-align: center;
+    color: #666;
+    padding: 16px;
+    font-style: italic;
+}
