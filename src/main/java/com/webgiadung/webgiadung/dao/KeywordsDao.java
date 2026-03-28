@@ -35,6 +35,7 @@ public class KeywordsDao extends BaseDao {
                         .execute()
         );
     }
+
     public void updateProductKeyword(int productId, int newKeywordId) {
         get().withHandle(h ->
                 h.createUpdate("UPDATE product_keywords SET keyword_id = :newKeywordId WHERE product_id = :productId")

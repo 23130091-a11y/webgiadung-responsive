@@ -117,9 +117,7 @@ public class ProductEditController extends HttpServlet {
                 if (keywordIdStr != null && !keywordIdStr.isEmpty()) {
                     try {
                         int keywordId = Integer.parseInt(keywordIdStr);
-
                         keywordService.updateProductKeyword(p.getId(), keywordId);
-
                     } catch (NumberFormatException e) {
                         System.err.println("Lỗi định dạng Keyword ID: " + e.getMessage());
                     }

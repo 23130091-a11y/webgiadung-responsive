@@ -18,13 +18,13 @@ public class DeleteProductController extends HttpServlet {
 
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        // Cấu hình phản hồi dạng JSON và encoding UTF-8
+
         resp.setContentType("application/json");
         resp.setCharacterEncoding("UTF-8");
         PrintWriter out = resp.getWriter();
 
         try {
-            // 1. Lấy ID từ request
+
             String idParam = req.getParameter("id");
 
             if (idParam == null || idParam.isEmpty()) {
@@ -35,14 +35,11 @@ public class DeleteProductController extends HttpServlet {
 
             int id = Integer.parseInt(idParam);
 
-            // 2. Gọi Service để xóa (Hàm này đã viết ở bước trước, có Transaction)
             boolean isDeleted = productService.deleteProduct(id);
 
-            // 3. Trả về kết quả cho Frontend
             if (isDeleted) {
                 out.print("{\"status\": \"success\", \"message\": \"Xóa thành công.\"}");
             } else {
-                // Xóa thất bại (ID không tồn tại hoặc lỗi DB)
                 resp.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
                 out.print("{\"status\": \"fail\", \"message\": \"Không thể xóa sản phẩm này. Có thể ID không tồn tại.\"}");
             }
@@ -59,9 +56,4 @@ public class DeleteProductController extends HttpServlet {
         }
     }
 
-    // Nếu lỡ gọi bằng phương thức GET thì chặn lại hoặc chuyển sang POST (tùy chọn)
-    @Override
-    protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        doPost(req, resp);
-    }
 }

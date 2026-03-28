@@ -364,7 +364,6 @@ public Product getProductFullInfo(int id) {
         return product;
     });
 }
-/// /////
     public boolean updateProduct(Product product) {
         return get().inTransaction(handle -> {
             int rowsUpdated = handle.createUpdate("""
@@ -485,15 +484,20 @@ public Product getProductFullInfo(int id) {
             return true;
         });
     }
-///   ///////////
+
     public boolean deleteProduct(int id) {
         return get().inTransaction(handle -> {
-
-            handle.createUpdate("DELETE FROM product_descriptions WHERE products_id = :pid")
+            handle.createUpdate("DELETE FROM product_keywords WHERE product_id = :pid")
+                    .bind("pid", id)
+                    .execute();
+            handle.createUpdate("DELETE FROM product_images WHERE product_id = :pid")
+                    .bind("pid", id)
+                    .execute();
+            handle.createUpdate("DELETE FROM product_descriptions WHERE product_id = :pid")
                     .bind("pid", id)
                     .execute();
 
-            handle.createUpdate("DELETE FROM product_details WHERE products_id = :pid")
+            handle.createUpdate("DELETE FROM product_details WHERE product_id = :pid")
                     .bind("pid", id)
                     .execute();
 
@@ -501,7 +505,6 @@ public Product getProductFullInfo(int id) {
                     .bind("id", id)
                     .execute();
 
-            // Trả về true nếu xóa thành công ít nhất 1 dòng
             return rowsDeleted > 0;
         });
     }
