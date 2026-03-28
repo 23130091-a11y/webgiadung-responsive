@@ -75,4 +75,7 @@ public class KeywordService {
             return false;
         }
     }
+    public void updateProductKeyword(int productId, int newKeywordId) {
+        keywordsDao.updateProductKeyword(productId, newKeywordId);
+    }
 }

@@ -2866,17 +2866,11 @@
         var html = '';
 
         products.forEach(function(p) {
-            // 1. Xử lý giá tiền
             var formattedPrice = new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(p.price);
-
-            // 2. Xử lý đường dẫn ảnh
             var imgUrl = contextPath + '/assets/img/products/' + p.image;
 
-            // 3. XỬ LÝ CHECKBOX (MỚI THÊM)
-            // Nếu p.post bằng 1 thì biến checkStatus là 'checked', ngược lại là rỗng
             var checkStatus = (p.post == 1) ? 'checked' : '';
 
-            // 4. TẠO HTML
             html += '<article class="product-table__row">';
 
             // Cột Ảnh
@@ -2993,7 +2987,7 @@
             sectionProductDetail.style.display = "block";
             sectionProductDetail.style.position = "static";
             sectionProductDetail.style.backgroundColor = "transparent";
-            sectionProductDetail.style.padding = "0"; // Hoặc padding tùy ý
+            sectionProductDetail.style.padding = "0";
 
 
             window.scrollTo({ top: 0, behavior: "smooth" });
@@ -3036,13 +3030,24 @@
         if(document.getElementById('v-updatedAt')) document.getElementById('v-updatedAt').innerText = p.updatedAt || '---';
         if(document.getElementById('v-name')) document.getElementById('v-name').innerText = p.name;
         if(document.getElementById('v-brand')) document.getElementById('v-brand').innerText = p.brandName || '---';
-        if(document.getElementById('v-tags')) document.getElementById('v-tags').innerText = p.keywordName || '---';
+        if (document.getElementById('v-tags')) {
+            if (p.keywords && Array.isArray(p.keywords) && p.keywords.length > 0) {
+                var keywordNames = p.keywords.map(function(k) {
+                    return k.name;
+                }).join(', ');
+
+                document.getElementById('v-tags').innerText = keywordNames;
+            } else {
+                document.getElementById('v-tags').innerText = '---';
+            }
+        }
 
         if(document.getElementById('v-stock')) document.getElementById('v-stock').innerText = p.quantity;
         if(document.getElementById('v-sold')) document.getElementById('v-sold').innerText = p.quantitySaled;
-        if(document.getElementById('v-isPost')) document.getElementById('v-isPost').checked = (p.post === 1);
+        if(document.getElementById('v-isPost')) {
+            document.getElementById('v-isPost').checked = (p.post == 1 || p.post === true || p.post === "true");
+        }
 
-        // 2. Render Giá tiền
         var priceFmt = new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' });
         if(document.getElementById('v-newPrice')) document.getElementById('v-newPrice').innerText = priceFmt.format(p.price);
 
@@ -3079,7 +3084,6 @@
             if (p.descriptions && p.descriptions.length > 0) {
                 var htmlDesc = '';
                 p.descriptions.forEach(function(d) {
-                    // SỬA LỖI TẠI ĐÂY: Dùng nháy đơn và dấu cộng
                     htmlDesc += '<div class="view-text-item">';
                     htmlDesc +=     '<h5>' + d.title + '</h5>';
                     htmlDesc +=     '<p>' + d.description + '</p>';
@@ -3099,7 +3103,6 @@
                 p.details.forEach(function(dt) {
                     var dtImgSrc = dt.image ? (contextPath + '/assets/img/details/' + dt.image) : '';
 
-                    // SỬA LỖI TẠI ĐÂY:
                     var imgTag = dtImgSrc ? '<img src="' + dtImgSrc + '" alt="Detail">' : '';
 
                     htmlDetail += '<div class="view-detail-card">';
@@ -3186,51 +3189,48 @@
     function fillEditForm(p) {
         console.log("Dữ liệu nhận được:", p);
 
-        // 1. Thông tin cơ bản
         document.getElementById('edit-id').value = p.id || "";
         document.getElementById('edit-name').value = p.name || "";
 
         var createdSpan = document.getElementById('view-created-at');
         if (createdSpan) createdSpan.innerText = p.createdAt || "---";
 
-        // 2. Select Box
         setSelectValue('edit-brand', p.brandId);
-        setSelectValue('edit-tags', p.keywordId);
+        if (p.keywords && Array.isArray(p.keywords) && p.keywords.length > 0) {
+            setSelectValue('edit-tags', p.keywords[0].id);
+        } else {
+            setSelectValue('edit-tags', "");
+        }
 
-        // 3. Giá cả
         document.getElementById('edit-oldPrice').value = p.firstPrice || 0;
         document.getElementById('edit-discount').value = p.discountPercent || 0;
-        document.getElementById('edit-newPrice').value = p.price || 0;
+        document.getElementById('edit-newPrice').value = p.price|| 0;
 
-        // 4. Kho hàng & Trạng thái
         document.getElementById('edit-stock').value = p.quantity || 0;
         document.getElementById('edit-sold').value = p.quantitySaled || 0;
         document.getElementById('edit-isPost').checked = (p.post === 1);
 
-        // 5. Ảnh đại diện
         var imgPath = p.image ? (contextPath + '/assets/img/products/' + p.image) : (contextPath + '/assets/img/no-image.png');
         document.getElementById('edit-v-image').src = imgPath;
         document.getElementById('edit-oldImageName').value = p.image || "";
 
-        // 6. Mô tả (CẬP NHẬT: Truyền thêm ID)
         var descContainer = document.getElementById('edit-v-descriptionList');
         if(descContainer) {
             descContainer.innerHTML = "";
             if (p.descriptions && p.descriptions.length > 0) {
                 p.descriptions.forEach(d => {
-                    // Truyền d.id vào hàm (nếu null thì truyền 0)
+
                     addDescriptionRow(d.id || 0, d.title, d.description);
                 });
             }
         }
 
-        // 7. Chi tiết (CẬP NHẬT: Truyền thêm ID)
         var detailContainer = document.getElementById('edit-v-detailList');
         if(detailContainer) {
             detailContainer.innerHTML = "";
             if (p.details && p.details.length > 0) {
                 p.details.forEach(dt => {
-                    // Truyền dt.id vào hàm
+
                     addDetailRow(dt.id || 0, dt.title, dt.description, dt.image);
                 });
             }
@@ -3242,12 +3242,10 @@
     function calculateNewPrice() {
         var oldPrice = parseFloat(document.getElementById('edit-oldPrice').value) || 0;
         var discount = parseFloat(document.getElementById('edit-discount').value) || 0;
-        // Tính giá sau giảm
         var newPrice = oldPrice - (oldPrice * discount / 100);
         document.getElementById('edit-newPrice').value = Math.round(newPrice);
     }
 
-    // --- HÀM UPDATE CHÍNH ---
     function updateProduct() {
         var id = document.getElementById('edit-id').value;
         if (!id) { alert("Lỗi: Thiếu ID sản phẩm."); return; }
@@ -3261,13 +3259,10 @@
         formData.append("id", id);
         formData.append("name", getValue("edit-name"));
 
-        // --- FIX QUAN TRỌNG: Thêm || 0 để tránh lỗi parseInt("") ---
         formData.append("price_first", getValue("edit-oldPrice") || 0);
         formData.append("price_total", getValue("edit-newPrice") || 0);
         formData.append("quantity", getValue("edit-stock") || 0);
 
-        // Lưu ý: Kiểm tra kỹ xem edit-tags là Category hay Keyword.
-        // Code dưới đây giả định bạn đang dùng nó thay cho categories_id như code cũ của bạn.
         formData.append("categories_id", getValue("edit-tags") || 0);
         formData.append("brands_id", getValue("edit-brand") || 0);
 
@@ -3316,9 +3311,9 @@
                         alert("Có lỗi xảy ra (Redirect Error).");
                     }
                 } else {
-                    // Nếu Java forward lại trang lỗi (không redirect)
+
                     return response.text().then(text => {
-                        console.error("Server Error Content:", text); // Xem lỗi trong Console F12
+                        console.error("Server Error Content:", text);
                         alert("Cập nhật thất bại! Vui lòng kiểm tra Console (F12) để xem chi tiết.");
                         isUpdating = false;
                         resetButton(btnSave);
@@ -3349,7 +3344,6 @@
         var div = document.createElement('div');
         div.className = 'edit-item-box';
 
-        // Thêm input hidden name="descId"
         div.innerHTML = `
         <input type="hidden" name="descId" value="${id}">
         <input type="text" class="form-input edit-sub-title" name="descTitle" placeholder="Tiêu đề">

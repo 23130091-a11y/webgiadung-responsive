@@ -290,7 +290,7 @@ public class ProductDao extends BaseDao {
                         .list()
         );
     }
-/// ///////
+
 public Product getProductFullInfo(int id) {
     return get().withHandle(handle -> {
         Product product = handle.createQuery("""
@@ -300,14 +300,19 @@ public Product getProductFullInfo(int id) {
             p.discounts_id AS discountsId, 
             p.categories_id AS categoriesId, 
             p.brands_id AS brandsId, 
+             p.is_visible,
+            p.status,
             p.quantity, 
             p.sold_quantity AS soldQuantity, 
             p.created_at AS createdAt, 
             p.updated_at AS updatedAt,
-            b.name AS brandName
+            b.name AS brandName,
+            d.discount_type AS discountType,
+            d.discount_value AS discountPercent
         FROM products p
         LEFT JOIN brands b ON p.brands_id = b.id
-        WHERE p.id = :id
+        LEFT JOIN discounts d ON p.discounts_id = d.id
+       WHERE p.id = :id
     """)
                 .bind("id", id)
                 .mapToBean(Product.class)
@@ -359,7 +364,6 @@ public Product getProductFullInfo(int id) {
         return product;
     });
 }
-/// /////
     public boolean updateProduct(Product product) {
         return get().inTransaction(handle -> {
             int rowsUpdated = handle.createUpdate("""
@@ -368,9 +372,11 @@ public Product getProductFullInfo(int id) {
                 image = :image,
                 price_first = :firstPrice,
                 categories_id = :categoriesId,
+                is_visible= :isVisible,
+                status= :status,
                 brands_id = :brandsId,
                 quantity = :quantity,
-                sold_quantity = :quantitySaled,
+                sold_quantity = :soldQuantity,
                 updated_at = NOW()             
             WHERE id = :id
         """)
@@ -380,8 +386,7 @@ public Product getProductFullInfo(int id) {
             if (rowsUpdated == 0) return false;
 
             if (product.getDescriptions() != null) {
-                // Bước A: Lấy danh sách ID hiện có trong DB
-                List<Integer> existingIds = handle.createQuery("SELECT id FROM products_description WHERE products_id = :pid")
+                List<Integer> existingIds = handle.createQuery("SELECT id FROM product_descriptions WHERE product_id = :pid")
                         .bind("pid", product.getId())
                         .mapTo(Integer.class)
                         .list();
@@ -397,27 +402,26 @@ public Product getProductFullInfo(int id) {
                         .collect(Collectors.toList());
 
                 if (!idsToDelete.isEmpty()) {
-                    handle.createUpdate("DELETE FROM products_description WHERE id IN (<ids>)")
+                    handle.createUpdate("DELETE FROM product_descriptions WHERE id IN (<ids>)")
                             .bindList("ids", idsToDelete)
                             .execute();
                 }
 
                 for (ProductDescriptions desc : product.getDescriptions()) {
                     if (desc.getId() > 0 && existingIds.contains(desc.getId())) {
-                        // Cập nhật dòng cũ
                         handle.createUpdate("""
-                        UPDATE products_description 
-                        SET title = :title, description = :desc, updated_at = NOW() 
+                        UPDATE product_descriptions
+                        SET attr_name = :attr_name, value= :value, updated_at = NOW() 
                         WHERE id = :id
                     """)
-                                .bind("title", desc.getAttrName())
-                                .bind("desc", desc.getValue())
+                                .bind("attr_name", desc.getAttrName())
+                                .bind("value", desc.getValue())
                                 .bind("id", desc.getId())
                                 .execute();
                     } else {
-                        // Insert dòng mới (ID = 0 hoặc rỗng)
+
                         handle.createUpdate("""
-                        INSERT INTO products_description (title, description, products_id, created_at, updated_at)
+                        INSERT INTO product_descriptions (attr_name, value, product_id, created_at, updated_at)
                         VALUES (:title, :desc, :pid, NOW(), NOW())
                     """)
                                 .bind("title", desc.getAttrName())
@@ -429,7 +433,7 @@ public Product getProductFullInfo(int id) {
             }
 
             if (product.getDetails() != null) {
-                List<Integer> existingDetailIds = handle.createQuery("SELECT id FROM products_detail WHERE products_id = :pid")
+                List<Integer> existingDetailIds = handle.createQuery("SELECT id FROM product_details WHERE product_id = :pid")
                         .bind("pid", product.getId())
                         .mapTo(Integer.class)
                         .list();
@@ -444,7 +448,7 @@ public Product getProductFullInfo(int id) {
                         .collect(Collectors.toList());
 
                 if (!detailIdsToDelete.isEmpty()) {
-                    handle.createUpdate("DELETE FROM products_detail WHERE id IN (<ids>)")
+                    handle.createUpdate("DELETE FROM product_details WHERE id IN (<ids>)")
                             .bindList("ids", detailIdsToDelete)
                             .execute();
                 }
@@ -453,7 +457,7 @@ public Product getProductFullInfo(int id) {
                     if (detail.getId() > 0 && existingDetailIds.contains(detail.getId())) {
                         // Update
                         handle.createUpdate("""
-                        UPDATE products_detail 
+                        UPDATE product_details
                         SET image = :img, title = :title, description = :desc, updated_at = NOW() 
                         WHERE id = :id
                     """)
@@ -465,7 +469,7 @@ public Product getProductFullInfo(int id) {
                     } else {
                         // Insert
                         handle.createUpdate("""
-                        INSERT INTO products_detail (image, title, description, products_id, created_at, updated_at)
+                        INSERT INTO product_details (image, title, description, product_id, created_at, updated_at)
                         VALUES (:img, :title, :desc, :pid, NOW(), NOW())
                     """)
                                 .bind("img", detail.getImage())
@@ -480,15 +484,20 @@ public Product getProductFullInfo(int id) {
             return true;
         });
     }
-///   ///////////
+
     public boolean deleteProduct(int id) {
         return get().inTransaction(handle -> {
-
-            handle.createUpdate("DELETE FROM product_descriptions WHERE products_id = :pid")
+            handle.createUpdate("DELETE FROM product_keywords WHERE product_id = :pid")
+                    .bind("pid", id)
+                    .execute();
+            handle.createUpdate("DELETE FROM product_images WHERE product_id = :pid")
+                    .bind("pid", id)
+                    .execute();
+            handle.createUpdate("DELETE FROM product_descriptions WHERE product_id = :pid")
                     .bind("pid", id)
                     .execute();
 
-            handle.createUpdate("DELETE FROM product_details WHERE products_id = :pid")
+            handle.createUpdate("DELETE FROM product_details WHERE product_id = :pid")
                     .bind("pid", id)
                     .execute();
 
@@ -496,7 +505,6 @@ public Product getProductFullInfo(int id) {
                     .bind("id", id)
                     .execute();
 
-            // Trả về true nếu xóa thành công ít nhất 1 dòng
             return rowsDeleted > 0;
         });
     }
