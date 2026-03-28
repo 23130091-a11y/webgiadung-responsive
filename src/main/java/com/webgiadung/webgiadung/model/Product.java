@@ -78,7 +78,9 @@ public class Product implements Serializable {
 
     private String discountType;
 
-
+    public void setStatus(int status) {
+        this.status = status;
+    }
 
     public Double getDiscountPercent() {
 
@@ -110,7 +112,9 @@ public class Product implements Serializable {
 
     }
 
-
+    public int getStatus() {
+        return status;
+    }
 
 // tính rating lấy từ review trong trang product details
 

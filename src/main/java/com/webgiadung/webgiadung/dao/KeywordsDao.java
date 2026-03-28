@@ -35,6 +35,14 @@ public class KeywordsDao extends BaseDao {
                         .execute()
         );
     }
+    public void updateProductKeyword(int productId, int newKeywordId) {
+        get().withHandle(h ->
+                h.createUpdate("UPDATE product_keywords SET keyword_id = :newKeywordId WHERE product_id = :productId")
+                        .bind("productId", productId)
+                        .bind("newKeywordId", newKeywordId)
+                        .execute()
+        );
+    }
     // Kiểm tra từ khóa có tồn tại ko
     public boolean checkExists(String name) {
         return get().withHandle(h ->

@@ -111,9 +111,22 @@ public class ProductViewController extends HttpServlet {
                         }
                         json.append(sjDetail.toString());
                     }
-                    json.append("]");
+                    json.append("],");
+                    json.append("\"keywords\": [");
+                    List<Keywords> keywordList = p.getKeywords();
+                    if (keywordList != null && !keywordList.isEmpty()) {
+                        StringJoiner sjKeyword = new StringJoiner(",");
+                        for (Keywords k : keywordList) {
+                            String kName = escapeJson(k.getName());
 
+                            sjKeyword.add("{\"id\":" + k.getId() + ", \"name\":\"" + kName + "\"}");
+
+                        }
+                        json.append(sjKeyword.toString());
+                    }
+                    json.append("]");
                     json.append("}");
+
 
                     out.print(json.toString());
                 } else {
