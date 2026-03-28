@@ -26,7 +26,15 @@ public class KeywordsDao extends BaseDao {
                         .one()
         );
     }
-
+    //insert vào bảng Productkeyword
+    public void insertProductKeyword(int productId, int keywordId) {
+        get().withHandle(h ->
+                h.createUpdate("INSERT INTO product_keywords (product_id, keyword_id) VALUES (:productId, :keywordId)")
+                        .bind("productId", productId)
+                        .bind("keywordId", keywordId)
+                        .execute()
+        );
+    }
     // Kiểm tra từ khóa có tồn tại ko
     public boolean checkExists(String name) {
         return get().withHandle(h ->

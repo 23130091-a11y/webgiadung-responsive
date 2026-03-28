@@ -1,5 +1,7 @@
 package com.webgiadung.webgiadung.controller.admin;
 
+import com.webgiadung.webgiadung.services.KeywordService;
+import com.webgiadung.webgiadung.services.ProductImageService;
 import com.webgiadung.webgiadung.utils.FileUtils;
 import com.webgiadung.webgiadung.model.Product;
 import com.webgiadung.webgiadung.model.ProductDescriptions;
@@ -25,6 +27,8 @@ import java.util.stream.Collectors;
 )
 public class AddProductController extends HttpServlet {
     private ProductService productService = new ProductService();
+    private KeywordService keywordService = new KeywordService();
+    private ProductImageService productImageService = new ProductImageService();
 
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
@@ -33,7 +37,7 @@ public class AddProductController extends HttpServlet {
         resp.setCharacterEncoding("UTF-8");
 
         try {
-            // --- 1. ĐỌC DỮ LIỆU CƠ BẢN ---
+
             String brandIdRaw = req.getParameter("brandID");
             String tagIdRaw = req.getParameter("tagID");
             String cateIdRaw = req.getParameter("cateID");
@@ -48,7 +52,6 @@ public class AddProductController extends HttpServlet {
             p.setName(req.getParameter("productName"));
             p.setFirstPrice(Double.parseDouble(req.getParameter("productPrice")));
 
-            // Set ID các khóa ngoại
             p.setBrandsId(Integer.parseInt(brandIdRaw));
             p.setCategoriesId(Integer.parseInt(cateIdRaw));
 
@@ -57,17 +60,41 @@ public class AddProductController extends HttpServlet {
 
             String realPath = getServletContext().getRealPath("/");
 
-            // Ảnh chính
-            Part mainPart = req.getPart("productImage");
-            if (mainPart != null && mainPart.getSize() > 0) {
-                p.setImage(FileUtils.saveFile(mainPart, realPath, "products"));
+            // lấy danh sách tất cả các ảnh sản phẩm
+            List<Part> allProductImages = req.getParts().stream()
+                    .filter(part -> "productImages[]".equals(part.getName()) && part.getSize() > 0)
+                    .collect(Collectors.toList());
+
+            if (!allProductImages.isEmpty()) {
+                Part firstPart = allProductImages.get(0);
+                // lấy ảnh đầu tiên là ảnh đại diện của sản phẩm
+                String mainImageName = FileUtils.saveFile(firstPart, realPath, "products");
+                p.setImage(mainImageName);
             }
 
-            // --- 2. LƯU SẢN PHẨM & LẤY ID ---
+           // lưu product và lấy productID
             int productId = productService.addProduct(p);
 
             if (productId > 0) {
-                // --- 3. LƯU MÔ TẢ (DESCRIPTIONS) ---
+                // các ảnh còn lại lưu vào bảng productImage
+                if (allProductImages.size() > 1) {
+                    for (int i = 1; i < allProductImages.size(); i++) {
+                        Part extraPart = allProductImages.get(i);
+                        String extraImageName = FileUtils.saveFile(extraPart, realPath, "products");
+
+                        if (extraImageName != null) {
+                            com.webgiadung.webgiadung.model.ProductImage img = new com.webgiadung.webgiadung.model.ProductImage();
+                            img.setProductId(productId);
+                            img.setPath(extraImageName);
+                            productImageService.addProductImage(img);
+                        }
+                    }
+                }
+
+            }
+
+            if (productId > 0) {
+              // lưu description
                 String[] dTitles = req.getParameterValues("descTitles[]");
                 String[] dContents = req.getParameterValues("descContents[]");
 
@@ -83,7 +110,7 @@ public class AddProductController extends HttpServlet {
                     }
                 }
 
-                // --- 4. LƯU CHI TIẾT (DETAILS) ---
+                // -lưu detail
                 String[] detTitles = req.getParameterValues("detTitles[]");
                 String[] detContents = req.getParameterValues("detContents[]");
                 List<Part> detImages = req.getParts().stream()
@@ -97,11 +124,23 @@ public class AddProductController extends HttpServlet {
                         detail.setTitle(detTitles[i]);
                         detail.setDescription(detContents[i]);
 
-                        // Ảnh chi tiết
                         if (i < detImages.size()) {
                             detail.setImage(FileUtils.saveFile(detImages.get(i), realPath, "details"));
                         }
                         productService.addProductDetail(detail);
+                    }
+                }
+                // lưu keyword
+                if (tagIdRaw != null && !tagIdRaw.isEmpty() && !"add-new".equals(tagIdRaw)) {
+                    try {
+                        int kwId = Integer.parseInt(tagIdRaw);
+                        boolean isAdd = keywordService.addKeywordToProduct(productId, kwId);
+
+                        if (!isAdd) {
+                            System.err.println("Lỗi thêm keyword" + productId);
+                        }
+                    } catch (NumberFormatException e) {
+                        System.err.println("Lỗi định dạng iD không phải số hợp lệ: " + tagIdRaw);
                     }
                 }
 
@@ -111,7 +150,6 @@ public class AddProductController extends HttpServlet {
             }
         } catch (Exception e) {
             e.printStackTrace();
-            // QUAN TRỌNG: Loại bỏ dấu ngoặc kép và ký tự xuống dòng trong message lỗi
             String cleanMessage = e.getMessage() != null
                     ? e.getMessage().replace("\"", "'").replace("\n", " ").replace("\r", "")
                     : "Unknown Server Error";

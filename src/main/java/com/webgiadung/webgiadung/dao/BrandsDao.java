@@ -9,7 +9,9 @@ public class BrandsDao extends BaseDao {
     // Lấy toàn bộ danh sách thương hiệu để hiển thị lựa chọn
     public List<Brands> getAll() {
         return get().withHandle(h ->
-                h.createQuery("SELECT * FROM brands ORDER BY name ASC")
+                h.createQuery("SELECT id, name, country, logo, " +
+                                "created_at AS createdAt, updated_at AS updatedAt " +
+                                "FROM brands ORDER BY name ASC")
                         .mapToBean(Brands.class)
                         .list()
         );
