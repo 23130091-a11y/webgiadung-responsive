@@ -5,7 +5,7 @@ import com.webgiadung.webgiadung.model.Cart;
 import com.webgiadung.webgiadung.model.CartItem;
 import com.webgiadung.webgiadung.model.User;
 import org.jdbi.v3.core.Handle;
-
+import com.webgiadung.webgiadung.model.CustomerPurchaseStat;
 import java.util.List;
 import java.util.Map;
 // Thảo luận lại OrderDao
@@ -217,5 +217,49 @@ public class OrderDao extends BaseDao {
                         .bind("id", orderId)
                         .execute()
         );
+    }
+    public List<CustomerPurchaseStat> getCustomerPurchaseStats(String keyword) {
+        String kw = "%" + (keyword == null ? "" : keyword.trim()) + "%";
+
+        return get().withHandle(handle -> handle.createQuery("""
+        SELECT u.id AS userId,
+               u.name AS customerName,
+               u.email AS email,
+               u.phone AS phone,
+               COUNT(o.id) AS totalOrders,
+               COALESCE(SUM(o.total_price), 0) AS totalSpent,
+               MAX(o.created_at) AS lastOrderDate
+        FROM users u
+        LEFT JOIN orders o ON u.id = o.user_id
+        WHERE u.role = 0
+          AND (
+                u.name LIKE :kw
+                OR u.email LIKE :kw
+                OR COALESCE(u.phone, '') LIKE :kw
+          )
+        GROUP BY u.id, u.name, u.email, u.phone
+        ORDER BY lastOrderDate DESC
+        """)
+                .bind("kw", kw)
+                .mapToBean(CustomerPurchaseStat.class)
+                .list());
+    }
+
+    public List<OrderAdmin> getOrdersByUserId(int userId) {
+        return get().withHandle(handle -> handle.createQuery("""
+        SELECT o.id AS id,
+               u.name AS customerName,
+               o.status_transport AS statusTransport,
+               o.status_payment AS statusPayment,
+               o.created_at AS createdAt,
+               o.total_price AS totalPrice
+        FROM orders o
+        JOIN users u ON o.user_id = u.id
+        WHERE o.user_id = :userId
+        ORDER BY o.created_at DESC
+        """)
+                .bind("userId", userId)
+                .mapToBean(OrderAdmin.class)
+                .list());
     }
 }

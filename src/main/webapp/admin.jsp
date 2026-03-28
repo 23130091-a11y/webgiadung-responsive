@@ -70,7 +70,7 @@
 
                         <ul class="manage-nav__list">
                             <li class="manage-nav__item">
-                                <a href="#config" class="manage-nav__link">Cấu hình</a>
+                                <a href="#config" class="manage-nav__link">Quản lý doanh thu</a>
                             </li>
                             <li class="manage-nav__item">
                                 <a href="#news" class="manage-nav__link">Tin tức</a>
@@ -81,10 +81,17 @@
                             </li>
 
                             <li class="manage-nav__item">
+                                <a href="${pageContext.request.contextPath}/admin/purchase-history"
+                                   class="manage-nav__link ${tab == 'purchaseHistory' ? 'manage-nav__link--active' : ''}">
+                                    Lịch sử mua hàng
+                                </a>
+                            </li>
+
+                            <li class="manage-nav__item">
                                 <a href="#product" class="manage-nav__link manage-nav__link--active">Sản phẩm</a>
                             </li>
                             <li class="manage-nav__item">
-                                <a href="#order" class="manage-nav__link">Đơn hàng</a>
+                                <a href="${pageContext.request.contextPath}/order-admin" class="manage-nav__link">Đơn hàng</a>
                             </li>
                         </ul>
 
@@ -93,267 +100,168 @@
 
                 <div class="col l-10 m-12 c-12">
                     <section id="config" class="manage-detail">
-                        <h2 class="manage__heading">Cấu hình hệ thống</h2>
+                        <h2 class="manage__heading">Quản lý doanh thu</h2>
 
-                        <div class="config-card">
-                            <div class="config-card__header">
-                                <div>
-                                    <h3 class="config-title">Thiết lập cửa hàng</h3>
-                                    <p class="config-subtitle">
-                                        Cấu hình các thông tin hiển thị ngoài trang chủ, header/footer và các chế độ hệ thống.
-                                    </p>
+                        <div class="revenue-page">
+                            <div class="revenue-card">
+                                <div class="revenue-card__header">
+                                    <div>
+                                        <h3 class="revenue-title">Báo cáo doanh thu cửa hàng</h3>
+                                        <p class="revenue-subtitle">
+                                            Theo dõi tổng doanh thu, số đơn hàng, đơn hoàn tất và hiệu suất bán hàng.
+                                        </p>
+                                    </div>
+                                </div>
+
+
+                                <form class="revenue-filter" method="get" action="#">
+                                    <div class="revenue-filter__group">
+                                        <label>Từ ngày</label>
+                                        <input type="date" name="fromDate">
+                                    </div>
+
+                                    <div class="revenue-filter__group">
+                                        <label>Đến ngày</label>
+                                        <input type="date" name="toDate">
+                                    </div>
+
+                                    <div class="revenue-filter__group">
+                                        <label>Trạng thái đơn</label>
+                                        <select name="status">
+                                            <option value="">Tất cả</option>
+                                            <option value="done">Hoàn tất</option>
+                                            <option value="shipping">Đang giao</option>
+                                            <option value="pending">Chờ xử lý</option>
+                                            <option value="cancelled">Đã hủy</option>
+                                        </select>
+                                    </div>
+
+                                    <div class="revenue-filter__actions">
+                                        <button type="submit" class="btn-ui btn-ui--primary">Lọc dữ liệu</button>
+                                        <button type="reset" class="btn-ui btn-ui--ghost">Đặt lại</button>
+                                    </div>
+                                </form>
+
+
+                                <div class="revenue-summary">
+                                    <div class="revenue-box">
+                                        <span class="revenue-box__label">Doanh thu hôm nay</span>
+                                        <strong class="revenue-box__value">15.250.000 VND</strong>
+                                    </div>
+
+                                    <div class="revenue-box">
+                                        <span class="revenue-box__label">Doanh thu tháng này</span>
+                                        <strong class="revenue-box__value">248.900.000 VND</strong>
+                                    </div>
+
+                                    <div class="revenue-box">
+                                        <span class="revenue-box__label">Tổng đơn hàng</span>
+                                        <strong class="revenue-box__value">186</strong>
+                                    </div>
+
+                                    <div class="revenue-box">
+                                        <span class="revenue-box__label">Đơn hoàn tất</span>
+                                        <strong class="revenue-box__value">152</strong>
+                                    </div>
+                                </div>
+
+
+                                <div class="revenue-table-wrap">
+                                    <table class="revenue-table">
+                                        <thead>
+                                        <tr>
+                                            <th>Thời gian</th>
+                                            <th>Số đơn</th>
+                                            <th>Doanh thu gốc</th>
+                                            <th>Giảm giá</th>
+                                            <th>Doanh thu thực nhận</th>
+                                            <th>Trạng thái nổi bật</th>
+                                        </tr>
+                                        </thead>
+                                        <tbody>
+                                        <tr>
+                                            <td>01/03/2026</td>
+                                            <td>12</td>
+                                            <td>18.500.000 VND</td>
+                                            <td>1.200.000 VND</td>
+                                            <td>17.300.000 VND</td>
+                                            <td><span class="revenue-badge revenue-badge--success">Hoàn tất cao</span></td>
+                                        </tr>
+                                        <tr>
+                                            <td>02/03/2026</td>
+                                            <td>9</td>
+                                            <td>12.200.000 VND</td>
+                                            <td>600.000 VND</td>
+                                            <td>11.600.000 VND</td>
+                                            <td><span class="revenue-badge revenue-badge--info">Đang giao nhiều</span></td>
+                                        </tr>
+                                        <tr>
+                                            <td>03/03/2026</td>
+                                            <td>15</td>
+                                            <td>21.900.000 VND</td>
+                                            <td>1.500.000 VND</td>
+                                            <td>20.400.000 VND</td>
+                                            <td><span class="revenue-badge revenue-badge--warning">Chờ xử lý</span></td>
+                                        </tr>
+                                        <tr>
+                                            <td>04/03/2026</td>
+                                            <td>7</td>
+                                            <td>9.800.000 VND</td>
+                                            <td>300.000 VND</td>
+                                            <td>9.500.000 VND</td>
+                                            <td><span class="revenue-badge revenue-badge--danger">Có đơn hủy</span></td>
+                                        </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+
+
+                                <div class="revenue-grid">
+                                    <div class="revenue-panel">
+                                        <h4 class="revenue-panel__title">Sản phẩm bán chạy</h4>
+                                        <ul class="revenue-list">
+                                            <li>
+                                                <span>Nồi chiên không dầu Lock&Lock</span>
+                                                <strong>45.000.000 VND</strong>
+                                            </li>
+                                            <li>
+                                                <span>Máy xay sinh tố Philips</span>
+                                                <strong>31.500.000 VND</strong>
+                                            </li>
+                                            <li>
+                                                <span>Bếp điện đôi Sunhouse</span>
+                                                <strong>28.200.000 VND</strong>
+                                            </li>
+                                            <li>
+                                                <span>Nồi cơm điện Sharp</span>
+                                                <strong>24.700.000 VND</strong>
+                                            </li>
+                                        </ul>
+                                    </div>
+
+                                    <div class="revenue-panel">
+                                        <h4 class="revenue-panel__title">Tình trạng đơn hàng</h4>
+                                        <ul class="revenue-list">
+                                            <li>
+                                                <span>Đơn hoàn tất</span>
+                                                <strong>152</strong>
+                                            </li>
+                                            <li>
+                                                <span>Đơn đang giao</span>
+                                                <strong>21</strong>
+                                            </li>
+                                            <li>
+                                                <span>Đơn chờ xử lý</span>
+                                                <strong>9</strong>
+                                            </li>
+                                            <li>
+                                                <span>Đơn đã hủy</span>
+                                                <strong>4</strong>
+                                            </li>
+                                        </ul>
+                                    </div>
                                 </div>
                             </div>
-
-                            <!-- Lưu ý: hiện form này mới là UI. Khi bạn làm backend thì đổi action thành URL controller của bạn. -->
-                            <form class="config-form-ui" method="post" action="#">
-                                <!-- 1) THÔNG TIN CỬA HÀNG -->
-                                <div class="config-block">
-                                    <h4 class="config-block__title">Thông tin cửa hàng</h4>
-
-                                    <div class="config-grid">
-                                        <div class="config-field">
-                                            <label class="config-label">Tên cửa hàng</label>
-                                            <input class="config-input" type="text" name="storeName" placeholder="VD: WebGiaDung" />
-                                        </div>
-
-                                        <div class="config-field">
-                                            <label class="config-label">Slogan</label>
-                                            <input class="config-input" type="text" name="slogan" placeholder="VD: Đồ gia dụng chính hãng - Giá tốt" />
-                                        </div>
-
-                                        <div class="config-field">
-                                            <label class="config-label">Hotline</label>
-                                            <input class="config-input" type="text" name="hotline" placeholder="VD: 0909 000 000" />
-                                        </div>
-
-                                        <div class="config-field">
-                                            <label class="config-label">Email hỗ trợ</label>
-                                            <input class="config-input" type="email" name="email" placeholder="support@tenweb.com" />
-                                        </div>
-
-                                        <div class="config-field config-col-2">
-                                            <label class="config-label">Địa chỉ cửa hàng</label>
-                                            <input class="config-input" type="text" name="address" placeholder="Số nhà, đường, phường/xã, quận/huyện, tỉnh/thành" />
-                                        </div>
-
-                                        <div class="config-field">
-                                            <label class="config-label">Giờ làm việc</label>
-                                            <input class="config-input" type="text" name="openHours" placeholder="VD: 08:00 - 22:00 (T2 - CN)" />
-                                        </div>
-
-                                        <div class="config-field">
-                                            <label class="config-label">Bản đồ (Google Map Embed link)</label>
-                                            <input class="config-input" type="text" name="mapEmbed" placeholder="Dán link embed (nếu có)" />
-                                        </div>
-
-                                        <div class="config-field">
-                                            <label class="config-label">Logo</label>
-                                            <input class="config-input" type="file" name="logo" />
-                                            <span class="config-note">Gợi ý: PNG nền trong.</span>
-                                        </div>
-
-                                        <div class="config-field">
-                                            <label class="config-label">Favicon</label>
-                                            <input class="config-input" type="file" name="favicon" />
-                                            <span class="config-note">Gợi ý: 32x32, PNG/ICO.</span>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div class="config-divider-ui"></div>
-
-                                <!-- 2) THÔNG TIN DOANH NGHIỆP -->
-                                <div class="config-block">
-                                    <h4 class="config-block__title">Thông tin doanh nghiệp</h4>
-
-                                    <div class="config-grid">
-                                        <div class="config-field">
-                                            <label class="config-label">Tên công ty / Hộ kinh doanh</label>
-                                            <input class="config-input" type="text" name="companyName" placeholder="VD: CÔNG TY TNHH ABC" />
-                                        </div>
-
-                                        <div class="config-field">
-                                            <label class="config-label">Mã số thuế</label>
-                                            <input class="config-input" type="text" name="taxCode" placeholder="VD: 031xxxxxxx" />
-                                        </div>
-
-                                        <div class="config-field">
-                                            <label class="config-label">Người đại diện</label>
-                                            <input class="config-input" type="text" name="legalRep" placeholder="VD: Nguyễn Văn A" />
-                                        </div>
-
-                                        <div class="config-field">
-                                            <label class="config-label">Email nhận hóa đơn</label>
-                                            <input class="config-input" type="email" name="invoiceEmail" placeholder="invoice@tenweb.com" />
-                                        </div>
-
-                                        <div class="config-field config-col-2">
-                                            <label class="config-label">Chính sách đổi trả (ngắn)</label>
-                                            <textarea class="config-input config-textarea" name="returnPolicy" placeholder="VD: Đổi trả trong 7 ngày nếu sản phẩm lỗi do NSX..."></textarea>
-                                        </div>
-
-                                        <div class="config-field config-col-2">
-                                            <label class="config-label">Chính sách bảo hành (ngắn)</label>
-                                            <textarea class="config-input config-textarea" name="warrantyPolicy" placeholder="VD: Bảo hành 12 tháng, hỗ trợ đổi mới trong 7 ngày..."></textarea>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div class="config-divider-ui"></div>
-
-                                <!-- 3) BÁN HÀNG & ĐƠN HÀNG -->
-                                <div class="config-block">
-                                    <h4 class="config-block__title">Bán hàng &amp; đơn hàng</h4>
-
-                                    <div class="config-grid">
-                                        <div class="config-field">
-                                            <label class="config-label">VAT (%)</label>
-                                            <input class="config-input" type="number" name="vatRate" min="0" max="20" step="0.5" placeholder="VD: 10" />
-                                        </div>
-
-                                        <div class="config-field">
-                                            <label class="config-label">Cảnh báo tồn kho &lt;=</label>
-                                            <input class="config-input" type="number" name="lowStockThreshold" min="0" step="1" placeholder="VD: 5" />
-                                        </div>
-
-                                        <div class="config-field">
-                                            <label class="config-label">Tự hủy đơn chờ thanh toán (giờ)</label>
-                                            <input class="config-input" type="number" name="autoCancelHours" min="0" step="1" placeholder="VD: 24" />
-                                        </div>
-
-                                        <div class="config-field">
-                                            <label class="config-label">Cho phép mua không cần đăng nhập</label>
-                                            <select class="config-input" name="guestCheckout">
-                                                <option value="1">Bật</option>
-                                                <option value="0">Tắt</option>
-                                            </select>
-                                        </div>
-                                    </div>
-
-                                    <div class="config-toggles">
-                                        <label class="toggle">
-                                            <input type="checkbox" name="allowRegister" checked>
-                                            <span class="toggle-ui"></span>
-                                            <span class="toggle-text">
-                                                <b>Cho phép đăng ký</b>
-                                                <small>Bật/tắt chức năng tạo tài khoản.</small>
-                                            </span>
-                                        </label>
-
-                                        <label class="toggle">
-                                            <input type="checkbox" name="autoConfirmOrder">
-                                            <span class="toggle-ui"></span>
-                                            <span class="toggle-text">
-                                                <b>Tự động xác nhận đơn</b>
-                                                <small>Chỉ nên bật khi quy trình đã ổn định.</small>
-                                            </span>
-                                        </label>
-                                    </div>
-                                </div>
-
-                                <div class="config-divider-ui"></div>
-
-                                <!-- 4) THANH TOÁN & VẬN CHUYỂN -->
-                                <div class="config-block">
-                                    <h4 class="config-block__title">Thanh toán &amp; vận chuyển</h4>
-
-                                    <div class="config-grid">
-                                        <div class="config-field">
-                                            <label class="config-label">Phí ship mặc định (VNĐ)</label>
-                                            <input class="config-input" type="number" name="shippingFee" min="0" step="1000" placeholder="VD: 30000" />
-                                        </div>
-
-                                        <div class="config-field">
-                                            <label class="config-label">Miễn phí ship từ (VNĐ)</label>
-                                            <input class="config-input" type="number" name="freeShipFrom" min="0" step="1000" placeholder="VD: 399000" />
-                                        </div>
-
-                                        <div class="config-field config-col-2">
-                                            <label class="config-label">Ghi chú vận chuyển</label>
-                                            <input class="config-input" type="text" name="shippingNote" placeholder="VD: Giao hàng 1-3 ngày, nội thành nhanh hơn..." />
-                                        </div>
-                                    </div>
-
-                                    <div class="config-toggles">
-                                        <label class="toggle">
-                                            <input type="checkbox" name="payCOD" checked>
-                                            <span class="toggle-ui"></span>
-                                            <span class="toggle-text">
-                                                <b>Thanh toán COD</b>
-                                                <small>Nhận hàng rồi thanh toán.</small>
-                                            </span>
-                                        </label>
-
-                                        <label class="toggle">
-                                            <input type="checkbox" name="payBank">
-                                            <span class="toggle-ui"></span>
-                                            <span class="toggle-text">
-                                                <b>Chuyển khoản ngân hàng</b>
-                                                <small>Hiển thị thông tin tài khoản khi đặt hàng.</small>
-                                            </span>
-                                        </label>
-
-                                        <label class="toggle">
-                                            <input type="checkbox" name="payOnline">
-                                            <span class="toggle-ui"></span>
-                                            <span class="toggle-text">
-                                                <b>Thanh toán online</b>
-                                                <small>VNPAY/Momo... (khi bạn tích hợp).</small>
-                                            </span>
-                                        </label>
-                                    </div>
-                                </div>
-
-                                <div class="config-divider-ui"></div>
-
-                                <!-- 6) GIAO DIỆN -->
-                                <div class="config-block">
-                                    <h4 class="config-block__title">Giao diện</h4>
-
-                                    <div class="config-grid">
-                                        <div class="config-field">
-                                            <label class="config-label">Màu chính (primary)</label>
-                                            <input class="config-input" type="text" name="primaryColor" placeholder="VD: #f6a500" />
-                                        </div>
-
-                                        <div class="config-field">
-                                            <label class="config-label">Màu phụ (soft)</label>
-                                            <input class="config-input" type="text" name="softColor" placeholder="VD: #E06A1C" />
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div class="config-divider-ui"></div>
-
-                                <!-- 7) CHẾ ĐỘ HỆ THỐNG -->
-                                <div class="config-block">
-                                    <h4 class="config-block__title">Chế độ hệ thống</h4>
-
-                                    <div class="config-toggles">
-                                        <label class="toggle">
-                                            <input type="checkbox" name="maintenance">
-                                            <span class="toggle-ui"></span>
-                                            <span class="toggle-text">
-                                                <b>Bảo trì</b>
-                                                <small>Khóa người dùng truy cập ngoài trang.</small>
-                                            </span>
-                                        </label>
-                                    </div>
-
-                                    <div class="config-grid" style="margin-top:12px;">
-                                        <div class="config-field config-col-2">
-                                            <label class="config-label">Thông báo bảo trì</label>
-                                            <textarea class="config-input config-textarea" name="maintenanceMsg" placeholder="VD: Website đang bảo trì, vui lòng quay lại sau."></textarea>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div class="config-actions-ui">
-                                    <button type="submit" class="btn-ui btn-ui--primary">Lưu cấu hình</button>
-                                    <button type="reset" class="btn-ui btn-ui--ghost">Đặt lại</button>
-                                </div>
-                            </form>
                         </div>
                     </section>
 
@@ -362,7 +270,7 @@
                         <div class="section-header">
                             <h2>Khách hàng</h2>
 
-                            <!-- Search -->
+
                             <form class="customer-search" method="get" action="${pageContext.request.contextPath}/admin/customers">
                                 <input type="text" name="q" placeholder="Tìm kiếm (tên/email/sđt)..." value="${param.q}">
                                 <button type="submit">Tìm</button>
@@ -402,7 +310,7 @@
                                                 <td>${fn:escapeXml(u.email)}</td>
                                                 <td>${fn:escapeXml(u.address)}</td>
 
-                                                <!-- Xem -->
+
                                                 <td>
                                                     <button type="button"
                                                             class="customer-table__view"
@@ -419,7 +327,7 @@
                                                     </button>
                                                 </td>
 
-                                                <!-- Sửa -->
+
                                                 <td>
                                                     <button type="button"
                                                             class="customer-table__edit"
@@ -434,7 +342,7 @@
                                                     </button>
                                                 </td>
 
-                                                <!-- Xóa/Khóa -->
+
                                                 <td>
                                                     <form method="post" action="${pageContext.request.contextPath}/admin/customers/lock"
                                                           onsubmit="return confirm('Khóa khách hàng này?');">
@@ -450,14 +358,14 @@
                             </table>
                         </div>
 
-                        <!-- DETAIL -->
 
 
-                        <!-- EDIT FORM -->
+
+
 
                     </section>
 
-                    <!-- Chi tiết khách hàng -->
+
                     <section id="customer-detail" class="customer-detail hidden">
                         <h2 class="manage__heading">Chi tiết khách hàng</h2>
 
@@ -469,7 +377,7 @@
 
                             </div>
 
-                            <!-- Thông tin -->
+
                             <div class="customer-detail__info">
                                 <div class="customer-detail__row">
                                     <span class="label">Tên:</span>
@@ -518,14 +426,14 @@
                             </div>
                         </div>
 
-                        <!-- Nút đóng -->
+
                         <div class="customer-detail__actions">
                             <button class="btn btn--default-color" onclick="hideCustomerDetail()">
                                 Đóng
                             </button>
                         </div>
                     </section>
-                    <!-- Sửa khách hàng -->
+
                     <section id="customer-edit" class="customer-detail hidden">
                         <h2 class="manage__heading">Sửa thông tin khách hàng</h2>
 
@@ -1619,6 +1527,102 @@
                         </div>
                     </div>
 
+                    <section id="purchase-history" class="admin-section">
+                        <h2 class="manage__heading">Thống kê lịch sử mua hàng theo khách</h2>
+
+                        <div class="purchase-history-card">
+                            <form class="customer-search" method="get" action="${pageContext.request.contextPath}/admin/purchase-history">
+                                <input type="text"
+                                       name="q"
+                                       class="customer-search__input"
+                                       placeholder="Nhập tên, email hoặc số điện thoại khách hàng"
+                                       value="${q}">
+                                <button type="submit" class="customer-search__btn">Tìm kiếm</button>
+                            </form>
+
+                            <div class="customer-table-wrap">
+                                <table class="customer-table">
+                                    <thead>
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>Khách hàng</th>
+                                        <th>Email</th>
+                                        <th>SĐT</th>
+                                        <th>Số đơn</th>
+                                        <th>Tổng chi tiêu</th>
+                                        <th>Đơn gần nhất</th>
+                                        <th>Thao tác</th>
+                                    </tr>
+                                    </thead>
+                                    <tbody>
+                                    <c:forEach var="item" items="${purchaseStats}">
+                                        <tr>
+                                            <td>${item.userId}</td>
+                                            <td>${item.customerName}</td>
+                                            <td>${item.email}</td>
+                                            <td>${empty item.phone ? '-' : item.phone}</td>
+                                            <td>${item.totalOrders}</td>
+                                            <td>${item.totalSpent}</td>
+                                            <td>${empty item.lastOrderDate ? '-' : item.lastOrderDate}</td>
+                                            <td>
+                                                <a href="${pageContext.request.contextPath}/admin/purchase-history?userId=${item.userId}"
+                                                   class="btn btn--default-color">
+                                                    Xem chi tiết
+                                                </a>
+                                            </td>
+                                        </tr>
+                                    </c:forEach>
+
+                                    <c:if test="${empty purchaseStats}">
+                                        <tr>
+                                            <td colspan="8" class="purchase-history-empty">Không có dữ liệu khách hàng</td>
+                                        </tr>
+                                    </c:if>
+                                    </tbody>
+                                </table>
+                            </div>
+
+                            <c:if test="${selectedUserId > 0}">
+                                <div class="purchase-history-detail">
+                                    <h3 class="purchase-history-detail__title">Chi tiết đơn hàng của khách ID: ${selectedUserId}</h3>
+
+                                    <div class="customer-table-wrap">
+                                        <table class="customer-table">
+                                            <thead>
+                                            <tr>
+                                                <th>Mã đơn</th>
+                                                <th>Khách hàng</th>
+                                                <th>Trạng thái giao hàng</th>
+                                                <th>Trạng thái thanh toán</th>
+                                                <th>Ngày tạo</th>
+                                                <th>Tổng tiền</th>
+                                            </tr>
+                                            </thead>
+                                            <tbody>
+                                            <c:forEach var="o" items="${selectedOrders}">
+                                                <tr>
+                                                    <td>${o.id}</td>
+                                                    <td>${o.customerName}</td>
+                                                    <td>${o.statusTransport}</td>
+                                                    <td>${o.statusPayment}</td>
+                                                    <td>${o.createdAt}</td>
+                                                    <td>${o.totalPrice}</td>
+                                                </tr>
+                                            </c:forEach>
+
+                                            <c:if test="${empty selectedOrders}">
+                                                <tr>
+                                                    <td colspan="6" class="purchase-history-empty">Khách này chưa có đơn hàng</td>
+                                                </tr>
+                                            </c:if>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </c:if>
+                        </div>
+                    </section>
+
                     <section id="order" class="manage-detail">
                         <h2 class="manage__heading">Đơn hàng</h2>
 
@@ -1666,6 +1670,7 @@
     const sectionAdd = document.getElementById("add-product");
     const sectionOrder = document.getElementById("order");
     const sectionCustomer = document.getElementById("customer");
+    const sectionPurchaseHistory = document.getElementById("purchase-history");
     const sectionCustomerDetail = document.getElementById("customer-detail");
     const sectionCustomerEdit = document.getElementById("customer-edit");
     const sectionNews = document.getElementById("news");
@@ -1719,6 +1724,7 @@
         sectionOrder.style.display = "none";
         sectionConfig.style.display = "none";
         sectionCustomer.style.display = "none";
+        sectionPurchaseHistory.style.display = "none";
         sectionCustomerDetail.style.display = "none";
         sectionCustomerEdit.style.display = "none";
         sectionNews.style.display = "none";
@@ -1730,38 +1736,90 @@
         sectionEventEdit.style.display = "none";
 
     }
-    // Mở đúng tab theo controller
-    const serverTab = "${tab}"; // controller đang set "customers"
 
-    window.addEventListener("DOMContentLoaded", () => {
-        if (!serverTab) return; // nếu không có tab thì thôi
+    const serverTab = "${tab}";
 
+    function setActiveMenu(targetKey) {
+        menuLinks.forEach(link => link.classList.remove("manage-nav__link--active"));
+
+        menuLinks.forEach(link => {
+            const href = link.getAttribute("href") || "";
+
+            if (targetKey === "config" && href === "#config") {
+                link.classList.add("manage-nav__link--active");
+            }
+            if (targetKey === "news" && href === "#news") {
+                link.classList.add("manage-nav__link--active");
+            }
+            if (targetKey === "product" && href === "#product") {
+                link.classList.add("manage-nav__link--active");
+            }
+            if (targetKey === "order" && href.includes("/order-admin")) {
+                link.classList.add("manage-nav__link--active");
+            }
+            if (targetKey === "customers" && href.includes("/admin/customers")) {
+                link.classList.add("manage-nav__link--active");
+            }
+        });
+    }
+
+    function openMainSection(targetKey) {
         hideAllSections();
 
-        if (serverTab === "customers") {
+        if (targetKey === "customers") {
             sectionCustomer.style.display = "block";
-        } else if (serverTab === "product") {
+        } else if (serverTab === "purchaseHistory") {
+            sectionPurchaseHistory.style.display = "block";
+        } else if (targetKey === "product") {
             sectionProduct.style.display = "block";
-        } else if (serverTab === "order") {
+        } else if (targetKey === "order") {
             sectionOrder.style.display = "block";
+        } else if (targetKey === "news") {
+            sectionNews.style.display = "block";
+            showNewsDefault();
         } else {
             sectionConfig.style.display = "block";
         }
+
+        setActiveMenu(targetKey);
+    }
+
+    window.addEventListener("DOMContentLoaded", () => {
+        if (serverTab && serverTab.trim() !== "") {
+            openMainSection(serverTab);
+            return;
+        }
+
+        const hash = window.location.hash;
+
+        if (hash === "#config") {
+            openMainSection("config");
+        } else if (hash === "#news") {
+            openMainSection("news");
+        } else if (hash === "#product") {
+            openMainSection("product");
+        } else if (hash === "#order") {
+            openMainSection("order");
+        } else {
+            openMainSection("product"); // mặc định mở product
+        }
     });
-    // Click menu
+
+
     menuLinks.forEach(link => {
         link.addEventListener("click", function (e) {
             const href = this.getAttribute("href") || "";
+
             if (!href.startsWith("#")) return;
+
             e.preventDefault();
             const targetId = href.substring(1);
-            hideAllSections(); // ẩn tất cả trước
 
-            if (targetId === "config") sectionConfig.style.display = "block";
-            if (targetId === "product") sectionProduct.style.display = "block";
-            if (targetId === "order") sectionOrder.style.display = "block";
-            if (targetId === "customer") sectionCustomer.style.display = "block";
-            if (targetId === "news") showNewsDefault();
+            if (targetId === "config") openMainSection("config");
+            if (targetId === "news") openMainSection("news");
+            if (targetId === "product") openMainSection("product");
+            if (targetId === "order") openMainSection("order");
+            if (targetId === "customer" || targetId === "customers") openMainSection("customers");
         });
     });
     productMenuButtons.forEach(btn => {
@@ -1857,7 +1915,7 @@
             }
         });
     });
-    // 1. Khi bấm nút "Thêm sự kiện giảm giá" (Nút xanh ở trang quản lý sự kiện)
+
     if (btnAddEventTrigger) {
         btnAddEventTrigger.addEventListener("click", () => {
             hideAllSections();
@@ -1867,23 +1925,23 @@
     }
 
     function backToEventList() {
-        // Ẩn trang thêm sự kiện
+
         sectionEventAdd.style.display = "none";
 
-        // Hiển thị lại trang Sản phẩm (cha)
+
         sectionProduct.style.display = "block";
 
-        // Kích hoạt hiển thị Tab Sự kiện bên trong trang Sản phẩm
+
         sectionProductEvent.style.display = "block";
         sectionProductList.style.display = "none";
         sectionEventView.style.display = "none";
         sectionEventEdit.style.display = "none";
 
-        // Ẩn sidebar vì trang sự kiện của bạn không dùng sidebar
+
         const sidebar = document.querySelector(".product-sidebar");
         if (sidebar) sidebar.style.display = "none";
 
-        // Cập nhật trạng thái Active cho menu con
+
         productMenuButtons.forEach(btn => {
             if (btn.getAttribute("data-target") === "product-event") {
                 btn.classList.add("active");
@@ -1895,7 +1953,7 @@
         window.scrollTo({ top: 0, behavior: "smooth" });
     }
 
-    // 3. Xử lý Radio "Phạm vi áp dụng" để ẩn hiện nội dung theo dòng
+
     const scopeRadios = document.querySelectorAll('input[name="applyScope"]');
     const boxCategory = document.getElementById('scopeCategory');
     const boxSpecific = document.getElementById('scopeSpecific');
@@ -1904,11 +1962,11 @@
         radio.addEventListener('change', (e) => {
             const val = e.target.value;
 
-            // Ẩn tất cả trước
+
             boxCategory.style.display = "none";
             boxSpecific.style.display = "none";
 
-            // Hiện theo lựa chọn
+
             if (val === "category") {
                 boxCategory.style.display = "block";
             } else if (val === "specific") {
@@ -1916,7 +1974,7 @@
             }
         });
     });
-    // --- XỬ LÝ CHỌN SLIDE CHO SỰ KIỆN ---
+
     if (slideSelect) {
 
         selectedBox.addEventListener('click', (e) => {

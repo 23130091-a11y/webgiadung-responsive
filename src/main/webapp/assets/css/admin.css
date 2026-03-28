@@ -21,6 +21,9 @@
 .manage-detail:target {
     display: block;
 }
+.admin-section {
+    display: none;
+}
 
 /* Navbar header */
 .navbar__greeting {
@@ -2591,4 +2594,235 @@
     color: #6b7280 !important;
     cursor: not-allowed;
     opacity: 1;
+}
+/* ================= REVENUE UI ================= */
+.revenue-page {
+    background: transparent;
+}
+
+.revenue-card {
+    background: #fff;
+    border: 1px solid #eee;
+    border-radius: 12px;
+    box-shadow: 0 6px 20px rgba(0,0,0,0.06);
+    overflow: hidden;
+}
+
+.revenue-card__header {
+    padding: 18px 22px;
+    border-bottom: 1px solid #f1f1f1;
+}
+
+.revenue-title {
+    margin: 0;
+    font-size: 1.8rem;
+    font-weight: 800;
+    color: var(--text-color);
+}
+
+.revenue-subtitle {
+    margin: 6px 0 0;
+    font-size: 1.35rem;
+    color: #777;
+}
+
+.revenue-filter {
+    padding: 18px 22px;
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 14px 16px;
+    border-bottom: 1px solid #f1f1f1;
+}
+
+.revenue-filter__group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.revenue-filter__group label {
+    font-size: 1.3rem;
+    font-weight: 700;
+    color: #444;
+}
+
+.revenue-filter__group input,
+.revenue-filter__group select {
+    width: 100%;
+    padding: 10px 12px;
+    font-size: 1.4rem;
+    border-radius: 10px;
+    border: 1px solid #ddd;
+    background: #fff;
+    outline: none;
+}
+
+.revenue-filter__group input:focus,
+.revenue-filter__group select:focus {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px rgba(246,165,0,0.18);
+}
+
+.revenue-filter__actions {
+    display: flex;
+    align-items: end;
+    gap: 10px;
+}
+
+.revenue-summary {
+    padding: 18px 22px;
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 16px;
+}
+
+.revenue-box {
+    background: linear-gradient(135deg, #fff8e8, #fff);
+    border: 1px solid #f3e5c0;
+    border-radius: 12px;
+    padding: 16px;
+}
+
+.revenue-box__label {
+    display: block;
+    font-size: 1.3rem;
+    color: #777;
+    margin-bottom: 8px;
+}
+
+.revenue-box__value {
+    font-size: 2rem;
+    font-weight: 800;
+    color: var(--soft-color);
+}
+
+.revenue-table-wrap {
+    padding: 0 22px 22px;
+    overflow-x: auto;
+}
+
+.revenue-table {
+    width: 100%;
+    border-collapse: collapse;
+    background: #fff;
+    min-width: 900px;
+}
+
+.revenue-table th,
+.revenue-table td {
+    padding: 14px 12px;
+    border-bottom: 1px solid #eee;
+    text-align: left;
+    font-size: 1.35rem;
+}
+
+.revenue-table th {
+    background: #fafafa;
+    font-weight: 800;
+    color: #333;
+}
+
+.revenue-badge {
+    display: inline-block;
+    padding: 6px 10px;
+    border-radius: 999px;
+    font-size: 1.2rem;
+    font-weight: 700;
+}
+
+.revenue-badge--success {
+    background: #eafaf0;
+    color: #1b8f4d;
+}
+
+.revenue-badge--info {
+    background: #eaf6ff;
+    color: #1d74c9;
+}
+
+.revenue-badge--warning {
+    background: #fff7e6;
+    color: #d08a00;
+}
+
+.revenue-badge--danger {
+    background: #ffecec;
+    color: #d93025;
+}
+
+.revenue-grid {
+    padding: 0 22px 22px;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 16px;
+}
+
+.revenue-panel {
+    background: #fff;
+    border: 1px solid #eee;
+    border-radius: 12px;
+    padding: 16px;
+}
+
+.revenue-panel__title {
+    margin: 0 0 12px;
+    font-size: 1.5rem;
+    font-weight: 800;
+    color: var(--text-color);
+}
+
+.revenue-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.revenue-list li {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 0;
+    border-bottom: 1px solid #f1f1f1;
+    font-size: 1.35rem;
+}
+
+.revenue-list li:last-child {
+    border-bottom: none;
+}
+
+@media (max-width: 992px) {
+    .revenue-filter,
+    .revenue-summary,
+    .revenue-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .revenue-filter__actions {
+        align-items: stretch;
+    }
+}
+.purchase-history-card {
+    background: #fff;
+    border-radius: 8px;
+    padding: 16px;
+    border: 1px solid #e5e5e5;
+}
+
+.purchase-history-detail {
+    margin-top: 24px;
+}
+
+.purchase-history-detail__title {
+    font-size: 1.8rem;
+    font-weight: 700;
+    margin-bottom: 12px;
+    color: var(--text-color);
+}
+
+.purchase-history-empty {
+    text-align: center;
+    color: #666;
+    padding: 16px;
+    font-style: italic;
 }
