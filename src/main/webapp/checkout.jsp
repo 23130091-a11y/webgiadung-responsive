@@ -319,23 +319,23 @@
                         </h2>
                         <div class="shipping-options">
                             <label class="shipping-option">
-                                <input type="radio" name="shipping-method" value="standard"
-                                ${ship == 25000 ? "checked" : ""}>
+                                <input type="radio" name="shipping-method" value="standard" data-price-ship="25000"
+                                ${shipMethod == 'standard' ? 'checked' : ''}>
                                 <div class="shipping-details">
                                     <p class="shipping-name">Giao hàng Tiêu Chuẩn</p>
                                     <span class="shipping-time">Nhận hàng dự kiến: 2 - 4 ngày</span>
                                 </div>
-                                <span class="shipping-price">25.000đ</span>
+                                <span class="shipping-price" id="price-standard">25.000đ</span>
                             </label>
 
                             <label class="shipping-option">
-                                <input type="radio" name="shipping-method" value="express"
-                                ${ship == 150000 ? "checked" : ""}>
+                                <input type="radio" name="shipping-method" value="express" data-price-ship="150000"
+                                ${shipMethod == 'express' ? 'checked' : ''}>
                                 <div class="shipping-details">
                                     <p class="shipping-name">Giao hàng Hỏa Tốc</p>
-                                    <span class="shipping-time">Nhận hàng dự kiến: Trong 24h</span>
+                                    <span class="shipping-time">Nhận hàng dự kiến: Trong 4h</span>
                                 </div>
-                                <span class="shipping-price">150.000đ</span>
+                                <span class="shipping-price" id="price-express">150.000đ</span>
                             </label>
                         </div>
                     </section>
@@ -403,20 +403,23 @@
 
                         <div class="summary-line">
                             <span>Tạm tính (${totalQuantity} SP):</span>
-                            <span><fmt:formatNumber value="${totalPrice}" type="number" />đ</span>
+                            <span id="summary-subtotal" data-value="${totalPrice}">
+                                <fmt:formatNumber value="${totalPrice}" type="number" />đ
+                            </span>
                         </div>
 
                         <div class="summary-line">
                             <span>Phí vận chuyển:</span>
-                            <span class="shipping-cost"><fmt:formatNumber value="${ship}" type="number" />đ</span>
+                            <span id="summary-shipping" class="shipping-cost" data-value="${ship}">
+                                <fmt:formatNumber value="${ship}" type="number" />đ
+                            </span>
                         </div>
-
 
                         <div class="summary-total-final">
                             <span>TỔNG THANH TOÁN:</span>
-                            <span class="final-price">
-                                    <fmt:formatNumber value="${totalPrice + ship}" type="number" />đ
-                                </span>
+                            <span id="summary-final-total" class="final-price">
+                                <fmt:formatNumber value="${totalPrice + ship}" type="number" />đ
+                            </span>
                         </div>
 
                         <button type="submit" class="btn btn--default-color btn-place-order">ĐẶT HÀNG</button>
@@ -431,34 +434,14 @@
 <!-- Footer -->
 <jsp:include page="/common/footer.jsp" />
 
-<!-- Tính ship -->
 <script>
-    (function () {
-        const baseTotal = Number('${totalPrice}'); // tổng tiền hàng (chưa ship)
-        const FEES = { standard: 25000, express: 150000 };
-
-        const shipCostEl = document.querySelector('.shipping-cost');
-        const finalPriceEl = document.querySelector('.final-price');
-        const radios = document.querySelectorAll('input[name="shipping-method"]');
-
-        const fmt = (n) => new Intl.NumberFormat('vi-VN').format(n) + 'đ';
-
-        function updateSummary() {
-            let method = 'standard';
-            radios.forEach(r => { if (r.checked) method = r.value; });
-
-            const ship = FEES[method] ?? FEES.standard;
-
-            if (shipCostEl) shipCostEl.textContent = fmt(ship);
-            if (finalPriceEl) finalPriceEl.textContent = fmt(baseTotal + ship);
+    let modal;
+    const closeModal = () => {
+        if (modal) {
+            modal.classList.remove('is-open');
         }
+    };
 
-        radios.forEach(r => r.addEventListener('change', updateSummary));
-        updateSummary(); // chạy lần đầu để đúng UI
-    })();
-</script>
-
-<script>
     document.addEventListener("DOMContentLoaded", function() {
         const host = "https://provinces.open-api.vn/api/";
 
@@ -495,7 +478,7 @@
         });
 
         // xử lý đóng mở modal + điều khiển ra vào giữa view select và add
-        const modal = document.getElementById('addressModal');
+        modal = document.getElementById('addressModal');
         const listView = document.getElementById('addressListView');
         const addView = document.getElementById('addressAddView');
 
@@ -519,11 +502,7 @@
             listView.style.display = 'block';
         };
 
-        const closeModal = () => modal.classList.remove('is-open');
-        document.getElementById('btnCloseModal').onclick = closeModal;
-
         window.onclick = (e) => { if (e.target == modal) closeModal(); };
-
 
         // Hàm vẽ lại danh sách địa chỉ trong Modal
         function renderAddressList(addresses, selectedId) {
@@ -584,6 +563,8 @@
                     document.getElementById("displayShipPhone").innerText = "(" + sa.phone + ")";
                     document.getElementById("displayShipAddress").innerText = sa.address;
 
+//
+                    updateShippingFee();
                     closeModal();
 
                     console.log("Đã cập nhật địa chỉ chọn mới thành công!");
@@ -631,12 +612,83 @@
                         document.getElementById("displayShipAddress").innerText = newAddr.address;
                         // gọi hàm tạo lại giao diện
                         renderAddressList(allAddrs, newAddr.id);
+//
+                        updateShippingFee();
                         closeModal();
                     } else {
                         alert("Lỗi: " + response.data.msg);
                     }
                 }).catch(err => console.error(err));
         });
+
+        document.getElementById('btnCloseModal').onclick = closeModal;
+
+        // Hàm format tiền 150000 -> 150.000đ
+        function formatVND(amount) {
+            return new Intl.NumberFormat('vi-VN').format(amount) + "đ";
+        }
+
+        function updateOrderSummary(newShipFee) {
+            const subtotalEl = document.getElementById('summary-subtotal');
+
+            // Lấy giá trị data-value, xóa hết dấu chấm/phẩy/chữ nếu có
+            const subtotal = parseInt(subtotalEl.getAttribute('data-value').toString().replace(/\D/g, '')) || 0;
+
+            // Ép kiểu phí ship mới thành số
+            const fee = parseInt(newShipFee.toString().replace(/\D/g, '')) || 0;
+
+            const finalTotal = subtotal + fee;
+
+            // cập nhật hiển thị tiền ship
+            const shipEl = document.getElementById('summary-shipping');
+            shipEl.innerText = formatVND(newShipFee);
+            shipEl.dataset.value = newShipFee;
+
+            // cập nhật tổng tiền sau khi tính ship vào
+            document.getElementById('summary-final-total').innerText = formatVND(finalTotal);
+        }
+
+        function updateShippingFee() {
+            // Lấy ID địa chỉ đang được tích chọn trong Modal
+            let selectedAddrRadio = document.querySelector('input[name="selectedAddrId"]:checked');
+
+            if (!selectedAddrRadio) {
+                selectedAddrRadio = document.querySelector('input[name="selectedAddrId"]');
+            }
+
+            if (!selectedAddrRadio) {
+                console.warn("Không tìm thấy thẻ địa chỉ nào để tính phí.");
+                return;
+            }
+
+            const addrId = selectedAddrRadio.value;
+
+            const selectedMethodRadio = document.querySelector('input[name="shipping-method"]:checked');
+            const method = selectedMethodRadio ? selectedMethodRadio.value : "standard";
+
+            // Gọi AJAX đến ông ship servlet gửi add id và method là gì lên
+            fetch(`${pageContext.request.contextPath}/shipping-calculate?addressId=` + addrId + "&method=" + method)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.fee !== undefined) {
+                        // lấy id ptvc dựa vào method rồi cập nhật cho ele có id đó khoảng phí trả về
+                        const priceDisplayId = (method === 'standard') ? 'price-standard' : 'price-express';
+                        document.getElementById(priceDisplayId).innerText = formatVND(data.fee);
+
+                        // bỏ phí nhận được từ ajax vào gọi update ông tóm tắt đơn
+                        updateOrderSummary(data.fee);
+                    }
+                })
+                .catch(err => console.error("Lỗi tính phí ship:", err));
+        }
+
+        // gọi khi chọn ptvc
+        document.querySelectorAll('input[name="shipping-method"]').forEach(radio => {
+            radio.addEventListener('change', updateShippingFee);
+        });
+
+        // Chạy lần đầu khi vừa load trang để đảm bảo con số khớp với địa chỉ mặc định
+        updateShippingFee();
     });
 </script>
 
