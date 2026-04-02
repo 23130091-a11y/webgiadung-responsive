@@ -35,71 +35,76 @@
     <link rel="stylesheet" href="assets/css/search.css">
     <link rel="stylesheet" href="assets/css/account.css">
 
-    <!-- Link favicon -->
+
 </head>
 
 <body>
-<!-- header -->
+
 <%@ include file="/common/header.jsp" %>
-<c:set var="tab" value="${empty param.tab ? 'all' : param.tab}" />
+<c:set var="tab" value="${empty param.tab ? 'info' : param.tab}" />
 <main class="main">
     <div class="account">
         <div class="grid wide">
             <div class="row small-gutter">
                 <div class="col l-2 m-0 c-0">
                     <aside class="account__sidebar">
-                        <!-- Nhóm: Tài khoản -->
+
                         <section class="account__section">
                             <h2 class="account__title">Tài khoản của tôi</h2>
                             <ul class="account__list">
                                 <li class="account__item">
-                                    <a href="#info" class="account__link account__link--active">Thông tin cá
-                                        nhân</a>
+                                     <a href="${pageContext.request.contextPath}/account?tab=info"
+                                       class="account__link ${tab == 'info' ? 'account__link--active' : ''}">
+                                        Thông tin cá nhân
+                                        </a>
                                 </li>
                                 <li class="account__item">
-                                    <a href="#address" class="account__link">Địa chỉ</a>
+                                    <a href="${pageContext.request.contextPath}/account?tab=address"
+                                          class="account__link ${tab == 'address' ? 'account__link--active' : ''}">Địa chỉ</a>
                                 </li>
                                 <li class="account__item">
-                                    <a href="#password" class="account__link">Đổi mật khẩu</a>
+                                    <a href="${pageContext.request.contextPath}/account?tab=password"
+                                         class="account__link ${tab == 'password' ? 'account__link--active' : ''}">Đổi mật khẩu</a>
                                 </li>
                             </ul>
                         </section>
 
-                        <!-- Nhóm: Yêu thích -->
+
                         <section class="account__section">
                             <h2 class="account__title">Yêu thích</h2>
                             <ul class="account__list">
                                 <li class="account__item">
-                                    <a href="#favorite-product" class="account__link">Sản phẩm đã thích</a>
+                                    <a href="${pageContext.request.contextPath}/account?tab=favorite"
+                                        class="account__link ${tab == 'favorite' ? 'account__link--active' : ''}">Sản phẩm đã thích</a>
                                 </li>
                             </ul>
                         </section>
 
-                        <!-- Nhóm: Thông tin đơn hàng -->
+
                         <section class="account__section">
                           <h2 class="account__title">Thông tin đơn hàng</h2>
                           <ul class="account__list">
                             <li class="account__item">
                               <a href="${pageContext.request.contextPath}/account?tab=all"
-                                 class="account__link ${tab=='all' ? 'is-active' : ''}">
+                               class="account__link ${tab == 'all' ? 'account__link--active' : ''}">
                                 Tất cả đơn hàng
                               </a>
                             </li>
                             <li class="account__item">
                               <a href="${pageContext.request.contextPath}/account?tab=processing"
-                                 class="account__link ${tab=='processing' ? 'is-active' : ''}">
+                               class="account__link ${tab == 'processing' ? 'account__link--active' : ''}">
                                 Đơn đang xử lý
                               </a>
                             </li>
                             <li class="account__item">
                               <a href="${pageContext.request.contextPath}/account?tab=delivered"
-                                 class="account__link ${tab=='delivered' ? 'is-active' : ''}">
+                                  class="account__link ${tab == 'delivered' ? 'account__link--active' : ''}">
                                 Đơn đã giao
                               </a>
                             </li>
                             <li class="account__item">
                               <a href="${pageContext.request.contextPath}/account?tab=cancelled"
-                                 class="account__link ${tab=='cancelled' ? 'is-active' : ''}">
+                                  class="account__link ${tab == 'cancelled' ? 'account__link--active' : ''}">
                                 Đơn đã hủy
                               </a>
                             </li>
@@ -111,22 +116,24 @@
                     </aside>
                 </div>
 
-                <!-- Khối nội dung chính -->
+
                 <div class="col l-10 m-12 c-12">
-                    <section id="info" class="account__content">
+                    <c:if test="${tab == 'info'}">
+                    <section class="account__content">
                         <h2 class="account__heading">Thông tin cá nhân</h2>
 
                         <form class="account__form" action="${pageContext.request.contextPath}/account" method="post">
                             <input type="hidden" name="action" value="updateProfile">
+                             <input type="hidden" name="tab" value="info">
 
-                            <!-- Họ và tên -->
+
                             <div class="account__form-group">
                                 <label for="fullname" class="account__label">Họ và tên</label>
                                 <input type="text" id="fullname" name="name" class="account__input"
                                        value="${sessionScope.user.name}" required>
                             </div>
 
-                            <!-- Số điện thoại -->
+
                             <div class="account__form-group">
                                 <label for="phone" class="account__label">Số điện thoại</label>
                                 <input type="tel" id="phone" name="phone" class="account__input"
@@ -143,14 +150,17 @@
                             <button type="submit" class="account__btn btn btn--default-color">Lưu thông tin</button>
                         </form>
                     </section>
+                     </c:if>
 
-                    <section id="address" class="account__content">
+                    <c:if test="${tab == 'address'}">
+                    <section class="account__content">
                         <h2 class="account__heading">Địa chỉ</h2>
 
                         <form id="addressForm" class="account__form" action="${pageContext.request.contextPath}/account" method="post">
                             <input type="hidden" name="action" value="updateProfile">
+                            <input type="hidden" name="tab" value="address">
 
-                            <!-- Tỉnh/thành phố -->
+
                             <div class="account__form-group">
                                 <label for="tinh" class="account__label">Tỉnh/thành phố</label>
                                 <select id="tinh" name="tinh" class="account__select" required>
@@ -189,12 +199,15 @@
                             <button type="submit" class="account__btn btn btn--default-color">Lưu thông tin</button>
                         </form>
                     </section>
+                     </c:if>
 
-                    <section id="password" class="account__content">
+                    <c:if test="${tab == 'password'}">
+                    <section class="account__content">
                         <h2 class="account__heading">Đổi mật khẩu</h2>
 
                         <form class="account__form" action="${pageContext.request.contextPath}/account" method="post">
                             <input type="hidden" name="action" value="changePassword">
+                            <input type="hidden" name="tab" value="password">
 
                             <!-- Mật khẩu hiện tại -->
                             <div class="account__form-group">
@@ -227,12 +240,13 @@
                             <button type="submit" class="account__btn btn btn--default-color">Lưu thông tin</button>
                         </form>
                     </section>
+                     </c:if>
 
 
 
-                   <!-- ========== TẤT CẢ ĐƠN HÀNG ========== -->
+
                    <c:if test="${tab == 'all'}">
-                     <section class="account-section__content" id="orders-all">
+                     <section class="account__content">
                      <h2 class="account__heading">Tất cả đơn hàng</h2>
                        <c:if test="${empty ordersAll}">
                          <div class="order-empty">Chưa có đơn hàng.</div>
@@ -292,6 +306,7 @@
                                <form method="post" action="${pageContext.request.contextPath}/account" style="display:inline;">
                                  <input type="hidden" name="action" value="cancelOrder"/>
                                  <input type="hidden" name="orderId" value="${o.id}"/>
+                                 <input type="hidden" name="tab" value="all"/>
                                  <button type="submit" class="order-item__action-btn"
                                          onclick="return confirm('Bạn muốn hủy đơn #${o.id}?');">Hủy đơn</button>
                                </form>
@@ -303,7 +318,7 @@
                    </c:if>
 
 
-                   <!-- ========== ĐƠN ĐANG XỬ LÝ ========== -->
+
                    <c:if test="${tab == 'processing'}">
                      <section id="orders-processing" class="account__content">
                        <h2 class="account__heading">Đơn đang xử lý</h2>
@@ -350,6 +365,7 @@
                              <form method="post" action="${pageContext.request.contextPath}/account" style="display:inline;">
                                <input type="hidden" name="action" value="cancelOrder"/>
                                <input type="hidden" name="orderId" value="${o.id}"/>
+                               <input type="hidden" name="tab" value="processing"/>
                                <button type="submit" class="order-item__action-btn"
                                        onclick="return confirm('Bạn muốn hủy đơn #${o.id}?');">Hủy đơn</button>
                              </form>
@@ -360,7 +376,7 @@
                    </c:if>
 
 
-                   <!-- ========== ĐƠN ĐÃ GIAO ========== -->
+
                    <c:if test="${tab == 'delivered'}">
                      <section id="orders-delivered" class="account__content">
                        <h2 class="account__heading">Đơn đã giao</h2>
@@ -409,6 +425,7 @@
                                <input type="hidden" name="orderId" value="${o.id}"/>
                                <input type="hidden" name="redirect" value="checkout"/>
                                <input type="hidden" name="replaceCart" value="1"/>
+                               <input type="hidden" name="tab" value="delivered"/>
                                <button type="submit" class="order-item__action-btn order-item__action-btn--primary">Mua lại</button>
                              </form>
                            </footer>
@@ -418,7 +435,7 @@
                    </c:if>
 
 
-                   <!-- ========== ĐƠN ĐÃ HỦY ========== -->
+
                    <c:if test="${tab == 'cancelled'}">
                      <section id="orders-cancelled" class="account__content">
                        <h2 class="account__heading">Đơn đã hủy</h2>
@@ -467,6 +484,7 @@
                               <input type="hidden" name="orderId" value="${o.id}"/>
                               <input type="hidden" name="redirect" value="checkout"/>
                               <input type="hidden" name="replaceCart" value="1"/>
+                              <input type="hidden" name="tab" value="cancelled"/>
                               <button type="submit" class="order-item__action-btn order-item__action-btn--primary">Mua lại</button>
                             </form>
                            </footer>
@@ -476,7 +494,8 @@
                    </c:if>
 
 
-                    <section id="favorite-product" class="account__content">
+                    <c:if test="${tab == 'favorite'}">
+                    <section class="account__content">
                         <h2 class="account__heading">Sản phẩm đã thích</h2>
                         <div class="favorite-product-list row small-gutter">
                             <div class="col l-3 m-4 c-6">
@@ -670,6 +689,7 @@
                             </div>
                         </div>
                     </section>
+                     </c:if>
 
                 </div>
             </div>
@@ -680,33 +700,10 @@
 <!-- Footer -->
 <jsp:include page="/common/footer.jsp" />
 </body>
-<!-- Link JS -->
+
 <script src="assets/js/script.js"></script>
-<script>
-  (function () {
-    const params = new URLSearchParams(location.search);
-    const tab = params.get("tab");
 
-    const map = {
-      all: "#orders-all",
-      processing: "#orders-processing",
-      delivered: "#orders-delivered",
-      cancelled: "#orders-cancelled",
-      orders: "#orders-all"
-    };
 
-    if (tab && map[tab]) {
-      location.hash = map[tab]; // để CSS :target hiển thị đúng tab
-      const el = document.querySelector(map[tab]);
-      if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
-      return;
-    }
-
-    // vào /account mà không có hash/tab thì mặc định hiện thông tin cá nhân
-    if (!location.hash) location.hash = "#info";
-  })();
-</script>
-<!-- Ghép tỉnh + huyện + địa chỉ thành 1 chuỗi lưu vào users.address -->
 <script>
   (function () {
     const f = document.getElementById("addressForm");
@@ -721,7 +718,7 @@
       const huyenText = huyen && huyen.value ? huyen.options[huyen.selectedIndex].text : "";
       const soNha = diachi ? diachi.value.trim() : "";
 
-      // full address -> lưu vào DB
+
       diachi.value = [soNha, huyenText, tinhText].filter(Boolean).join(", ");
     });
   })();
