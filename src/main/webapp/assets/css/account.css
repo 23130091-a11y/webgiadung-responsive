@@ -355,3 +355,12 @@
     color: #666;
     background: #fff;
 }
+<style>
+    .account__content {
+        display: block !important;
+        border-radius: 2px;
+        border: 1px solid rgba(0, 0, 0, .125);
+        margin-bottom: 20px;
+        overflow: hidden;
+    }
+</style>

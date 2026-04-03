@@ -33,7 +33,7 @@
     <link rel="stylesheet" href="assets/css/base.css">
     <link rel="stylesheet" href="assets/css/style.css">
     <link rel="stylesheet" href="assets/css/search.css">
-    <link rel="stylesheet" href="assets/css/account.css">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/account.css?v=20260403">
 
 
 </head>
@@ -118,7 +118,8 @@
 
 
                 <div class="col l-10 m-12 c-12">
-                    <c:if test="${tab == 'info'}">
+                <c:choose>
+                    <c:when test="${tab == 'info'}">
                     <section class="account__content">
                         <h2 class="account__heading">Thông tin cá nhân</h2>
 
@@ -150,9 +151,9 @@
                             <button type="submit" class="account__btn btn btn--default-color">Lưu thông tin</button>
                         </form>
                     </section>
-                     </c:if>
+                     </c:when>
 
-                    <c:if test="${tab == 'address'}">
+                    <c:when test="${tab == 'address'}">
                     <section class="account__content">
                         <h2 class="account__heading">Địa chỉ</h2>
 
@@ -199,9 +200,9 @@
                             <button type="submit" class="account__btn btn btn--default-color">Lưu thông tin</button>
                         </form>
                     </section>
-                     </c:if>
+                     </c:when>
 
-                    <c:if test="${tab == 'password'}">
+                    <c:when test="${tab == 'password'}">
                     <section class="account__content">
                         <h2 class="account__heading">Đổi mật khẩu</h2>
 
@@ -240,12 +241,12 @@
                             <button type="submit" class="account__btn btn btn--default-color">Lưu thông tin</button>
                         </form>
                     </section>
-                     </c:if>
+                     </c:when>
 
 
 
 
-                   <c:if test="${tab == 'all'}">
+                   <c:when test="${tab == 'all'}">
                      <section class="account__content">
                      <h2 class="account__heading">Tất cả đơn hàng</h2>
                        <c:if test="${empty ordersAll}">
@@ -315,11 +316,11 @@
                          </article>
                        </c:forEach>
                      </section>
-                   </c:if>
+                   </c:when>
 
 
 
-                   <c:if test="${tab == 'processing'}">
+                  <c:when test="${tab == 'processing'}">
                      <section id="orders-processing" class="account__content">
                        <h2 class="account__heading">Đơn đang xử lý</h2>
 
@@ -373,11 +374,11 @@
                          </article>
                        </c:forEach>
                      </section>
-                   </c:if>
+                   </c:when>
 
 
 
-                   <c:if test="${tab == 'delivered'}">
+                   <c:when test="${tab == 'delivered'}">
                      <section id="orders-delivered" class="account__content">
                        <h2 class="account__heading">Đơn đã giao</h2>
 
@@ -432,11 +433,11 @@
                          </article>
                        </c:forEach>
                      </section>
-                   </c:if>
+                   </c:when>
 
 
 
-                   <c:if test="${tab == 'cancelled'}">
+                  <c:when test="${tab == 'cancelled'}">
                      <section id="orders-cancelled" class="account__content">
                        <h2 class="account__heading">Đơn đã hủy</h2>
 
@@ -491,10 +492,10 @@
                          </article>
                        </c:forEach>
                      </section>
-                   </c:if>
+                   </c:when>
 
 
-                    <c:if test="${tab == 'favorite'}">
+                   <c:when test="${tab == 'favorite'}">
                     <section class="account__content">
                         <h2 class="account__heading">Sản phẩm đã thích</h2>
                         <div class="favorite-product-list row small-gutter">
@@ -689,8 +690,8 @@
                             </div>
                         </div>
                     </section>
-                     </c:if>
-
+                     </c:when>
+                    </c:choose>
                 </div>
             </div>
         </div>
