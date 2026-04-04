@@ -3540,7 +3540,6 @@
 
             const formData = new FormData(this);
 
-            // Đảm bảo logic đồng bộ với Java
             if (formData.get('applyScope') === 'all') {
                 formData.set('applyCategories', '0');
             }
@@ -3553,7 +3552,7 @@
             try {
                 const response = await fetch(url, {
                     method: 'POST',
-                    body: formData // Servlet dùng @MultipartConfig nên gửi FormData là chuẩn
+                    body: formData
                 });
 
                 const responseText = await response.text();
@@ -3580,6 +3579,25 @@
             }
         });
     }
+    function setupDiscountUnitChange() {
+        const discountTypeSelect = document.getElementById('discountType');
+        const discountUnitSpan = document.getElementById('discountUnit');
+
+        if (discountTypeSelect && discountUnitSpan) {
+            discountTypeSelect.addEventListener('change', function() {
+                if (this.value === 'percentage') {
+                    discountUnitSpan.textContent = '%';
+                } else if (this.value === 'amount') {
+                    discountUnitSpan.textContent = 'đ';
+                }
+            });
+        }
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        setupFormSubmit();
+        setupDiscountUnitChange();
+    });
 </script>
 <script>
     document.addEventListener("DOMContentLoaded", function() {
@@ -3631,7 +3649,6 @@
         html += '    <div class="event-table__cell event-col-action">Xóa</div>';
         html += '</div>';
 
-        // BƯỚC 2: Duyệt danh sách để thêm dữ liệu
         if (discounts && discounts.length > 0) {
             discounts.forEach(function (d) {
                 var discountDisplay = d.discount + "%";
@@ -3707,7 +3724,6 @@
 <script>
     $(document).ready(function() {
 
-        // 1. AJAX TÌM KIẾM
         $(document).on('submit', '#searchOrderForm', function(e) {
             e.preventDefault();
             $.ajax({
@@ -3771,10 +3787,9 @@
     });
 
     $(document).on('click', '#btnReloadAll', function() {
-        // Xóa trắng ô input tìm kiếm
+
         $('input[name="keyword"]').val('');
 
-        // Gửi AJAX không kèm keyword để lấy toàn bộ danh sách
         $.ajax({
             url: '${pageContext.request.contextPath}/order-search',
             type: 'GET',
