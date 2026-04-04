@@ -15,7 +15,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @WebServlet("/admin/add-discount")
-@MultipartConfig // Quan trọng để đọc được dữ liệu text từ FormData gửi lên
+@MultipartConfig
 public class AddDiscountController extends HttpServlet {
 
     private final DiscountService discountService = new DiscountService();
@@ -30,7 +30,7 @@ public class AddDiscountController extends HttpServlet {
         response.setCharacterEncoding("UTF-8");
 
         try {
-            // Đọc dữ liệu
+
             String name = request.getParameter("eventName");
             String discountValueRaw = request.getParameter("discountValue");
             String startDateRaw = request.getParameter("startDate");
@@ -39,7 +39,6 @@ public class AddDiscountController extends HttpServlet {
             String type = request.getParameter("discountType");
             String catIdRaw = request.getParameter("applyCategories");
 
-            // KIỂM TRA NULL/EMPTY trước khi parse để tránh lỗi 500
             if (name == null || name.isBlank() || discountValueRaw == null || startDateRaw == null || endDateRaw == null) {
                 response.getWriter().write("{\"status\":\"error\", \"message\":\"Vui lòng điền đầy đủ thông tin!\"}");
                 return;
@@ -52,7 +51,6 @@ public class AddDiscountController extends HttpServlet {
 
             double value = Double.parseDouble(discountValueRaw);
 
-            // Bẫy lỗi parse ngày tháng
             LocalDateTime start = LocalDate.parse(startDateRaw).atStartOfDay();
             LocalDateTime end = LocalDate.parse(endDateRaw).atTime(23, 59, 59);
 
@@ -61,7 +59,7 @@ public class AddDiscountController extends HttpServlet {
             d.setDiscountValue(value);
             d.setStartDate(start);
             d.setEndDate(end);
-            d.setDiscountType("percentage".equals(type) ? "1" : "2");
+            d.setDiscountType("percentage".equals(type) ? "percentage" : "fixed");
             d.setCategoryId(idCate);
 
             int newDiscountId = discountService.insertDiscount(d);
@@ -77,7 +75,7 @@ public class AddDiscountController extends HttpServlet {
 
         } catch (Exception e) {
             e.printStackTrace();
-            // Không setStatus(500) nếu bạn muốn trả về thông báo JSON sạch cho Client
+
             response.getWriter().write("{\"status\":\"error\", \"message\":\"Lỗi Server: " + e.getMessage() + "\"}");
         }
     }}
