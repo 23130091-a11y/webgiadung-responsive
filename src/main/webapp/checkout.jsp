@@ -174,13 +174,14 @@
 
 <main class="main" style="background-color: #f5f5f5; padding-top: 20px;">
     <div class="grid wide">
-        <!-- form này chuyển đến servlet checkout -->
-        <form action="${pageContext.request.contextPath}/checkout" method="post">
+        <!-- form này chuyển đến servlet process-checkout -->
+        <form action="${pageContext.request.contextPath}/process-checkout" method="post">
             <!-- lưu giữ id đơn hàng để tránh bị refresh lại mất -->
             <input type="hidden" name="ids" value="${ids != null ? ids : param.ids}">
+
             <div class="row">
 
-                <div class="col l-8 m-12 c-12">
+                <div class="col l-8 m-1hi2 c-12">
 
                     <section class="checkout-section shipping-info-section">
                         <h2 class="section-title">
@@ -190,6 +191,10 @@
                         <c:set var="u" value="${sessionScope.user}" />
 
                         <c:set var="sa" value="${requestScope.selectedAddress}" />
+
+                        <input type="hidden" name="addressId" id="hiddenAddressId" value="${not empty sa ? sa.id : 0}">
+
+                        <input type="hidden" name="shippingMethod" id="hiddenShippingMethod" value="${shipMethod}">
                         <!-- Khi mà người dùng chọn địa chỉ xong => hiện tên và sđt của địa chỉ đó
                             Nếu không lấy từ thông tin cá nhân hiện lên -->
                         <div class="current-address">
@@ -351,14 +356,14 @@
                                 Thanh toán khi nhận hàng (COD)
                             </label>
                             <label class="payment-option">
-                                <input type="radio" name="payment" value="bank">
+                                <input type="radio" name="payment" value="viet-qr">
                                 <span class="custom-radio"></span>
-                                Chuyển khoản ngân hàng (QR Code)
+                                Thanh toán qua (VIETQR Code)
                             </label>
                             <label class="payment-option">
                                 <input type="radio" name="payment" value="e-wallet">
                                 <span class="custom-radio"></span>
-                                Ví điện tử (Momo, ZaloPay,...)
+                                Thanh toán qua (VNPAY)
                             </label>
                         </div>
                     </section>
@@ -380,7 +385,6 @@
                                     <c:forEach var="item" items="${items}">
                                         <div class="summary-product-item">
 
-                                                <%-- Ảnh: nhớ thêm contextPath để khỏi lỗi đường dẫn --%>
                                             <img class="summary-thumb"
                                                  src="${pageContext.request.contextPath}/assets/img/products/${item.product.image}"
                                                  alt="${item.product.name}" />
@@ -403,7 +407,7 @@
 
                         <div class="summary-line">
                             <span>Tạm tính (${totalQuantity} SP):</span>
-                            <span id="summary-subtotal" data-value="${totalPrice}">
+                            <span id="summary-subtotal" data-value="${totalPrice.longValue()}">
                                 <fmt:formatNumber value="${totalPrice}" type="number" />đ
                             </span>
                         </div>
@@ -550,6 +554,8 @@
                 return;
             }
 
+            document.getElementById('hiddenAddressId').value = selectedRadio.value;
+
             const addressId = selectedRadio.value;
 
             axios.post(contextPath + '/address/select', new URLSearchParams({
@@ -631,11 +637,10 @@
         function updateOrderSummary(newShipFee) {
             const subtotalEl = document.getElementById('summary-subtotal');
 
-            // Lấy giá trị data-value, xóa hết dấu chấm/phẩy/chữ nếu có
-            const subtotal = parseInt(subtotalEl.getAttribute('data-value').toString().replace(/\D/g, '')) || 0;
+            let subtotalRaw = subtotalEl.getAttribute('data-value');
 
-            // Ép kiểu phí ship mới thành số
-            const fee = parseInt(newShipFee.toString().replace(/\D/g, '')) || 0;
+            const subtotal = parseInt(subtotalRaw) || 0;
+            const fee = parseInt(newShipFee) || 0;
 
             const finalTotal = subtotal + fee;
 
@@ -684,12 +689,17 @@
 
         // gọi khi chọn ptvc
         document.querySelectorAll('input[name="shipping-method"]').forEach(radio => {
-            radio.addEventListener('change', updateShippingFee);
+            radio.addEventListener('change', function() {
+                document.getElementById('hiddenShippingMethod').value = this.value;
+
+                updateShippingFee();
+            });
         });
 
         // Chạy lần đầu khi vừa load trang để đảm bảo con số khớp với địa chỉ mặc định
         updateShippingFee();
     });
+
 </script>
 
 </body>

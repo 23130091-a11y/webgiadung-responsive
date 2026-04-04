@@ -37,11 +37,11 @@ public class UserAddressDao extends BaseDao {
                         .map((rs, ctx) -> {
                             UserAddress a = new UserAddress();
                             a.setId(rs.getInt("id"));
-                            a.setUserId(rs.getInt("user_id"));
-                            a.setFullName(rs.getString("full_name"));
+                            a.setUserId(rs.getInt("userId"));
+                            a.setFullName(rs.getString("fullName"));
                             a.setPhone(rs.getString("phone"));
                             a.setAddress(rs.getString("address"));
-                            a.setIsDefault(rs.getInt("is_default"));
+                            a.setIsDefault(rs.getInt("isDefault"));
                             return a;
                         })
                         .findOne()

@@ -1,71 +1,55 @@
 package com.webgiadung.webgiadung.dao;
 
-import com.webgiadung.webgiadung.model.OrderAdmin;
-import com.webgiadung.webgiadung.model.Cart;
-import com.webgiadung.webgiadung.model.CartItem;
-import com.webgiadung.webgiadung.model.User;
+import com.webgiadung.webgiadung.model.*;
 import org.jdbi.v3.core.Handle;
-import com.webgiadung.webgiadung.model.CustomerPurchaseStat;
+
 import java.util.List;
 import java.util.Map;
 // Thảo luận lại OrderDao
 public class OrderDao extends BaseDao {
 
-    public int placeOrder(User user, Cart cart, int shipFee) {
-        double total = cart.getTotalPrice() + shipFee;
+    public int placeOrder(User user, UserAddress address, String shipMethod,
+                          long shipFee, String payMethod, double finalTotal, Cart orderCart) {
 
         return get().inTransaction(handle -> {
-            int orderId = insertOrder(handle,
-                    user.getId(),
-                    (user.getName() != null && !user.getName().trim().isEmpty()) ? user.getName() : user.getEmail(),
-                    total
-            );
+            int orderId = insertOrder(handle, user, address, payMethod, shipFee, finalTotal);
 
-            for (CartItem it : cart.getItems()) {
-                insertOrderItem(handle,
-                        orderId,
-                        it.getProduct().getId(),
-                        it.getProduct().getName(),
-                        it.getDiscountPrice(),
-                        it.getQuantity(),
-                        it.getTotalPrice()
-                );
-            }
-            return orderId;
+            insertOrderItems(handle, orderId, orderCart);
+
+            return orderId; // Trả về ID để Servlet dùng gửi sang VNPAY
         });
     }
 
-    private int insertOrder(Handle h, int userId, String customerName, double totalPrice) {
-        String sql = """
-            INSERT INTO orders(user_id, customer_name, status_transport, status_payment, total_price)
-            VALUES (:user_id, :customer_name, 0, 0, :total_price)
-        """;
-
-        // lấy id vừa insert
-        return h.createUpdate(sql)
-                .bind("user_id", userId)
-                .bind("customer_name", customerName)
-                .bind("total_price", totalPrice)
-                .executeAndReturnGeneratedKeys("id")
+    private int insertOrder(Handle handle, User user, UserAddress address,
+                            String payMethod, long shipFee, double finalTotal) {
+        return handle.createUpdate(
+                        "INSERT INTO orders (user_id, customer_name, customer_phone, shipping_address, " +
+                                "payment_method, shipping_fee, total_price, status_payment, status_transport, created_at) " +
+                                "VALUES (:userId, :name, :phone, :address, :payMethod, :shipFee, :total, 0, 0, NOW())")
+                .bind("userId", user.getId())
+                .bind("name", address.getFullName())
+                .bind("phone", address.getPhone())
+                .bind("address", address.getAddress())
+                .bind("payMethod", payMethod)
+                .bind("shipFee", shipFee)
+                .bind("total", finalTotal)
+                .executeAndReturnGeneratedKeys()
                 .mapTo(Integer.class)
                 .one();
     }
 
-    private void insertOrderItem(Handle h, int orderId, int productId, String productName,
-                                 double price, int quantity, double totalPrice) {
-        String sql = """
-            INSERT INTO order_items(order_id, product_id, product_name, price, quantity, total_price)
-            VALUES (:order_id, :product_id, :product_name, :price, :quantity, :total_price)
-        """;
-
-        h.createUpdate(sql)
-                .bind("order_id", orderId)
-                .bind("product_id", productId)
-                .bind("product_name", productName)
-                .bind("price", price)
-                .bind("quantity", quantity)
-                .bind("total_price", totalPrice)
-                .execute();
+    private void insertOrderItems(Handle handle, int orderId, Cart orderCart) {
+        for (CartItem item : orderCart.getItems()) {
+            handle.createUpdate(
+                            "INSERT INTO order_items (order_id, product_id, product_name, price, quantity) " +
+                                    "VALUES (:orderId, :prodId, :prodName, :price, :qty)")
+                    .bind("orderId", orderId)
+                    .bind("prodId", item.getProduct().getId())
+                    .bind("prodName", item.getProduct().getName())
+                    .bind("price", item.getDiscountPrice())
+                    .bind("qty", item.getQuantity())
+                    .execute();
+        }
     }
 
     public List<Map<String, Object>> findOrdersByUser(int userId) {
@@ -86,7 +70,7 @@ public class OrderDao extends BaseDao {
 
     public List<Map<String, Object>> findItemsByOrder(int orderId) {
         String sql = """
-            SELECT product_name, price, quantity, total_price
+            SELECT product_name, price, quantity, (price * quantity) AS total_price
             FROM order_items
             WHERE order_id = :order_id
             ORDER BY id ASC
@@ -137,7 +121,7 @@ public class OrderDao extends BaseDao {
             oi.product_name AS name,
             COALESCE(p.image, 'assets/img/no-image.png') AS image,
             oi.price        AS first_price,
-            oi.price        AS total_price,
+            (oi.price * oi.quantity) AS total_price,
             oi.quantity     AS quantity
         FROM order_items oi
         LEFT JOIN products p ON p.id = oi.product_id
@@ -152,35 +136,51 @@ public class OrderDao extends BaseDao {
                         .list()
         );
     }
+    // lấy tất cả những order
     public List<OrderAdmin> getAllOrders() {
         return get().withHandle(handle ->
-                handle.createQuery(
-                        "SELECT o.id, u.name AS customer_name, " +
-                                "o.status_transport, o.status_payment, o.created_at, o.total_price " +
-                                "FROM orders o " +
-                                "JOIN users u ON o.user_id = u.id " +
-                                "ORDER BY o.created_at DESC"
-                ).mapToBean(OrderAdmin.class).list()
+                handle.createQuery("""
+                SELECT 
+                    o.id,
+                    o.user_id AS userId,
+                    o.customer_name AS customerName,
+                    o.customer_phone AS customerPhone,
+                    o.shipping_address AS shippingAddress,
+                    o.status_transport AS statusTransport,
+                    o.payment_method AS paymentMethod,
+                    o.status_payment AS statusPayment,
+                    o.total_price AS totalPrice,
+                    o.shipping_fee AS shippingFee,
+                    o.created_at AS createdAt
+                FROM orders o
+                ORDER BY o.created_at DESC
+            """).mapToBean(OrderAdmin.class).list()
         );
     }
 
+    // search order theo id hoặc name
     public List<OrderAdmin> searchOrders(String keyword) {
         String searchPattern = "%" + (keyword == null ? "" : keyword.trim()) + "%";
 
         return get().withHandle(handle ->
-                handle.createQuery(
-                                "SELECT o.id, " +
-                                        "u.name AS customer_name, " +
-                                        "o.status_transport, " +
-                                        "o.status_payment, " +
-                                        "o.created_at, " +
-                                        "o.total_price " +
-                                        "FROM orders o " +
-                                        "JOIN users u ON o.user_id = u.id " +
-                                        "WHERE CAST(o.id AS CHAR) LIKE :kw " +
-                                        "OR u.name LIKE :kw " +
-                                        "ORDER BY o.created_at DESC"
-                        )
+                handle.createQuery("""
+                SELECT 
+                    o.id,
+                    o.user_id AS userId,
+                    o.customer_name AS customerName,
+                    o.customer_phone AS customerPhone,
+                    o.shipping_address AS shippingAddress,
+                    o.status_transport AS statusTransport,
+                    o.payment_method AS paymentMethod,
+                    o.status_payment AS statusPayment,
+                    o.total_price AS totalPrice,
+                    o.shipping_fee AS shippingFee,
+                    o.created_at AS createdAt
+                FROM orders o
+                WHERE CAST(o.id AS CHAR) LIKE :kw
+                   OR o.customer_name LIKE :kw
+                ORDER BY o.created_at DESC
+            """)
                         .bind("kw", searchPattern)
                         .mapToBean(OrderAdmin.class)
                         .list()
@@ -247,19 +247,52 @@ public class OrderDao extends BaseDao {
 
     public List<OrderAdmin> getOrdersByUserId(int userId) {
         return get().withHandle(handle -> handle.createQuery("""
-        SELECT o.id AS id,
-               u.name AS customerName,
-               o.status_transport AS statusTransport,
-               o.status_payment AS statusPayment,
-               o.created_at AS createdAt,
-               o.total_price AS totalPrice
-        FROM orders o
-        JOIN users u ON o.user_id = u.id
-        WHERE o.user_id = :userId
-        ORDER BY o.created_at DESC
+         SELECT
+                            o.id,
+                            o.user_id AS userId,
+                            o.customer_name AS customerName,
+                            o.customer_phone AS customerPhone,
+                            o.shipping_address AS shippingAddress,
+                            o.status_transport AS statusTransport,
+                            o.payment_method AS paymentMethod,
+                            o.status_payment AS statusPayment,
+                            o.total_price AS totalPrice,
+                            o.shipping_fee AS shippingFee,
+                            o.created_at AS createdAt
+                        FROM orders o
+                        WHERE o.user_id = :userId
+                        ORDER BY o.created_at DESC
         """)
                 .bind("userId", userId)
                 .mapToBean(OrderAdmin.class)
                 .list());
+    }
+
+    // tìm đơn hàng theo id
+    public OrderAdmin findById(int orderId) {
+        String sql = """
+        SELECT
+                    id,
+                    user_id AS userId,
+                    customer_name AS customerName,
+                    customer_phone AS customerPhone,
+                    shipping_address AS shippingAddress,
+                    status_transport AS statusTransport,
+                    payment_method AS paymentMethod,
+                    status_payment AS statusPayment,
+                    total_price AS totalPrice,
+                    shipping_fee AS shippingFee,
+                    created_at AS createdAt
+        FROM orders
+        WHERE id = :id
+    """;
+
+        return get().withHandle(h ->
+                h.createQuery(sql)
+                        .bind("id", orderId)
+                        .mapToBean(OrderAdmin.class)
+                        .findOne()
+                        .orElse(null)
+        );
     }
 }
