@@ -43,21 +43,20 @@
     font-weight: 500;
     color: var(--text-color);
     border-radius: 6px;
-    transition: all 0.25s ease;
+    border-left: 3px solid transparent;
+    transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease;
 }
 
 .account__link:hover {
     background-color: #f2f2f2;
     color: var(--primary-color);
-    padding-left: 16px;
 }
 
 .account__link--active {
     background-color: rgba(0, 123, 255, 0.1);
     color: var(--primary-color);
     font-weight: 600;
-    border-left: 3px solid var(--primary-color);
-    padding-left: 14px;
+    border-left-color: var(--primary-color);
 }
 
 /* CSS phần thông tin chi tiết bên phải */
@@ -116,13 +115,12 @@
     border-radius: 6px;
 }
 
-/* Đổi tab cơ bản */
 .account__content {
-    display: none;
-}
-
-.account__content:target {
     display: block;
+    border-radius: 2px;
+    border: 1px solid rgba(0, 0, 0, .125);
+    margin-bottom: 20px;
+    overflow: hidden;
 }
 
 .account__select {
@@ -351,3 +349,18 @@
     justify-content: flex-start;
     gap: 5px;
 }
+.order-empty {
+    padding: 16px;
+    font-size: 1.5rem;
+    color: #666;
+    background: #fff;
+}
+<style>
+    .account__content {
+        display: block !important;
+        border-radius: 2px;
+        border: 1px solid rgba(0, 0, 0, .125);
+        margin-bottom: 20px;
+        overflow: hidden;
+    }
+</style>
