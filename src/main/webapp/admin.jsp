@@ -438,13 +438,13 @@
                         <h2 class="manage__heading">Sửa thông tin khách hàng</h2>
 
                         <div class="customer-detail__card">
-                            <!-- Avatar -->
+
                             <div class="customer-detail__avatar">
                                 <img src="${pageContext.request.contextPath}/assets/img/avatar4.jpg" alt="Avatar">
-                                <span class="customer-detail__status online">Đang hoạt động</span>
+                                <span id="customerEditStatusBadge" class="customer-detail__status online">Đang hoạt động</span>
                             </div>
 
-                            <!-- Form thông tin -->
+
                             <form class="customer-detail__info"
                                   id="customerEditForm"
                                   method="post"
@@ -2193,6 +2193,20 @@
         });
     }
     // SỬA KHÁCH HÀNG (mở form + đổ dữ liệu)
+    function updateCustomerEditStatusBadge(status) {
+        const badge = document.getElementById("customerEditStatusBadge");
+        if (!badge) return;
+
+        if (String(status) === "1") {
+            badge.textContent = "Đang hoạt động";
+            badge.classList.remove("offline");
+            badge.classList.add("online");
+        } else {
+            badge.textContent = "Bị khóa";
+            badge.classList.remove("online");
+            badge.classList.add("offline");
+        }
+    }
     document.addEventListener("DOMContentLoaded", () => {
       document.querySelectorAll(".customer-table__edit").forEach(btn => {
         btn.addEventListener("click", () => {
@@ -2212,14 +2226,22 @@
           if (roleEl) roleEl.value = (btn.dataset.role ?? "0");
 
           const statusEl = document.getElementById("editStatus");
-          if (statusEl) statusEl.value = (btn.dataset.status ?? "1");
+          if (statusEl) {
+              statusEl.value = (btn.dataset.status ?? "1");
+              updateCustomerEditStatusBadge(statusEl.value);
+          }
 
           // password luôn để trống
           const passEl = document.getElementById("editPassword");
           if (passEl) passEl.value = "";
         });
       });
-
+              const editStatusEl = document.getElementById("editStatus");
+              if (editStatusEl) {
+                editStatusEl.addEventListener("change", function () {
+                  updateCustomerEditStatusBadge(this.value);
+                });
+              }
       // XEM KHÁCH HÀNG (mở detail + đổ dữ liệu)
       document.querySelectorAll(".customer-table__view").forEach(btn => {
         btn.addEventListener("click", () => {
