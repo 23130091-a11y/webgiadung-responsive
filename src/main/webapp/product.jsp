@@ -25,7 +25,7 @@
     <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/grid.css">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/base.css">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/style.css">
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/product.css?v=99">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/product.css?v=1">
     <!-- Link favicon -->
 </head>
 
@@ -52,11 +52,27 @@
 
                 <div class="product-details__inner">
                     <!-- Media Details -->
-                    <figure class="media-details">
-                        <img src="${pageContext.request.contextPath}/assets/img/products/${product.image}"  alt="${product.name}" class="media-details__img">
+                    <div class="product-image-wrapper">
+                     <figure class="media-details">
+                        <img src="${pageContext.request.contextPath}/assets/img/products/${product.image}"
+                             alt="${product.name}"
+                             class="media-details__img"
+                             id="main-product-image">
+                     </figure>
 
-                    </figure>
+                     <div class="media-thumbnails">
 
+                        <c:if test="${not empty product.images}">
+                            <c:forEach var="imgObj" items="${product.images}">
+                                <img src="${pageContext.request.contextPath}/assets/img/products/${imgObj.path}"
+                                     alt="Thumbnail"
+                                     class="media-thumbnails__img"
+                                     onclick="changeMainImage(this)">
+                            </c:forEach>
+                        </c:if>
+
+                      </div>
+                    </div>
                     <!-- Content Details -->
                     <div class="content-details">
                         <h1 class="content-details__heading">
@@ -496,6 +512,18 @@ function showToast(msg) {
 
   paint(Number(input.value) || 5);
 })();
+</script>
+<script>
+    function changeMainImage(thumbnail) {
+
+        const mainProductImage = document.getElementById('main-product-image');
+        mainProductImage.src = thumbnail.src;
+        const allThumbnails = document.querySelectorAll('.media-thumbnails__img');
+        allThumbnails.forEach(function(img) {
+            img.classList.remove('active');
+        });
+        thumbnail.classList.add('active');
+    }
 </script>
 <!-- Link JS -->
 <script src="assets/js/script.js"></script>

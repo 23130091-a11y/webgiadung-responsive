@@ -355,10 +355,22 @@ public Product getProductFullInfo(int id) {
                     .bind("pid", id)
                     .mapToBean(Keywords.class)
                     .list();
-
+            List<ProductImage> images = handle.createQuery("""
+                SELECT 
+                    id, path, 
+                    product_id AS productId, 
+                    created_at AS createdAt, 
+                    updated_at AS updatedAt
+                FROM product_images 
+                WHERE product_id = :pid
+            """)
+                    .bind("pid", id)
+                    .mapToBean(ProductImage.class)
+                    .list();
             product.setDescriptions(descriptions);
             product.setDetails(details);
             product.setKeywords(keywords);
+            product.setImages(images);
         }
 
         return product;

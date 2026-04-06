@@ -24,7 +24,6 @@
 
 .media-details {
     flex-shrink: 0;
-    width: 480px;
     align-self: flex-start;
 }
 
@@ -546,4 +545,11 @@
 .product-review__date {
     font-size: 1.2rem;
     color: #ccc;
+}
+.media-thumbnails {
+    display: flex;
+    gap: 5px;
+    margin-top: 10px;
+    width: 100%;
+    padding-bottom: 5px;
 }
