@@ -88,7 +88,7 @@
                             </li>
 
                             <li class="manage-nav__item">
-                                <a href="#product" class="manage-nav__link manage-nav__link--active">Sản phẩm</a>
+                                <a href="#product" class="manage-nav__link">Sản phẩm</a>
                             </li>
                             <li class="manage-nav__item">
                                 <a href="${pageContext.request.contextPath}/order-admin" class="manage-nav__link">Đơn hàng</a>
@@ -372,7 +372,7 @@
                         <div class="customer-detail__card">
                             <!-- Avatar -->
                             <div class="customer-detail__avatar">
-                                <img id="customerDetailAvatar" src="assets/img/avatar-default.png" alt="Avatar">
+                                <img id="customerDetailAvatar" src="${pageContext.request.contextPath}/assets/img/avatar-default.png" alt="Avatar">
                                 <span id="customerDetailStatus" class="customer-detail__status online">Hoạt động</span>
 
                             </div>
@@ -1364,7 +1364,7 @@
                                 <div class="view-grid">
                                     <div class="view-col">
                                         <div class="view-image-box">
-                                            <img id="v-image" src="" alt="Ảnh sản phẩm" class="view-img-main" onerror="this.src='assets/img/no-image.png'">
+                                            <img id="v-image" src="" alt="Ảnh sản phẩm" class="view-img-main" onerror="this.onerror=null;this.src='${pageContext.request.contextPath}/assets/img/no-image.png'">
                                         </div>
                                         <div class="view-time">
                                             <p><strong>Ngày tạo:</strong> <span id="v-createdAt">---</span></p>
@@ -1434,7 +1434,7 @@
                                     <div class="view-grid">
                                         <div class="view-col">
                                             <div class="view-image-box">
-                                                <img id="edit-v-image" src="assets/img/no-image.png" alt="Ảnh sản phẩm" class="view-img-main">
+                                               <img id="edit-v-image" src="${pageContext.request.contextPath}/assets/img/no-image.png" alt="Ảnh sản phẩm" class="view-img-main">
                                                 <div class="upload-action">
                                                     <label for="input-file-edit" class="btn-upload">
                                                         <i class="fa-solid fa-camera"></i> Thay đổi ảnh
@@ -1653,7 +1653,7 @@
                             </form>
 
                             <div class="order-table" id="order-main-content">
-                                <jsp:include page="_order_list.jsp" />
+                                <%-- <jsp:include page="_order_list.jsp" /> --%>
                             </div>
                         </div>
                     </section>
@@ -1760,6 +1760,9 @@
             if (targetKey === "customers" && href.includes("/admin/customers")) {
                 link.classList.add("manage-nav__link--active");
             }
+            if (targetKey === "purchaseHistory" && href.includes("/admin/purchase-history")) {
+                link.classList.add("manage-nav__link--active");
+            }
         });
     }
 
@@ -1768,7 +1771,7 @@
 
         if (targetKey === "customers") {
             sectionCustomer.style.display = "block";
-        } else if (serverTab === "purchaseHistory") {
+        } else if (targetKey === "purchaseHistory") {
             sectionPurchaseHistory.style.display = "block";
         } else if (targetKey === "product") {
             sectionProduct.style.display = "block";
