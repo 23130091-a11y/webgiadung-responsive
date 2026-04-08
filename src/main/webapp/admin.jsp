@@ -322,7 +322,8 @@
                                                             data-role="${u.role}"
                                                             data-status="${u.status}"
                                                             data-created="${u.createdAt}"
-                                                            data-updated="${u.updatedAt}">
+                                                            data-updated="${u.updatedAt}"
+                                                            data-avatar="${empty u.avatar ? '' : u.avatar}">
                                                         Xem
                                                     </button>
                                                 </td>
@@ -372,7 +373,10 @@
                         <div class="customer-detail__card">
                             <!-- Avatar -->
                             <div class="customer-detail__avatar">
-                                <img id="customerDetailAvatar" src="${pageContext.request.contextPath}/assets/img/avatar-default.png" alt="Avatar">
+                                <img id="customerDetailAvatar"
+                                     src="${pageContext.request.contextPath}/assets/img/default-avatar.png"
+                                     alt="Avatar"
+                                     onerror="this.onerror=null;this.src='${pageContext.request.contextPath}/assets/img/default-avatar.png';">
                                 <span id="customerDetailStatus" class="customer-detail__status online">Hoạt động</span>
 
                             </div>
@@ -440,7 +444,10 @@
                         <div class="customer-detail__card">
 
                             <div class="customer-detail__avatar">
-                                <img src="${pageContext.request.contextPath}/assets/img/avatar4.jpg" alt="Avatar">
+                                <img id="customerEditAvatar"
+                                     src="${pageContext.request.contextPath}/assets/img/default-avatar.png"
+                                     alt="Avatar"
+                                     onerror="this.onerror=null;this.src='${pageContext.request.contextPath}/assets/img/default-avatar.png';">
                                 <span id="customerEditStatusBadge" class="customer-detail__status online">Đang hoạt động</span>
                             </div>
 
@@ -2274,10 +2281,29 @@
             }
           }
 
-          // avatar (nếu có)
-          const av = btn.dataset.avatar;
+          const av = btn.dataset.avatar || "";
           const avatarEl = document.getElementById("customerDetailAvatar");
-          if (avatarEl && av) avatarEl.src = av;
+          const contextPath = "${pageContext.request.contextPath}";
+          const defaultAvatar = contextPath + "/assets/img/default-avatar.png";
+
+          if (avatarEl) {
+            avatarEl.onerror = function () {
+              this.onerror = null;
+              this.src = defaultAvatar;
+            };
+
+            if (!av) {
+              avatarEl.src = defaultAvatar;
+            } else if (
+              av.startsWith("http://") ||
+              av.startsWith("https://") ||
+              av.startsWith(contextPath + "/")
+            ) {
+              avatarEl.src = av;
+            } else {
+              avatarEl.src = contextPath + "/" + av.replace(/^\/+/, "");
+            }
+          }
 
           // role text
           const r = btn.dataset.role; // "1" hoặc "0"
