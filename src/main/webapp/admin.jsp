@@ -268,7 +268,7 @@
 
                     <section id="customer" class="admin-section">
                         <div class="section-header">
-                            <h2>Khách hàng</h2>
+                            <h2>Quản lý khách hàng</h2>
 
 
                             <form class="customer-search" method="get" action="${pageContext.request.contextPath}/admin/customers">
@@ -338,7 +338,9 @@
                                                             data-phone="${fn:escapeXml(u.phone)}"
                                                             data-address="${fn:escapeXml(u.address)}"
                                                             data-role="${u.role}"
-                                                            data-status="${u.status}">
+                                                            data-status="${u.status}"
+                                                            data-created="${u.createdAt}"
+                                                            data-updated="${u.updatedAt}">
                                                         Sửa
                                                     </button>
                                                 </td>
@@ -505,12 +507,12 @@
                                 </div>
                                 <div class="customer-detail__row">
                                     <label class="label">Ngày tạo:</label>
-                                    <input type="text" class="input" value="01/12/2025" disabled>
+                                    <input type="text" class="input" id="editCreatedAt" disabled>
                                 </div>
 
                                 <div class="customer-detail__row">
                                     <label class="label">Ngày cập nhật:</label>
-                                    <input type="text" class="input" value="10/12/2025" disabled>
+                                    <input type="text" class="input" id="editUpdatedAt" disabled>
                                 </div>
 
                                 <!-- Action -->
@@ -2230,6 +2232,8 @@
           document.getElementById("editEmail").value = btn.dataset.email || "";
           document.getElementById("editPhone").value = btn.dataset.phone || "";
           document.getElementById("editAddress").value = btn.dataset.address || "";
+          document.getElementById("editCreatedAt").value = btn.dataset.created || "-";
+          document.getElementById("editUpdatedAt").value = btn.dataset.updated || "-";
 
           // role/status -> đổ vào SELECT (phải chắc id không trùng)
           const roleEl = document.getElementById("editRole");

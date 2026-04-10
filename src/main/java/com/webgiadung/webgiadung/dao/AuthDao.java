@@ -49,8 +49,8 @@ public class AuthDao extends BaseDao {
 
         get().useHandle(h ->
                 h.createUpdate(
-                                "INSERT INTO users (name, email, password, phone, role, status) " +
-                                        "VALUES (:name, :email, :password, :phone, :role, :status)"
+                                "INSERT INTO users (name, email, password, phone, role, status, created_at, updated_at) " +
+                                        "VALUES (:name, :email, :password, :phone, :role, :status, NOW(), NOW())"
                         )
                         .bind("name", user.getName()) // Bổ sung dòng này
                         .bind("email", user.getEmail())
@@ -110,7 +110,7 @@ public class AuthDao extends BaseDao {
                                 "UPDATE users SET " +
                                         "name=:name, email=:email, " +
                                         "phone = CASE WHEN :phone IS NULL OR :phone = '' THEN phone ELSE :phone END, " +
-                                        "address=:address, role=:role, status=:status " +
+                                        "address=:address, role=:role, status=:status, updated_at=NOW() " +
                                         "WHERE id=:id"
                         )
                         .bindBean(u)
@@ -124,7 +124,7 @@ public class AuthDao extends BaseDao {
                                 "UPDATE users SET " +
                                         "name=:name, email=:email, " +
                                         "phone = CASE WHEN :phone IS NULL OR :phone = '' THEN phone ELSE :phone END, " +
-                                        "address=:address, role=:role, status=:status, password=:password " +
+                                        "address=:address, role=:role, status=:status, password=:password, updated_at=NOW() " +
                                         "WHERE id=:id"
                         )
                         .bindBean(u)
@@ -135,7 +135,7 @@ public class AuthDao extends BaseDao {
     // khóa user để tránh lỗi FK (đơn hàng)
     public void adminSoftDeleteUser(int id) {
         get().useHandle(h ->
-                h.createUpdate("UPDATE users SET status = 0 WHERE id=:id")
+                h.createUpdate("UPDATE users SET status = 0, updated_at = NOW() WHERE id=:id")
                         .bind("id", id)
                         .execute()
         );
@@ -145,7 +145,7 @@ public class AuthDao extends BaseDao {
     public void activateUser(String email) {
         String e = (email == null) ? "" : email.trim().toLowerCase();
         get().useHandle(h ->
-                h.createUpdate("UPDATE users SET status = 1 WHERE LOWER(email) = :email")
+                h.createUpdate("UPDATE users SET status = 1, updated_at = NOW() WHERE LOWER(email) = :email")
                         .bind("email", e)
                         .execute()
         );
