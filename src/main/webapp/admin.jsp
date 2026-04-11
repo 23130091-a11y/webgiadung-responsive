@@ -88,7 +88,7 @@
                             </li>
 
                             <li class="manage-nav__item">
-                                <a href="#product" class="manage-nav__link manage-nav__link--active">Sản phẩm</a>
+                                <a href="#product" class="manage-nav__link">Sản phẩm</a>
                             </li>
                             <li class="manage-nav__item">
                                 <a href="${pageContext.request.contextPath}/order-admin" class="manage-nav__link">Đơn hàng</a>
@@ -268,7 +268,7 @@
 
                     <section id="customer" class="admin-section">
                         <div class="section-header">
-                            <h2>Khách hàng</h2>
+                            <h2>Quản lý khách hàng</h2>
 
 
                             <form class="customer-search" method="get" action="${pageContext.request.contextPath}/admin/customers">
@@ -322,7 +322,8 @@
                                                             data-role="${u.role}"
                                                             data-status="${u.status}"
                                                             data-created="${u.createdAt}"
-                                                            data-updated="${u.updatedAt}">
+                                                            data-updated="${u.updatedAt}"
+                                                            data-avatar="${empty u.avatar ? '' : u.avatar}">
                                                         Xem
                                                     </button>
                                                 </td>
@@ -337,7 +338,9 @@
                                                             data-phone="${fn:escapeXml(u.phone)}"
                                                             data-address="${fn:escapeXml(u.address)}"
                                                             data-role="${u.role}"
-                                                            data-status="${u.status}">
+                                                            data-status="${u.status}"
+                                                            data-created="${u.createdAt}"
+                                                            data-updated="${u.updatedAt}">
                                                         Sửa
                                                     </button>
                                                 </td>
@@ -372,7 +375,10 @@
                         <div class="customer-detail__card">
                             <!-- Avatar -->
                             <div class="customer-detail__avatar">
-                                <img id="customerDetailAvatar" src="assets/img/avatar-default.png" alt="Avatar">
+                                <img id="customerDetailAvatar"
+                                     src="${pageContext.request.contextPath}/assets/img/default-avatar.png"
+                                     alt="Avatar"
+                                     onerror="this.onerror=null;this.src='${pageContext.request.contextPath}/assets/img/default-avatar.png';">
                                 <span id="customerDetailStatus" class="customer-detail__status online">Hoạt động</span>
 
                             </div>
@@ -438,13 +444,16 @@
                         <h2 class="manage__heading">Sửa thông tin khách hàng</h2>
 
                         <div class="customer-detail__card">
-                            <!-- Avatar -->
+
                             <div class="customer-detail__avatar">
-                                <img src="${pageContext.request.contextPath}/assets/img/avatar4.jpg" alt="Avatar">
-                                <span class="customer-detail__status online">Đang hoạt động</span>
+                                <img id="customerEditAvatar"
+                                     src="${pageContext.request.contextPath}/assets/img/default-avatar.png"
+                                     alt="Avatar"
+                                     onerror="this.onerror=null;this.src='${pageContext.request.contextPath}/assets/img/default-avatar.png';">
+                                <span id="customerEditStatusBadge" class="customer-detail__status online">Đang hoạt động</span>
                             </div>
 
-                            <!-- Form thông tin -->
+
                             <form class="customer-detail__info"
                                   id="customerEditForm"
                                   method="post"
@@ -498,12 +507,12 @@
                                 </div>
                                 <div class="customer-detail__row">
                                     <label class="label">Ngày tạo:</label>
-                                    <input type="text" class="input" value="01/12/2025" disabled>
+                                    <input type="text" class="input" id="editCreatedAt" disabled>
                                 </div>
 
                                 <div class="customer-detail__row">
                                     <label class="label">Ngày cập nhật:</label>
-                                    <input type="text" class="input" value="10/12/2025" disabled>
+                                    <input type="text" class="input" id="editUpdatedAt" disabled>
                                 </div>
 
                                 <!-- Action -->
@@ -1364,7 +1373,7 @@
                                 <div class="view-grid">
                                     <div class="view-col">
                                         <div class="view-image-box">
-                                            <img id="v-image" src="" alt="Ảnh sản phẩm" class="view-img-main" onerror="this.src='assets/img/no-image.png'">
+                                            <img id="v-image" src="" alt="Ảnh sản phẩm" class="view-img-main" onerror="this.onerror=null;this.src='${pageContext.request.contextPath}/assets/img/no-image.png'">
                                         </div>
                                         <div class="view-time">
                                             <p><strong>Ngày tạo:</strong> <span id="v-createdAt">---</span></p>
@@ -1434,7 +1443,7 @@
                                     <div class="view-grid">
                                         <div class="view-col">
                                             <div class="view-image-box">
-                                                <img id="edit-v-image" src="assets/img/no-image.png" alt="Ảnh sản phẩm" class="view-img-main">
+                                               <img id="edit-v-image" src="${pageContext.request.contextPath}/assets/img/no-image.png" alt="Ảnh sản phẩm" class="view-img-main">
                                                 <div class="upload-action">
                                                     <label for="input-file-edit" class="btn-upload">
                                                         <i class="fa-solid fa-camera"></i> Thay đổi ảnh
@@ -1653,7 +1662,7 @@
                             </form>
 
                             <div class="order-table" id="order-main-content">
-                                <jsp:include page="_order_list.jsp" />
+                                <%-- <jsp:include page="_order_list.jsp" /> --%>
                             </div>
                         </div>
                     </section>
@@ -1760,6 +1769,9 @@
             if (targetKey === "customers" && href.includes("/admin/customers")) {
                 link.classList.add("manage-nav__link--active");
             }
+            if (targetKey === "purchaseHistory" && href.includes("/admin/purchase-history")) {
+                link.classList.add("manage-nav__link--active");
+            }
         });
     }
 
@@ -1768,7 +1780,7 @@
 
         if (targetKey === "customers") {
             sectionCustomer.style.display = "block";
-        } else if (serverTab === "purchaseHistory") {
+        } else if (targetKey === "purchaseHistory") {
             sectionPurchaseHistory.style.display = "block";
         } else if (targetKey === "product") {
             sectionProduct.style.display = "block";
@@ -2193,6 +2205,20 @@
         });
     }
     // SỬA KHÁCH HÀNG (mở form + đổ dữ liệu)
+    function updateCustomerEditStatusBadge(status) {
+        const badge = document.getElementById("customerEditStatusBadge");
+        if (!badge) return;
+
+        if (String(status) === "1") {
+            badge.textContent = "Đang hoạt động";
+            badge.classList.remove("offline");
+            badge.classList.add("online");
+        } else {
+            badge.textContent = "Bị khóa";
+            badge.classList.remove("online");
+            badge.classList.add("offline");
+        }
+    }
     document.addEventListener("DOMContentLoaded", () => {
       document.querySelectorAll(".customer-table__edit").forEach(btn => {
         btn.addEventListener("click", () => {
@@ -2206,20 +2232,30 @@
           document.getElementById("editEmail").value = btn.dataset.email || "";
           document.getElementById("editPhone").value = btn.dataset.phone || "";
           document.getElementById("editAddress").value = btn.dataset.address || "";
+          document.getElementById("editCreatedAt").value = btn.dataset.created || "-";
+          document.getElementById("editUpdatedAt").value = btn.dataset.updated || "-";
 
           // role/status -> đổ vào SELECT (phải chắc id không trùng)
           const roleEl = document.getElementById("editRole");
           if (roleEl) roleEl.value = (btn.dataset.role ?? "0");
 
           const statusEl = document.getElementById("editStatus");
-          if (statusEl) statusEl.value = (btn.dataset.status ?? "1");
+          if (statusEl) {
+              statusEl.value = (btn.dataset.status ?? "1");
+              updateCustomerEditStatusBadge(statusEl.value);
+          }
 
           // password luôn để trống
           const passEl = document.getElementById("editPassword");
           if (passEl) passEl.value = "";
         });
       });
-
+              const editStatusEl = document.getElementById("editStatus");
+              if (editStatusEl) {
+                editStatusEl.addEventListener("change", function () {
+                  updateCustomerEditStatusBadge(this.value);
+                });
+              }
       // XEM KHÁCH HÀNG (mở detail + đổ dữ liệu)
       document.querySelectorAll(".customer-table__view").forEach(btn => {
         btn.addEventListener("click", () => {
@@ -2249,10 +2285,29 @@
             }
           }
 
-          // avatar (nếu có)
-          const av = btn.dataset.avatar;
+          const av = btn.dataset.avatar || "";
           const avatarEl = document.getElementById("customerDetailAvatar");
-          if (avatarEl && av) avatarEl.src = av;
+          const contextPath = "${pageContext.request.contextPath}";
+          const defaultAvatar = contextPath + "/assets/img/default-avatar.png";
+
+          if (avatarEl) {
+            avatarEl.onerror = function () {
+              this.onerror = null;
+              this.src = defaultAvatar;
+            };
+
+            if (!av) {
+              avatarEl.src = defaultAvatar;
+            } else if (
+              av.startsWith("http://") ||
+              av.startsWith("https://") ||
+              av.startsWith(contextPath + "/")
+            ) {
+              avatarEl.src = av;
+            } else {
+              avatarEl.src = contextPath + "/" + av.replace(/^\/+/, "");
+            }
+          }
 
           // role text
           const r = btn.dataset.role; // "1" hoặc "0"
