@@ -228,7 +228,7 @@
                                         <c:param name="redirect" value="/product?id=${product.id}#reviews"/>
                                     </c:url>
 
-                                    <a class="btn btn--default-color"
+                                    <a class="btn btn--default-color btn-comt"
                                        href="${pageContext.request.contextPath}/login?redirect=/product?id=${product.id}%23reviews">
                                        Đăng nhập để đánh giá
                                     </a>
@@ -280,7 +280,6 @@
                                 </c:otherwise>
                             </c:choose>
                         </div>
-
 
                         <div class="product-review">
                             <h2 class="section-title product-review__heading">Bình luận</h2>

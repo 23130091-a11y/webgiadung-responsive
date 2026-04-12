@@ -380,51 +380,51 @@
     </div>
   </div>
 
-  <section class="blog">
-    <div class="grid wide">
-      <div class="blog__inner">
-        <div class="blog__header">
-          <h2 class="blog__heading">Blog tin tức</h2>
-          <a href="#!" class="blog__view-all">Xem tất cả</a>
-        </div>
-        <div class="blog__list row small-gutter ">
-          <c:choose>
-            <c:when test="${not empty latestBlogs}">
-              <c:forEach items="${latestBlogs}" var="b">
-                <div class="col c-3 m-3 l-3">
-                  <article class="blog-item">
-                    <a href="blog-detail?id=${b.id}" class="blog-item__link">
-                      <img src="${b.thumbnail}" alt="${b.title}" class="blog-item__img">
-                    </a>
-                    <div class="blog-item__content">
-                      <h3>
-                        <a class="blog-item__title" href="blog-detail?id=${b.id}">
-                            ${b.title}
-                        </a>
-                      </h3>
-                      <p class="blog-item__desc">
-                          ${b.summary}
-                      </p>
-                      <div class="blog-item__meta">
-                        <span class="blog-item__time">
-                          <i class="fa-regular fa-clock"></i>
-                          ${b.createdAt}
-                        </span>
-                      </div>
-                    </div>
-                  </article>
-                </div>
-              </c:forEach>
-            </c:when>
+<%--  <section class="blog">--%>
+<%--    <div class="grid wide">--%>
+<%--      <div class="blog__inner">--%>
+<%--        <div class="blog__header">--%>
+<%--          <h2 class="blog__heading">Blog tin tức</h2>--%>
+<%--          <a href="#!" class="blog__view-all">Xem tất cả</a>--%>
+<%--        </div>--%>
+<%--        <div class="blog__list row small-gutter ">--%>
+<%--          <c:choose>--%>
+<%--            <c:when test="${not empty latestBlogs}">--%>
+<%--              <c:forEach items="${latestBlogs}" var="b">--%>
+<%--                <div class="col c-3 m-3 l-3">--%>
+<%--                  <article class="blog-item">--%>
+<%--                    <a href="blog-detail?id=${b.id}" class="blog-item__link">--%>
+<%--                      <img src="${b.thumbnail}" alt="${b.title}" class="blog-item__img">--%>
+<%--                    </a>--%>
+<%--                    <div class="blog-item__content">--%>
+<%--                      <h3>--%>
+<%--                        <a class="blog-item__title" href="blog-detail?id=${b.id}">--%>
+<%--                            ${b.title}--%>
+<%--                        </a>--%>
+<%--                      </h3>--%>
+<%--                      <p class="blog-item__desc">--%>
+<%--                          ${b.summary}--%>
+<%--                      </p>--%>
+<%--                      <div class="blog-item__meta">--%>
+<%--                        <span class="blog-item__time">--%>
+<%--                          <i class="fa-regular fa-clock"></i>--%>
+<%--                          ${b.createdAt}--%>
+<%--                        </span>--%>
+<%--                      </div>--%>
+<%--                    </div>--%>
+<%--                  </article>--%>
+<%--                </div>--%>
+<%--              </c:forEach>--%>
+<%--            </c:when>--%>
 
-            <c:otherwise>
-              <!-- nếu DB chưa có blog thì giữ hard-code 4 bài cũ ở đây -->
-            </c:otherwise>
-          </c:choose>
-        </div>
-      </div>
-    </div>
-  </section>
+<%--            <c:otherwise>--%>
+<%--              <!-- nếu DB chưa có blog thì giữ hard-code 4 bài cũ ở đây -->--%>
+<%--            </c:otherwise>--%>
+<%--          </c:choose>--%>
+<%--        </div>--%>
+<%--      </div>--%>
+<%--    </div>--%>
+<%--  </section>--%>
 </main>
 <!-- Footer -->
 <jsp:include page="/common/footer.jsp" />

@@ -19,7 +19,7 @@ public class VnPayReturn extends HttpServlet {
 
         if ("00".equals(responseCode)) {
             orderDao.updateStatusPayment(id, 2);
-            response.sendRedirect(request.getContextPath() + "/checkout-success?orderId=" + orderId);
+            response.sendRedirect(request.getContextPath() + "/account?tab=processing");
         } else {
             orderDao.updateStatusPayment(id, 4);
             response.sendRedirect(request.getContextPath() + "/checkout-error");

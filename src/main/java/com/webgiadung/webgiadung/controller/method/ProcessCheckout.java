@@ -7,7 +7,6 @@ import com.webgiadung.webgiadung.model.CartItem;
 import com.webgiadung.webgiadung.model.User;
 import com.webgiadung.webgiadung.model.UserAddress;
 import com.webgiadung.webgiadung.utils.ShippingUtils;
-import com.webgiadung.webgiadung.utils.VnPayConfig;
 import jakarta.servlet.*;
 import jakarta.servlet.http.*;
 import jakarta.servlet.annotation.*;
@@ -75,7 +74,7 @@ public class ProcessCheckout extends HttpServlet {
                     for (String idStr : productIds.split(",")) {
                         fullCart.deleteItem(Integer.parseInt(idStr.trim()));
                     }
-                    response.sendRedirect(request.getContextPath() + "/checkout-success?orderId=" + orderId);
+                    response.sendRedirect(request.getContextPath() + "/account?tab=processing");
                 }
             }
             catch (Exception e){

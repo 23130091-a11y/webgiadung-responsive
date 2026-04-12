@@ -21,8 +21,7 @@
     <!-- Link font -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link
-            href="https://fonts.googleapis.com/css2?family=Open+Sans:ital,wght@0,300..800;1,300..800&family=Poppins:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400;1,500;1,600;1,700&display=swap"
+    <link href="https://fonts.googleapis.com/css2?family=Open+Sans:ital,wght@0,300..800;1,300..800&family=Poppins:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400;1,500;1,600;1,700&display=swap"
             rel="stylesheet">
     <!-- Link icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.1/css/all.min.css"
@@ -34,8 +33,7 @@
     <link rel="stylesheet" href="assets/css/style.css">
     <link rel="stylesheet" href="assets/css/search.css">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/account.css?v=20260403">
-
-
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.21.1/axios.min.js"></script>
 </head>
 
 <body>
@@ -56,33 +54,38 @@
                                      <a href="${pageContext.request.contextPath}/account?tab=info"
                                        class="account__link ${tab == 'info' ? 'account__link--active' : ''}">
                                         Thông tin cá nhân
-                                        </a>
+                                     </a>
                                 </li>
                                 <li class="account__item">
                                     <a href="${pageContext.request.contextPath}/account?tab=address"
-                                          class="account__link ${tab == 'address' ? 'account__link--active' : ''}">Địa chỉ</a>
+                                          class="account__link ${tab == 'address' ? 'account__link--active' : ''}">
+                                        Địa chỉ
+                                    </a>
                                 </li>
                                 <li class="account__item">
                                     <a href="${pageContext.request.contextPath}/account?tab=password"
-                                         class="account__link ${tab == 'password' ? 'account__link--active' : ''}">Đổi mật khẩu</a>
+                                         class="account__link ${tab == 'password' ? 'account__link--active' : ''}">
+                                        Đổi mật khẩu
+                                    </a>
                                 </li>
                             </ul>
                         </section>
-
 
                         <section class="account__section">
                             <h2 class="account__title">Yêu thích</h2>
                             <ul class="account__list">
                                 <li class="account__item">
                                     <a href="${pageContext.request.contextPath}/account?tab=favorite"
-                                        class="account__link ${tab == 'favorite' ? 'account__link--active' : ''}">Sản phẩm đã thích</a>
+                                        class="account__link ${tab == 'favorite' ? 'account__link--active' : ''}">
+                                        Sản phẩm đã thích
+                                    </a>
                                 </li>
                             </ul>
                         </section>
 
-
                         <section class="account__section">
                           <h2 class="account__title">Thông tin đơn hàng</h2>
+
                           <ul class="account__list">
                             <li class="account__item">
                               <a href="${pageContext.request.contextPath}/account?tab=all"
@@ -90,607 +93,280 @@
                                 Tất cả đơn hàng
                               </a>
                             </li>
+
                             <li class="account__item">
                               <a href="${pageContext.request.contextPath}/account?tab=processing"
                                class="account__link ${tab == 'processing' ? 'account__link--active' : ''}">
-                                Đơn đang xử lý
+                                Đơn chờ xác nhận
                               </a>
                             </li>
+
+                              <li class="account__item">
+                                  <a href="${pageContext.request.contextPath}/account?tab=shipping"
+                                     class="account__link ${tab == 'shipping' ? 'account__link--active' : ''}">
+                                      Đơn đang giao
+                                  </a>
+                              </li>
+
                             <li class="account__item">
                               <a href="${pageContext.request.contextPath}/account?tab=delivered"
                                   class="account__link ${tab == 'delivered' ? 'account__link--active' : ''}">
                                 Đơn đã giao
                               </a>
                             </li>
+
                             <li class="account__item">
                               <a href="${pageContext.request.contextPath}/account?tab=cancelled"
                                   class="account__link ${tab == 'cancelled' ? 'account__link--active' : ''}">
-                                Đơn đã hủy
+                                Đơn đã hủy / trả hàng
                               </a>
                             </li>
                           </ul>
+
                         </section>
-
-
-
                     </aside>
                 </div>
 
-
+                <!-- Content -->
                 <div class="col l-10 m-12 c-12">
-                <c:choose>
-                    <c:when test="${tab == 'info'}">
-                    <section class="account__content">
-                        <h2 class="account__heading">Thông tin cá nhân</h2>
+                    <c:choose>
+                        <c:when test="${tab == 'info'}">
+                            <section class="account__content">
+                                <h2 class="account__heading">Thông tin cá nhân</h2>
 
-                        <form class="account__form" action="${pageContext.request.contextPath}/account" method="post">
-                            <input type="hidden" name="action" value="updateProfile">
-                             <input type="hidden" name="tab" value="info">
+                                <form class="account__form" action="${pageContext.request.contextPath}/account" method="post">
+                                    <input type="hidden" name="action" value="updateProfile">
+                                    <input type="hidden" name="tab" value="info">
 
+                                    <div class="account__form-group">
+                                        <label for="fullname" class="account__label">Họ và tên</label>
+                                        <input type="text" id="fullname" name="name" class="account__input"
+                                               value="${sessionScope.user.name}" required>
+                                    </div>
 
-                            <div class="account__form-group">
-                                <label for="fullname" class="account__label">Họ và tên</label>
-                                <input type="text" id="fullname" name="name" class="account__input"
-                                       value="${sessionScope.user.name}" required>
-                            </div>
+                                    <div class="account__form-group">
+                                        <label for="phone" class="account__label">Số điện thoại</label>
+                                        <input type="tel" id="phone" name="phone" class="account__input"
+                                               value="${sessionScope.user.phone}">
+                                    </div>
 
+                                    <c:if test="${not empty profileMsg}">
+                                        <p style="color:green;margin:8px 0;">${profileMsg}</p>
+                                    </c:if>
+                                    <c:if test="${not empty profileError}">
+                                        <p style="color:red;margin:8px 0;">${profileError}</p>
+                                    </c:if>
 
-                            <div class="account__form-group">
-                                <label for="phone" class="account__label">Số điện thoại</label>
-                                <input type="tel" id="phone" name="phone" class="account__input"
-                                       value="${sessionScope.user.phone}">
-                            </div>
+                                    <button type="submit" class="account__btn btn btn--default-color">Lưu thông tin</button>
+                                </form>
+                            </section>
+                        </c:when>
 
-                            <c:if test="${not empty profileMsg}">
-                                <p style="color:green;margin:8px 0;">${profileMsg}</p>
-                            </c:if>
-                            <c:if test="${not empty profileError}">
-                                <p style="color:red;margin:8px 0;">${profileError}</p>
-                            </c:if>
+                        <c:when test="${tab == 'address'}">
+                            <section class="account__content">
+                                <h2 class="account__heading">Địa chỉ</h2>
 
-                            <button type="submit" class="account__btn btn btn--default-color">Lưu thông tin</button>
-                        </form>
-                    </section>
-                     </c:when>
+                                <form id="addressForm" class="account__form" action="${pageContext.request.contextPath}/account" method="post">
+                                    <input type="hidden" name="action" value="updateProfile">
+                                    <input type="hidden" name="tab" value="address">
+                                    <input type="hidden" name="provinceName" id="provinceName">
 
-                    <c:when test="${tab == 'address'}">
-                    <section class="account__content">
-                        <h2 class="account__heading">Địa chỉ</h2>
+                                    <div class="account__form-group">
+                                        <label for="province" class="account__label">Tỉnh/thành phố</label>
+                                        <select id="province" name="province" class="account__select" required>
+                                            <option value="">Chọn tỉnh/thành phố</option>
+                                        </select>
+                                    </div>
 
-                        <form id="addressForm" class="account__form" action="${pageContext.request.contextPath}/account" method="post">
-                            <input type="hidden" name="action" value="updateProfile">
-                            <input type="hidden" name="tab" value="address">
+                                    <!-- Quận/huyện -->
+                                    <div class="account__form-group">
+                                        <label for="district" class="account__label">Quận/huyện</label>
+                                        <select id="district" name="district" class="account__select" required>
+                                            <option value="">Chọn quận/huyện</option>
+                                        </select>
+                                    </div>
 
+                                    <div class="account__form-group">
+                                        <label for="detailAddress" class="account__label">Địa chỉ</label>
+                                        <input type="text" id="detailAddress" name="detailAddress" class="account__input"
+                                               value="${sessionScope.user.address}" required>
+                                    </div>
 
-                            <div class="account__form-group">
-                                <label for="tinh" class="account__label">Tỉnh/thành phố</label>
-                                <select id="tinh" name="tinh" class="account__select" required>
-                                    <option value="">Chọn tỉnh/thành phố</option>
-                                    <option value="HN">Hà Nội</option>
-                                    <option value="HCM">TP. Hồ Chí Minh</option>
-                                    <option value="DN">Đà Nẵng</option>
-                                </select>
-                            </div>
+                                    <c:if test="${not empty profileMsg}">
+                                        <p style="color:green;margin:8px 0;">${profileMsg}</p>
+                                    </c:if>
+                                    <c:if test="${not empty profileError}">
+                                        <p style="color:red;margin:8px 0;">${profileError}</p>
+                                    </c:if>
 
-                            <!-- Quận/huyện -->
-                            <div class="account__form-group">
-                                <label for="huyen" class="account__label">Quận/huyện</label>
-                                <select id="huyen" name="huyen" class="account__select" required>
-                                    <option value="">Chọn quận/huyện</option>
-                                    <option value="Q1">Quận 1</option>
-                                    <option value="Q3">Quận 3</option>
-                                    <option value="Q5">Quận 5</option>
-                                </select>
-                            </div>
+                                    <button type="submit" class="account__btn btn btn--default-color">Lưu thông tin</button>
+                                </form>
+                            </section>
+                        </c:when>
 
-                            <!-- Địa chỉ (LƯU VÀO users.address) -->
-                            <div class="account__form-group">
-                                <label for="diachi" class="account__label">Địa chỉ</label>
-                                <input type="text" id="diachi" name="address" class="account__input"
-                                       value="${sessionScope.user.address}" required>
-                            </div>
+                        <c:when test="${tab == 'password'}">
+                            <section class="account__content">
+                                <h2 class="account__heading">Đổi mật khẩu</h2>
 
-                            <c:if test="${not empty profileMsg}">
-                                <p style="color:green;margin:8px 0;">${profileMsg}</p>
-                            </c:if>
-                            <c:if test="${not empty profileError}">
-                                <p style="color:red;margin:8px 0;">${profileError}</p>
-                            </c:if>
+                                <form class="account__form" action="${pageContext.request.contextPath}/account" method="post">
+                                    <input type="hidden" name="action" value="changePassword">
+                                    <input type="hidden" name="tab" value="password">
 
-                            <button type="submit" class="account__btn btn btn--default-color">Lưu thông tin</button>
-                        </form>
-                    </section>
-                     </c:when>
+                                    <!-- Mật khẩu hiện tại -->
+                                    <div class="account__form-group">
+                                        <label for="current-password" class="account__label">Mật khẩu hiện tại</label>
+                                        <input type="password" id="current-password" name="oldPassword"
+                                               class="account__input" required>
+                                    </div>
 
-                    <c:when test="${tab == 'password'}">
-                    <section class="account__content">
-                        <h2 class="account__heading">Đổi mật khẩu</h2>
+                                    <!-- Mật khẩu mới -->
+                                    <div class="account__form-group">
+                                        <label for="new-password" class="account__label">Mật khẩu mới</label>
+                                        <input type="password" id="new-password" name="newPassword"
+                                               class="account__input" required>
+                                    </div>
 
-                        <form class="account__form" action="${pageContext.request.contextPath}/account" method="post">
-                            <input type="hidden" name="action" value="changePassword">
-                            <input type="hidden" name="tab" value="password">
+                                    <!-- Xác nhận mật khẩu mới -->
+                                    <div class="account__form-group">
+                                        <label for="confirm-password" class="account__label">Xác nhận mật khẩu mới</label>
+                                        <input type="password" id="confirm-password" name="confirmPassword"
+                                               class="account__input" required>
+                                    </div>
 
-                            <!-- Mật khẩu hiện tại -->
-                            <div class="account__form-group">
-                                <label for="current-password" class="account__label">Mật khẩu hiện tại</label>
-                                <input type="password" id="current-password" name="oldPassword"
-                                       class="account__input" required>
-                            </div>
+                                    <c:if test="${not empty passMsg}">
+                                        <p style="color:green;margin:8px 0;">${passMsg}</p>
+                                    </c:if>
+                                    <c:if test="${not empty passError}">
+                                        <p style="color:red;margin:8px 0;">${passError}</p>
+                                    </c:if>
 
-                            <!-- Mật khẩu mới -->
-                            <div class="account__form-group">
-                                <label for="new-password" class="account__label">Mật khẩu mới</label>
-                                <input type="password" id="new-password" name="newPassword"
-                                       class="account__input" required>
-                            </div>
+                                    <button type="submit" class="account__btn btn btn--default-color">Lưu thông tin</button>
+                                </form>
+                            </section>
+                        </c:when>
 
-                            <!-- Xác nhận mật khẩu mới -->
-                            <div class="account__form-group">
-                                <label for="confirm-password" class="account__label">Xác nhận mật khẩu mới</label>
-                                <input type="password" id="confirm-password" name="confirmPassword"
-                                       class="account__input" required>
-                            </div>
+                        <c:when test="${tab == 'favorite'}">
+                            <section class="account__content">
+                                <h2 class="account__heading">Sản phẩm yêu thích</h2>
 
-                            <c:if test="${not empty passMsg}">
-                                <p style="color:green;margin:8px 0;">${passMsg}</p>
-                            </c:if>
-                            <c:if test="${not empty passError}">
-                                <p style="color:red;margin:8px 0;">${passError}</p>
-                            </c:if>
-
-                            <button type="submit" class="account__btn btn btn--default-color">Lưu thông tin</button>
-                        </form>
-                    </section>
-                     </c:when>
-
-
-
-
-                   <c:when test="${tab == 'all'}">
-                     <section class="account__content">
-                     <h2 class="account__heading">Tất cả đơn hàng</h2>
-                       <c:if test="${empty ordersAll}">
-                         <div class="order-empty">Chưa có đơn hàng.</div>
-                       </c:if>
-
-                       <c:forEach var="o" items="${ordersAll}">
-                         <article class="order-item">
-                           <header class="order-item__header">
-                             <div class="order-item__info">
-                               <div>Mã đơn: #${o.id}</div>
-                               <div>Ngày đặt:
-                                 <fmt:formatDate value="${o.created_at}" pattern="dd/MM/yyyy HH:mm"/>
-                               </div>
-                             </div>
-
-                             <c:choose>
-                               <c:when test="${o.status_transport == 0}">
-                                 <span class="order-item__status order-item__status--processing">Đang xử lý</span>
-                               </c:when>
-                               <c:when test="${o.status_transport == 1}">
-                                 <span class="order-item__status order-item__status--delivered">Đã giao</span>
-                               </c:when>
-                               <c:when test="${o.status_transport == 3}">
-                                 <span class="order-item__status order-item__status--cancelled">Đã hủy</span>
-                               </c:when>
-                               <c:otherwise>
-                                 <span class="order-item__status">Không rõ</span>
-                               </c:otherwise>
-                             </c:choose>
-                           </header>
-
-                           <section class="order-item__body">
-                             <c:forEach var="it" items="${orderItemsMap[o.id]}">
-                               <div class="order-product">
-                                 <div class="order-product__info">
-                                   <h4 class="order-product__name">${it.product_name}</h4>
-                                   <span class="order-product__quantity">x ${it.quantity}</span>
-                                 </div>
-                                 <div class="order-product__price-wrap">
-                                   <span class="order-product__final-price">
-                                     <fmt:formatNumber value="${it.total_price}" type="number" maxFractionDigits="0"/>đ
-                                   </span>
-                                 </div>
-                               </div>
-                             </c:forEach>
-                           </section>
-
-                           <footer class="order-item__footer">
-                             <div class="order-item__total">
-                               <span>Thành tiền:</span>
-                               <span class="order-item__total-price">
-                                 <fmt:formatNumber value="${o.total_price}" type="number" maxFractionDigits="0"/>đ
-                               </span>
-                             </div>
-
-                             <c:if test="${o.status_transport == 0}">
-                               <form method="post" action="${pageContext.request.contextPath}/account" style="display:inline;">
-                                 <input type="hidden" name="action" value="cancelOrder"/>
-                                 <input type="hidden" name="orderId" value="${o.id}"/>
-                                 <input type="hidden" name="tab" value="all"/>
-                                 <button type="submit" class="order-item__action-btn"
-                                         onclick="return confirm('Bạn muốn hủy đơn #${o.id}?');">Hủy đơn</button>
-                               </form>
-                             </c:if>
-                           </footer>
-                         </article>
-                       </c:forEach>
-                     </section>
-                   </c:when>
-
-
-
-                  <c:when test="${tab == 'processing'}">
-                     <section id="orders-processing" class="account__content">
-                       <h2 class="account__heading">Đơn đang xử lý</h2>
-
-                       <c:if test="${empty ordersProcessing}">
-                         <div class="order-empty">Không có đơn đang xử lý.</div>
-                       </c:if>
-
-                       <c:forEach var="o" items="${ordersProcessing}">
-                         <article class="order-item">
-                           <header class="order-item__header">
-                             <div class="order-item__info">
-                               <span class="order-item__id">Mã đơn: #${o.id}</span>
-                               <span class="order-item__date">
-                                 Ngày đặt: <fmt:formatDate value="${o.created_at}" pattern="dd/MM/yyyy HH:mm"/>
-                               </span>
-                             </div>
-                             <span class="order-item__status order-item__status--processing">Đang xử lý</span>
-                           </header>
-
-                           <section class="order-item__body">
-                             <c:forEach var="it" items="${orderItemsMap[o.id]}">
-                               <div class="order-product">
-                                 <div class="order-product__info">
-                                   <h4 class="order-product__name">${it.product_name}</h4>
-                                   <span class="order-product__quantity">x ${it.quantity}</span>
-                                 </div>
-                                 <div class="order-product__price-wrap">
-                                   <span class="order-product__final-price">
-                                     <fmt:formatNumber value="${it.total_price}" type="number" maxFractionDigits="0"/>đ
-                                   </span>
-                                 </div>
-                               </div>
-                             </c:forEach>
-                           </section>
-
-                           <footer class="order-item__footer">
-                             <div class="order-item__total">
-                               <span class="order-item__total-label">Thành tiền:</span>
-                               <span class="order-item__total-price">
-                                 <fmt:formatNumber value="${o.total_price}" type="number" maxFractionDigits="0"/>đ
-                               </span>
-                             </div>
-                             <form method="post" action="${pageContext.request.contextPath}/account" style="display:inline;">
-                               <input type="hidden" name="action" value="cancelOrder"/>
-                               <input type="hidden" name="orderId" value="${o.id}"/>
-                               <input type="hidden" name="tab" value="processing"/>
-                               <button type="submit" class="order-item__action-btn"
-                                       onclick="return confirm('Bạn muốn hủy đơn #${o.id}?');">Hủy đơn</button>
-                             </form>
-                           </footer>
-                         </article>
-                       </c:forEach>
-                     </section>
-                   </c:when>
-
-
-
-                   <c:when test="${tab == 'delivered'}">
-                     <section id="orders-delivered" class="account__content">
-                       <h2 class="account__heading">Đơn đã giao</h2>
-
-                       <c:if test="${empty ordersDelivered}">
-                         <div class="order-empty">Không có đơn đã giao.</div>
-                       </c:if>
-
-                       <c:forEach var="o" items="${ordersDelivered}">
-                         <article class="order-item">
-                           <header class="order-item__header">
-                             <div class="order-item__info">
-                               <span class="order-item__id">Mã đơn: #${o.id}</span>
-                               <span class="order-item__date">
-                                 Ngày đặt: <fmt:formatDate value="${o.created_at}" pattern="dd/MM/yyyy HH:mm"/>
-                               </span>
-                             </div>
-                             <span class="order-item__status order-item__status--delivered">Đã giao</span>
-                           </header>
-
-                           <section class="order-item__body">
-                             <c:forEach var="it" items="${orderItemsMap[o.id]}">
-                               <div class="order-product">
-                                 <div class="order-product__info">
-                                   <h4 class="order-product__name">${it.product_name}</h4>
-                                   <span class="order-product__quantity">x ${it.quantity}</span>
-                                 </div>
-                                 <div class="order-product__price-wrap">
-                                   <span class="order-product__final-price">
-                                     <fmt:formatNumber value="${it.total_price}" type="number" maxFractionDigits="0"/>đ
-                                   </span>
-                                 </div>
-                               </div>
-                             </c:forEach>
-                           </section>
-
-                           <footer class="order-item__footer">
-                             <div class="order-item__total">
-                               <span class="order-item__total-label">Thành tiền:</span>
-                               <span class="order-item__total-price">
-                                 <fmt:formatNumber value="${o.total_price}" type="number" maxFractionDigits="0"/>đ
-                               </span>
-                             </div>
-                             <form method="post" action="${pageContext.request.contextPath}/account" style="display:inline;">
-                               <input type="hidden" name="action" value="repurchase"/>
-                               <input type="hidden" name="orderId" value="${o.id}"/>
-                               <input type="hidden" name="redirect" value="checkout"/>
-                               <input type="hidden" name="replaceCart" value="1"/>
-                               <input type="hidden" name="tab" value="delivered"/>
-                               <button type="submit" class="order-item__action-btn order-item__action-btn--primary">Mua lại</button>
-                             </form>
-                           </footer>
-                         </article>
-                       </c:forEach>
-                     </section>
-                   </c:when>
-
-
-
-                  <c:when test="${tab == 'cancelled'}">
-                     <section id="orders-cancelled" class="account__content">
-                       <h2 class="account__heading">Đơn đã hủy</h2>
-
-                       <c:if test="${empty ordersCancelled}">
-                         <div class="order-empty">Không có đơn đã hủy.</div>
-                       </c:if>
-
-                       <c:forEach var="o" items="${ordersCancelled}">
-                         <article class="order-item">
-                           <header class="order-item__header">
-                             <div class="order-item__info">
-                               <span class="order-item__id">Mã đơn: #${o.id}</span>
-                               <span class="order-item__date">
-                                 Ngày đặt: <fmt:formatDate value="${o.created_at}" pattern="dd/MM/yyyy HH:mm"/>
-                               </span>
-                             </div>
-                             <span class="order-item__status order-item__status--cancelled">Đã hủy</span>
-                           </header>
-
-                           <section class="order-item__body">
-                             <c:forEach var="it" items="${orderItemsMap[o.id]}">
-                               <div class="order-product">
-                                 <div class="order-product__info">
-                                   <h4 class="order-product__name">${it.product_name}</h4>
-                                   <span class="order-product__quantity">x ${it.quantity}</span>
-                                 </div>
-                                 <div class="order-product__price-wrap">
-                                   <span class="order-product__final-price">
-                                     <fmt:formatNumber value="${it.total_price}" type="number" maxFractionDigits="0"/>đ
-                                   </span>
-                                 </div>
-                               </div>
-                             </c:forEach>
-                           </section>
-
-                           <footer class="order-item__footer">
-                             <div class="order-item__total">
-                               <span class="order-item__total-label">Thành tiền:</span>
-                               <span class="order-item__total-price">
-                                 <fmt:formatNumber value="${o.total_price}" type="number" maxFractionDigits="0"/>đ
-                               </span>
-                             </div>
-                            <form method="post" action="${pageContext.request.contextPath}/account" style="display:inline;">
-                              <input type="hidden" name="action" value="repurchase"/>
-                              <input type="hidden" name="orderId" value="${o.id}"/>
-                              <input type="hidden" name="redirect" value="checkout"/>
-                              <input type="hidden" name="replaceCart" value="1"/>
-                              <input type="hidden" name="tab" value="cancelled"/>
-                              <button type="submit" class="order-item__action-btn order-item__action-btn--primary">Mua lại</button>
-                            </form>
-                           </footer>
-                         </article>
-                       </c:forEach>
-                     </section>
-                   </c:when>
-
-
-                   <c:when test="${tab == 'favorite'}">
-                    <section class="account__content">
-                        <h2 class="account__heading">Sản phẩm đã thích</h2>
-                        <div class="favorite-product-list row small-gutter">
-                            <div class="col l-3 m-4 c-6">
-                                <div class="product-card">
-                                    <a><img src="assets/img/giado.jpg" alt=""></a>
-                                    <a>
-                                        <p>Giá đỡ chuyển đổi máy cầm tay thành máy bàn chuyên dụng, đa năng và an
-                                            toàn khi thao tác
-                                        </p>
-                                    </a>
-                                    <div class="price-discount">
-                                        <div class="price-top">
-                                            <span class="old-price">390.000đ</span>
-                                            <div class="discount-badge">Giảm 20%</div>
+                                <c:choose>
+                                    <c:when test="${empty favorites}">
+                                        <div class="order-empty">Bạn chưa có sản phẩm yêu thích nào.</div>
+                                    </c:when>
+                                    <c:otherwise>
+                                        <div class="row g-2">
+                                            <c:forEach var="p" items="${favorites}">
+                                                <div class="col l-2-4 m-4 c-6">
+                                                    <div class="product-item">
+                                                        <img src="${p.image}" alt="${p.name}">
+                                                        <h3>${p.name}</h3>
+                                                        <p>${p.price}</p>
+                                                    </div>
+                                                </div>
+                                            </c:forEach>
                                         </div>
-                                        <div class="price-bottom">
-                                            <span class="new-price">312.000đ</span>
-                                        </div>
-                                    </div>
-                                    <div class="cart">
-                                        <i class="fa-solid fa-cart-shopping content-details__cart-icon"></i>
-                                        Thêm vào giỏ hàng
-                                    </div>
-                                    <div class="bottom">
-                                        <div class="star"><i class="fa-solid fa-star"></i> 4.9</div>
-                                        <button class="fav-btn"><i class="fa-solid fa-heart"></i> Yêu
-                                            thích</button>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col l-3 m-4 c-6">
-                                <div class="product-card">
-                                    <a><img src="assets/img/mayhutbui.jpg" alt=""></a>
-                                    <a>
-                                        <p>Máy hút bụi cầm tay không dây đa năng, nhỏ gọn, lực hút mạnh</p>
-                                    </a>
-                                    <div class="price-discount">
-                                        <div class="price-top">
-                                            <span class="old-price">552.000đ</span>
-                                            <div class="discount-badge">Giảm 20%</div>
-                                        </div>
-                                        <div class="price-bottom">
-                                            <span class="new-price">441.000đ</span>
-                                        </div>
-                                    </div>
-                                    <div class="cart">
-                                        <i class="fa-solid fa-cart-shopping content-details__cart-icon"></i>
-                                        Thêm vào giỏ hàng
-                                    </div>
-                                    <div class="bottom">
-                                        <div class="star"><i class="fa-solid fa-star"></i> 5</div>
-                                        <button class="fav-btn"><i class="fa-solid fa-heart"></i> Yêu
-                                            thích</button>
-                                    </div>
-                                </div>
+                                    </c:otherwise>
+                                </c:choose>
+                            </section>
+                        </c:when>
 
-                            </div>
-                            <div class="col l-3 m-4 c-6">
-                                <div class="product-card">
-                                    <a><img src="assets/img/denhoc.jpg" alt=""></a>
-                                    <a>
-                                        <p>Đèn bàn học bóng LED chống cận bảo vệ mắt, Thân đèn</p>
-                                    </a>
-                                    <div class="price-discount">
-                                        <div class="price-top">
-                                            <span class="old-price">202.000đ</span>
-                                            <div class="discount-badge">Giảm 15%</div>
-                                        </div>
-                                        <div class="price-bottom">
-                                            <span class="new-price">171.000đ</span>
-                                        </div>
-                                    </div>
-                                    <div class="cart">
-                                        <i class="fa-solid fa-cart-shopping content-details__cart-icon"></i>
-                                        Thêm vào giỏ hàng
-                                    </div>
-                                    <div class="bottom">
-                                        <div class="star"><i class="fa-solid fa-star"></i> 4.6</div>
-                                        <button class="fav-btn"><i class="fa-solid fa-heart"></i> Yêu
-                                            thích</button>
-                                    </div>
-                                </div>
+                        <c:otherwise>
+                            <c:choose>
+                                <c:when test="${tab == 'processing'}">
+                                    <c:set var="displayList" value="${ordersNew}" />
+                                    <c:set var="tabHeading" value="Đơn chờ xác nhận" />
+                                </c:when>
+                                <c:when test="${tab == 'shipping'}">
+                                    <c:set var="displayList" value="${ordersShipping}" />
+                                    <c:set var="tabHeading" value="Đơn đang giao" />
+                                </c:when>
+                                <c:when test="${tab == 'delivered'}">
+                                    <c:set var="displayList" value="${ordersDelivered}" />
+                                    <c:set var="tabHeading" value="Đơn đã giao" />
+                                </c:when>
+                                <c:when test="${tab == 'cancelled'}">
+                                    <c:set var="displayList" value="${ordersCancelled}" />
+                                    <c:set var="tabHeading" value="Đơn đã hủy / trả hàng" />
+                                </c:when>
+                                <c:otherwise>
+                                    <c:set var="displayList" value="${ordersAll}" />
+                                    <c:set var="tabHeading" value="Tất cả đơn hàng" />
+                                </c:otherwise>
+                            </c:choose>
 
-                            </div>
-                            <div class="col l-3 m-4 c-6">
-                                <div class="product-card">
-                                    <a><img src="assets/img/candien.jpg" alt=""></a>
-                                    <a>
-                                        <p>Cân điện tử thông minh Xiaomi Smart Scale Gen 2</p>
-                                    </a>
-                                    <div class="price-discount">
-                                        <div class="price-top">
-                                            <span class="old-price">337.000đ</span>
-                                            <div class="discount-badge">Giảm 25%</div>
-                                        </div>
-                                        <div class="price-bottom">
-                                            <span class="new-price">252.000đ</span>
-                                        </div>
-                                    </div>
-                                    <div class="cart">
-                                        <i class="fa-solid fa-cart-shopping content-details__cart-icon"></i>
-                                        Thêm vào giỏ hàng
-                                    </div>
-                                    <div class="bottom">
-                                        <div class="star"><i class="fa-solid fa-star"></i> 4.7</div>
-                                        <button class="fav-btn"><i class="fa-solid fa-heart"></i> Yêu
-                                            thích</button>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col l-3 m-4 c-6">
-                                <div class="product-card">
-                                    <a><img src="assets/img/tuixach.jpg" alt=""></a>
-                                    <a>
-                                        <p>Túi xách Reeyee RY302B/G 2 trong 1</p>
-                                    </a>
-                                    <div class="price-discount">
-                                        <div class="price-top">
-                                            <span class="old-price">1.120.000đ</span>
-                                            <div class="discount-badge">Giảm 25%</div>
-                                        </div>
-                                        <div class="price-bottom">
-                                            <span class="new-price">840.000đ</span>
-                                        </div>
-                                    </div>
-                                    <div class="cart">
-                                        <i class="fa-solid fa-cart-shopping content-details__cart-icon"></i>
-                                        Thêm vào giỏ hàng
-                                    </div>
-                                    <div class="bottom">
-                                        <div class="star"><i class="fa-solid fa-star"></i> 5</div>
-                                        <button class="fav-btn"><i class="fa-solid fa-heart"></i> Yêu
-                                            thích</button>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col l-3 m-4 c-6">
-                                <div class="product-card">
-                                    <a><img src="assets/img/loadeban.jpg" alt=""></a>
-                                    <a>
-                                        <p>Loa để bàn mini nhỏ gọn âm thanh vượt trội</p>
-                                    </a>
-                                    <span class="price">162.000đ</span>
-                                    <div class="cart">
-                                        <i class="fa-solid fa-cart-shopping content-details__cart-icon"></i>
-                                        Thêm vào giỏ hàng
-                                    </div>
-                                    <div class="bottom">
-                                        <div class="star"><i class="fa-solid fa-star"></i> 4.6</div>
-                                        <button class="fav-btn"><i class="fa-solid fa-heart"></i> Yêu
-                                            thích</button>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col l-3 m-4 c-6">
-                                <div class="product-card">
-                                    <a><img src="assets/img/keogiay.jpg" alt=""></a>
-                                    <a>
-                                        <p>Keo dán giày dép siêu dính trong suốt chuyên dụng 100gr</p>
-                                    </a>
-                                    <span class="price">128.000đ</span>
-                                    <div class="cart">
-                                        <i class="fa-solid fa-cart-shopping content-details__cart-icon"></i>
-                                        Thêm vào giỏ hàng
-                                    </div>
-                                    <div class="bottom">
-                                        <div class="star"><i class="fa-solid fa-star"></i> 4.8</div>
-                                        <button class="fav-btn"><i class="fa-solid fa-heart"></i> Yêu
-                                            thích</button>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col l-3 m-4 c-6">
-                                <div class="product-card">
-                                    <a><img src="assets/img/balo.jpg" alt=""></a>
-                                    <a>
-                                        <p>Balo đựng sách vở, laptop,...cho học sinh,sinh viên vải dù cao cấp, Màu
-                                            trắng khóa xanh</p>
-                                    </a>
-                                    <span class="price">228.000đ</span>
-                                    <div class="cart">
-                                        <i class="fa-solid fa-cart-shopping content-details__cart-icon"></i>
-                                        Thêm vào giỏ hàng
-                                    </div>
-                                    <div class="bottom">
-                                        <div class="star"><i class="fa-solid fa-star"></i> 5</div>
-                                        <button class="fav-btn"><i class="fa-solid fa-heart"></i> Yêu
-                                            thích</button>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </section>
-                     </c:when>
+                            <section class="account__content">
+                                <h2 class="account__heading">${tabHeading}</h2>
+
+                                <c:if test="${empty displayList}">
+                                    <div class="order-empty">Không có đơn hàng nào trong mục này.</div>
+                                </c:if>
+
+                                <c:forEach var="o" items="${displayList}">
+                                    <article class="order-item">
+                                        <header class="order-item__header">
+                                            <div class="order-item__info">
+                                                <div>Mã đơn: #${o.id}</div>
+                                                <div>Ngày đặt: <fmt:formatDate value="${o.created_at}" pattern="dd/MM/yyyy HH:mm"/></div>
+                                            </div>
+
+                                            <c:choose>
+                                                <c:when test="${o.status_transport == 0}"><span class="order-item__status">Chờ xác nhận</span></c:when>
+                                                <c:when test="${o.status_transport == 1}"><span class="order-item__status">Đã xác nhận</span></c:when>
+                                                <c:when test="${o.status_transport == 2}"><span class="order-item__status">Đang giao</span></c:when>
+                                                <c:when test="${o.status_transport == 3}"><span class="order-item__status">Đã giao</span></c:when>
+                                                <c:when test="${o.status_transport == 4}"><span class="order-item__status">Đã hủy</span></c:when>
+                                                <c:when test="${o.status_transport == 5}"><span class="order-item__status">Trả hàng</span></c:when>
+                                            </c:choose>
+                                        </header>
+
+                                        <section class="order-item__body">
+                                            <c:forEach var="it" items="${orderItemsMap[o.id]}">
+                                                <div class="order-product">
+                                                    <div class="order-product__info">
+                                                        <img class="order-product__img" src="${pageContext.request.contextPath}/assets/img/products/${it.product_image}">
+                                                        <div class="order-product__meta">
+                                                            <h4 class="order-product__name">${it.product_name}</h4>
+                                                            <span class="order-product__quantity">x ${it.quantity}</span>
+                                                        </div>
+                                                    </div>
+                                                    <div class="order-product__price-wrap">
+                                                        <div class="price-wrapper">
+                                                            <c:if test="${it.original_price > it.discount_price}">
+                                                                <div class="old-price-box"><fmt:formatNumber value="${it.original_price}" type="number"/>đ</div>
+                                                            </c:if>
+                                                            <div class="new-price-box"><fmt:formatNumber value="${it.discount_price}" type="number"/>đ</div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </c:forEach>
+                                        </section>
+
+                                        <footer class="order-item__footer">
+                                            <div class="order-item__total">
+                                                <span>Thành tiền: </span>
+                                                <span class="order-item__total-price">
+                                                    <fmt:formatNumber value="${o.total_price}" type="number"/>đ
+                                                </span>
+                                            </div>
+
+                                            <div class="order-item__actions">
+                                                <c:if test="${o.status_transport == 0}">
+                                                    <button type="button" class="order-item__action-btn" onclick="cancelOrderAjax(${o.id}, this)">Hủy đơn</button>
+                                                </c:if>
+
+                                                <c:if test="${o.status_transport >= 3}">
+                                                    <form method="post" action="${pageContext.request.contextPath}/account-again">
+                                                        <input type="hidden" name="action" value="repurchase"/>
+                                                        <input type="hidden" name="orderId" value="${o.id}"/>
+                                                        <button type="submit" class="order-item__action-btn order-item__action-btn--primary">Mua lại</button>
+                                                    </form>
+                                                </c:if>
+                                            </div>
+                                        </footer>
+                                    </article>
+                                </c:forEach>
+                            </section>
+                        </c:otherwise>
                     </c:choose>
                 </div>
             </div>
@@ -704,24 +380,106 @@
 
 <script src="assets/js/script.js"></script>
 
+<script>
+    function cancelOrderAjax(orderId, btnElement) {
+        if(!confirm("Bạn có chắc là muốn hủy đơn hàng #" + orderId + "?")) {
+            return;
+        }
+        // const originalText = btnElement.innerText;
+        btnElement.disabled = true;
+        btnElement.style.opacity = '0.8';
+
+        // gửi request
+        const params = new URLSearchParams();
+        params.append('action', 'cancelOrder');
+        params.append('orderId', orderId);
+
+        fetch('${pageContext.request.contextPath}/account-again', {
+            method : 'POST',
+            headers : {
+                'Content-Type': 'application/x-www-form-urlencoded',
+            },
+            body : params.toString()
+        })
+            .then(response => response.json())
+            .then(data => {
+                if(data.status === 'success') {
+                    alert(data.message);
+
+                    // hiệu ứng xóa đơn
+                    const orderArticle = btnElement.closest('.order-item');
+                    orderArticle.style.transition = 'all 0.5s ease';
+                    orderArticle.style.opacity = '0';
+                    orderArticle.style.transform = 'scale(0.9)';
+
+                    setTimeout(() => {
+                        orderArticle.remove();
+                        if(document.querySelectorAll('.order-item').length === 0) {
+                            window.location.href = window.location.pathname + "?tab=cancelled";
+                        }
+                    }, 500);
+                } else {
+                    alert(data.message);
+                    btnElement.disabled = false;
+                    btnElement.style.opacity = '1';
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Có lỗi xảy ra, vui lòng thử lại!');
+                btnElement.disabled = false;
+                btnElement.style.opacity = '1';
+            });
+    }
+</script>
 
 <script>
-  (function () {
-    const f = document.getElementById("addressForm");
-    if (!f) return;
+    document.addEventListener("DOMContentLoaded", function () {
 
-    f.addEventListener("submit", function () {
-      const tinh = document.getElementById("tinh");
-      const huyen = document.getElementById("huyen");
-      const diachi = document.getElementById("diachi");
+        const provinceSelect = document.getElementById("province");
+        const districtSelect = document.getElementById("district");
 
-      const tinhText = tinh && tinh.value ? tinh.options[tinh.selectedIndex].text : "";
-      const huyenText = huyen && huyen.value ? huyen.options[huyen.selectedIndex].text : "";
-      const soNha = diachi ? diachi.value.trim() : "";
+        // Load tỉnh
+        fetch("https://provinces.open-api.vn/api/p/")
+            .then(res => res.json())
+            .then(data => {
+                data.forEach(province => {
+                    const option = document.createElement("option");
+                    option.value = province.code;
+                    option.textContent = province.name;
+                    provinceSelect.appendChild(option);
+                });
+            });
 
+        // Khi chọn tỉnh
+        provinceSelect.addEventListener("change", function () {
 
-      diachi.value = [soNha, huyenText, tinhText].filter(Boolean).join(", ");
+            const selectedOption = this.options[this.selectedIndex];
+
+            // lưu name vào hidden input
+            document.getElementById("provinceName").value = selectedOption.text;
+
+            const provinceCode = this.value;
+
+            const url = "https://provinces.open-api.vn/api/p/" + provinceCode + "?depth=2";
+
+            districtSelect.innerHTML = `<option value="">Chọn quận/huyện</option>`;
+
+            if (!provinceCode) return;
+
+            fetch(url)
+                .then(res => res.json())
+                .then(data => {
+                    data.districts.forEach(district => {
+                        const option = document.createElement("option");
+                        option.value = district.name;
+                        option.textContent = district.name;
+                        districtSelect.appendChild(option);
+                    });
+                });
+        });
+
     });
-  })();
 </script>
+
 </html>

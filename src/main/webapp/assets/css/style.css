@@ -1,6 +1,6 @@
 /* Common */
 .rating {
-    margin: -1 0 0 auto;
+    margin: -1px 0 0 auto;
     display: flex;
     align-items: center;
     gap: 6px;
@@ -23,6 +23,10 @@
 
 /* Làm phần header */
 .header {
+    position: sticky;
+    top: 0;
+    z-index: 999;
+
     background-color: var(--primary-color);
 }
 
@@ -67,7 +71,7 @@
     cursor: default;
 }
 
-.navbar__item--saparate::after {
+.navbar__item--separate::after {
     content: "";
     display: block;
     position: absolute;
@@ -316,7 +320,7 @@
     animation: scaleUp ease-in 0.3s;
     will-change: opacity, transform;
     /* Nói cho trình duyệt biết cái nào sẽ thay đổi trong animation */
-    z-index: 1;
+    z-index: 3;
 }
 
 .navbar-user__menu::before {
@@ -374,6 +378,10 @@
     margin-top: 10px;
     display: flex;
     align-items: center;
+
+    /*position: sticky;*/
+    /*top: var(--navbar-height);*/
+    /*z-index: 1000;*/
 }
 
 .logo {
@@ -814,10 +822,7 @@
     overflow-x: auto;
     scroll-snap-type: x mandatory;
     gap: 15px;
-    padding-bottom: 12px;
-    padding-left: 6px;
-    padding-right: 6px;
-    padding-top: 6px;
+    padding: 6px 6px 12px;
     margin-top: 12px;
     scroll-behavior: smooth;
 

@@ -18,7 +18,7 @@
             <!-- Navbar -->
             <nav class="navbar">
                 <ul class="navbar__list">
-                    <li class="navbar__item navbar__item--saparate navbar__item--fade-qr">
+                    <li class="navbar__item navbar__item--separate navbar__item--fade-qr">
                         Vào cửa hàng trên ứng dụng
                         <div class="navbar-qr">
                             <img src="assets/img/qr_code.jpg" alt="QR Code" class="navbar-qr__img">
@@ -104,7 +104,7 @@
                     </li>
 
                     <c:if test="${empty sessionScope.USER_LOGIN}">
-                        <li class="navbar__item navbar__item--strong-weight navbar__item--saparate">
+                        <li class="navbar__item navbar__item--strong-weight navbar__item--separate">
                             <a href="register.jsp" class="navbar__link">Đăng ký</a>
                         </li>
 
@@ -126,13 +126,13 @@
 
                             <ul class="navbar-user__menu">
                                 <li class="navbar-user__item">
-                                    <a href="account.jsp#info" class="navbar-user__link">Tài khoản của tôi</a>
+                                    <a href="${pageContext.request.contextPath}/account?tab=info" class="navbar-user__link">Tài khoản của tôi</a>
                                 </li>
                                 <li class="navbar-user__item">
-                                    <a href="account.jsp#favorite-product" class="navbar-user__link">Yêu thích</a>
+                                    <a href="${pageContext.request.contextPath}/account?tab=favorite" class="navbar-user__link">Yêu thích</a>
                                 </li>
                                 <li class="navbar-user__item">
-                                    <a href="account.jsp#orders-all" class="navbar-user__link">Thông tin đơn hàng</a>
+                                    <a href="${pageContext.request.contextPath}/account?tab=all" class="navbar-user__link">Thông tin đơn hàng</a>
                                 </li>
                                 <li class="navbar-user__item navbar-user__item--separate">
                                     <a href="${pageContext.request.contextPath}/logout" class="navbar-user__link">Đăng xuất</a>

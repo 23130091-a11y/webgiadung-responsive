@@ -188,17 +188,17 @@ public class AuthDao extends BaseDao {
     }
 
     // update name, phone, address của user
-    public boolean updateProfile(int id, String name, String phone, String address) {
-        int updated = get().withHandle(h ->
-                h.createUpdate("UPDATE users SET name = :name, phone = :phone, address = :address, updated_at = NOW() WHERE id = :id")
-                        .bind("id", id)
-                        .bind("name", name)
-                        .bind("phone", phone)
-                        .bind("address", address)
-                        .execute()
-        );
-        return updated > 0;
-    }
+//    public boolean updateProfile(int id, String name, String phone, String address) {
+//        int updated = get().withHandle(h ->
+//                h.createUpdate("UPDATE users SET name = :name, phone = :phone, address = :address, updated_at = NOW() WHERE id = :id")
+//                        .bind("id", id)
+//                        .bind("name", name)
+//                        .bind("phone", phone)
+//                        .bind("address", address)
+//                        .execute()
+//        );
+//        return updated > 0;
+//    }
 
     // hàm xác minh user có oldPass đúng không trước khi đổi mk mới
     public boolean checkPassword(int id, String oldPass) {
@@ -217,6 +217,27 @@ public class AuthDao extends BaseDao {
                 h.createUpdate("UPDATE users SET password=:pass, updated_at=NOW() WHERE id=:id")
                         .bind("id", id)
                         .bind("pass", newPass)
+                        .execute()
+        );
+        return updated > 0;
+    }
+
+    public boolean updateAddress(int id, String fullAddress) {
+        int updated = get().withHandle(h ->
+                h.createUpdate("UPDATE users SET address = :address, updated_at = NOW() WHERE id = :id")
+                        .bind("id", id)
+                        .bind("address", fullAddress)
+                        .execute()
+        );
+        return updated > 0;
+    }
+
+    public boolean updateInfo(int id, String name, String phone) {
+        int updated = get().withHandle(h ->
+                h.createUpdate("UPDATE users SET name = :name, phone = :phone, updated_at = NOW() WHERE id = :id")
+                        .bind("id", id)
+                        .bind("name", name)
+                        .bind("phone", phone)
                         .execute()
         );
         return updated > 0;

@@ -5,7 +5,7 @@ import org.jdbi.v3.core.Handle;
 
 import java.util.List;
 import java.util.Map;
-// Thảo luận lại OrderDao
+
 public class OrderDao extends BaseDao {
 
     public int placeOrder(User user, UserAddress address, String shipMethod,
@@ -38,18 +38,34 @@ public class OrderDao extends BaseDao {
                 .one();
     }
 
+    // dùng prepared batch để tăng hiệu suất
     private void insertOrderItems(Handle handle, int orderId, Cart orderCart) {
+        var itemBatch = handle.prepareBatch(
+                "INSERT INTO order_items (order_id, product_id, product_name, original_price, price, quantity) " +
+                        "VALUES (:orderId, :prodId, :prodName, :originalPrice, :price, :qty)");
+
+        var stockBatch = handle.prepareBatch(
+                "UPDATE products " +
+                        "SET quantity = quantity - :qty, " +
+                        "    sold_quantity = sold_quantity + :qty " +
+                        "WHERE id = :prodId AND quantity >= :qty");
+
         for (CartItem item : orderCart.getItems()) {
-            handle.createUpdate(
-                            "INSERT INTO order_items (order_id, product_id, product_name, price, quantity) " +
-                                    "VALUES (:orderId, :prodId, :prodName, :price, :qty)")
-                    .bind("orderId", orderId)
+            itemBatch.bind("orderId", orderId)
                     .bind("prodId", item.getProduct().getId())
                     .bind("prodName", item.getProduct().getName())
+                    .bind("originalPrice", item.getOriginalPrice())
                     .bind("price", item.getDiscountPrice())
                     .bind("qty", item.getQuantity())
-                    .execute();
+                    .add();
+
+            stockBatch.bind("prodId", item.getProduct().getId())
+                    .bind("qty", item.getQuantity())
+                    .add();
         }
+
+        itemBatch.execute();
+        stockBatch.execute();
     }
 
     public List<Map<String, Object>> findOrdersByUser(int userId) {
@@ -70,11 +86,18 @@ public class OrderDao extends BaseDao {
 
     public List<Map<String, Object>> findItemsByOrder(int orderId) {
         String sql = """
-            SELECT product_name, price, quantity, (price * quantity) AS total_price
-            FROM order_items
-            WHERE order_id = :order_id
-            ORDER BY id ASC
-        """;
+        SELECT 
+            oi.product_name, 
+            oi.original_price,
+            oi.price AS discount_price,
+            oi.quantity, 
+            (oi.price * oi.quantity) AS total_item_price,
+            p.image AS product_image
+        FROM order_items oi
+        LEFT JOIN products p ON oi.product_id = p.id
+        WHERE oi.order_id = :order_id
+        ORDER BY oi.id ASC
+    """;
 
         return get().withHandle(h ->
                 h.createQuery(sql)
@@ -87,7 +110,7 @@ public class OrderDao extends BaseDao {
     public boolean cancelOrder(int orderId, int userId) {
         String sql = """
         UPDATE orders
-        SET status_transport = 3
+        SET status_transport = 4
         WHERE id = :id
           AND user_id = :user_id
           AND status_transport = 0
@@ -136,6 +159,7 @@ public class OrderDao extends BaseDao {
                         .list()
         );
     }
+
     // lấy tất cả những order
     public List<OrderAdmin> getAllOrders() {
         return get().withHandle(handle ->

@@ -39,36 +39,47 @@ public class AccountController extends HttpServlet {
             if (tab == null || tab.isBlank()) tab = "all";
             req.setAttribute("tab", tab);
 
-            // 1) Lấy tất cả đơn của user
+            // Lấy tất cả đơn của user
             List<Map<String, Object>> ordersAll = orderDao.findOrdersByUser(user.getId());
 
-            // 2) Chia theo trạng thái (DB của bạn: 0 xử lý, 1 đã giao, 3 đã hủy)
-            List<Map<String, Object>> ordersProcessing = new ArrayList<>();
+            // Chia theo trạng thái (0 đơn mới, 1 xác nhận, 2 vận chuyển, 3 đã giao, 4 đã hủy, 5 trả hàng/hoàn tiền)
+            List<Map<String, Object>> ordersNew = new ArrayList<>();
+            List<Map<String, Object>> ordersShipping = new ArrayList<>();
             List<Map<String, Object>> ordersDelivered  = new ArrayList<>();
             List<Map<String, Object>> ordersCancelled  = new ArrayList<>();
 
-            for (Map<String, Object> o : ordersAll) {
-                int st = toInt(o.get("status_transport"));
+            for (Map<String, Object> oItem : ordersAll) {
+                int st = toInt(oItem.get("status_transport"));
 
-                if (st == 1) {
-                    ordersDelivered.add(o);
-                } else if (st == 3) {
-                    ordersCancelled.add(o);
-                } else { // mặc định 0/khác => xử lý
-                    ordersProcessing.add(o);
+                switch (st) {
+                    case 1:
+                    case 2:
+                        ordersShipping.add(oItem);
+                        break;
+                    case 3:
+                        ordersDelivered.add(oItem);
+                        break;
+                    case 4:
+                    case 5:
+                        ordersCancelled.add(oItem);
+                        break;
+                    default:
+                        ordersNew.add(oItem);
+                        break;
                 }
             }
 
-            // 3) Map items theo orderId
+            // Map items theo orderId
             Map<Integer, List<Map<String, Object>>> orderItemsMap = new HashMap<>();
             for (Map<String, Object> o : ordersAll) {
                 int orderId = toInt(o.get("id"));
                 orderItemsMap.put(orderId, orderDao.findItemsByOrder(orderId));
             }
 
-            // 4) Đẩy dữ liệu sang JSP
+            // Đẩy dữ liệu sang JSP
             req.setAttribute("ordersAll", ordersAll);
-            req.setAttribute("ordersProcessing", ordersProcessing);
+            req.setAttribute("ordersNew", ordersNew);
+            req.setAttribute("ordersShipping", ordersShipping);
             req.setAttribute("ordersDelivered", ordersDelivered);
             req.setAttribute("ordersCancelled", ordersCancelled);
             req.setAttribute("orderItemsMap", orderItemsMap);
@@ -84,145 +95,61 @@ public class AccountController extends HttpServlet {
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         HttpSession session = req.getSession();
         User user = (User) session.getAttribute("user");
+
         if (user == null) {
             resp.sendRedirect(req.getContextPath() + "/login");
             return;
         }
 
-        req.setCharacterEncoding("UTF-8");
         String action = req.getParameter("action");
-        // ORDER
-// DB status_transport: 0 = đang xử lí, 1 = đã giao, 3 = đã hủy
-        if ("cancelOrder".equals(action)) {
-            int orderId = toInt(req.getParameter("orderId"));
+        if("updateProfile".equals(action)) {
+            String currentTab = req.getParameter("tab");
+            boolean success = false;
+            if("info".equals(currentTab)) {
+                String name = req.getParameter("name");
+                String phone = req.getParameter("phone");
 
-            boolean ok = orderDao.cancelOrder(orderId, user.getId());
-            if (ok) session.setAttribute("orderMsg", "Đã hủy đơn hàng #" + orderId);
-            else session.setAttribute("orderError", "Không thể hủy đơn (đơn đã giao/đã hủy hoặc không hợp lệ).");
+                if (name == null || name.trim().isEmpty()) {
+                    req.setAttribute("profileError", "Họ và tên không được để trống");
+                } else if (phone != null && !phone.matches("^[0-9]{10}$")) {
+                    req.setAttribute("profileError", "Số điện thoại phải có 10 chữ số");
+                } else {
+                    success = authDao.updateInfo(user.getId(), name, phone);
+                    if (success) {
+                        user.setName(name);
+                        user.setPhone(phone);
+                        req.setAttribute("profileMsg", "Cập nhật thông tin cá nhân thành công!");
+                    }
+                }
+            } else if("address".equals(currentTab)) {
+                String province = req.getParameter("provinceName");
+                String district = req.getParameter("district");
+                String detail = req.getParameter("detailAddress");
 
-            resp.sendRedirect(req.getContextPath() + "/account?tab=cancelled");
-            return;
+                if (province == null || province.isEmpty() || district == null || district.isEmpty()) {
+                    req.setAttribute("profileError", "Bạn cần chọn lại Tỉnh/Thành và Quận/Huyện để cập nhật địa chỉ!");
+                    success = false;
+                } else {
+                    String fullAddress = detail + ", " + district + ", " + province;
+                    success = authDao.updateAddress(user.getId(), fullAddress);
+                    if (success) {
+                        user.setAddress(fullAddress);
+                        req.setAttribute("profileMsg", "Cập nhật địa chỉ thành công!");
+                    }
+                }
+            }
+
+            if (!success && req.getAttribute("profileError") == null) {
+                req.setAttribute("profileError", "Có lỗi xảy ra trong quá trình lưu dữ liệu.");
+            }
+
+            // Giữ đúng tab người dùng đang đứng
+            req.setAttribute("tab", currentTab);
+            req.getRequestDispatcher("/account.jsp").forward(req, resp);
         }
-
-        if ("repurchase".equals(action)) {
-            int orderId = toInt(req.getParameter("orderId"));
-
-            // bảo mật: chỉ mua lại order thuộc user
-            if (!orderDao.isOrderOwnedByUser(orderId, user.getId())) {
-                session.setAttribute("orderError", "Đơn hàng không hợp lệ.");
-                resp.sendRedirect(req.getContextPath() + "/account");
-                return;
-            }
-
-            // tuỳ chọn: replaceCart=1 -> xóa giỏ hiện tại rồi mới thêm
-            boolean replaceCart = "1".equals(req.getParameter("replaceCart"));
-
-            List<Map<String, Object>> items = orderDao.findItemsForRepurchase(orderId);
-
-            Cart cart = (Cart) session.getAttribute("cart");
-            if (cart == null || replaceCart) cart = new Cart();
-
-            int addedCount = 0;
-
-            for (Map<String, Object> row : items) {
-                int productId = toInt(row.get("product_id"));
-                int qty = toInt(row.get("quantity"));
-                if (productId <= 0 || qty <= 0) continue;
-
-                Product p = new Product();
-                p.setId(productId);
-                p.setName(row.get("name") == null ? "" : String.valueOf(row.get("name")));
-                p.setImage(row.get("image") == null ? "assets/img/no-image.png" : String.valueOf(row.get("image")));
-
-                double firstPrice = toDouble(row.get("first_price"));
-                double salePrice  = toDouble(row.get("total_price"));
-                if (firstPrice <= 0) firstPrice = salePrice;
-                if (salePrice  <= 0) salePrice  = firstPrice;
-
-                p.setFirstPrice(firstPrice);
-
-                cart.addItem(p, qty);
-                addedCount++;
-            }
-
-            session.setAttribute("cart", cart);
-
-            if (addedCount > 0) {
-                session.setAttribute("orderMsg", "Đã thêm sản phẩm từ đơn #" + orderId + " vào giỏ hàng.");
-            } else {
-                session.setAttribute("orderError", "Không tìm thấy sản phẩm để mua lại (sản phẩm có thể đã bị xoá).");
-            }
-
-            // redirect=checkout -> sang thẳng trang checkout; mặc định về giỏ
-            String redirect = trim(req.getParameter("redirect"));
-            if ("checkout".equalsIgnoreCase(redirect)) {
-                resp.sendRedirect(req.getContextPath() + "/checkout");
-            } else {
-                resp.sendRedirect(req.getContextPath() + "/cart");
-            }
-            return;
-        }
-
-
-        if ("updateProfile".equals(action)) {
-            String name = trim(req.getParameter("name"));
-            String phone = trim(req.getParameter("phone"));
-            String address = trim(req.getParameter("address"));
-
-            if (name.isEmpty()) name = user.getName();
-            if (phone.isEmpty()) phone = user.getPhone();
-
-            if (name == null || name.trim().isEmpty()) {
-                req.setAttribute("profileError", "Tên không được để trống!");
-                doGet(req, resp);
-                return;
-            }
-
-            boolean ok = authDao.updateProfile(user.getId(), name, phone, address);
-            if (ok) {
-                User fresh = authDao.findByIdFull(user.getId());
-                if (fresh != null) session.setAttribute("user", fresh);
-                req.setAttribute("profileMsg", "Cập nhật thông tin thành công!");
-            } else {
-                req.setAttribute("profileError", "Cập nhật thất bại, thử lại!");
-            }
-
-            doGet(req, resp);
-            return;
-        }
-
-        if ("changePassword".equals(action)) {
-            String oldPass = trim(req.getParameter("oldPassword"));
-            String newPass = trim(req.getParameter("newPassword"));
-            String confirm = trim(req.getParameter("confirmPassword"));
-
-            if (oldPass.isEmpty() || newPass.isEmpty() || confirm.isEmpty()) {
-                req.setAttribute("passError", "Vui lòng nhập đầy đủ các ô mật khẩu!");
-                doGet(req, resp);
-                return;
-            }
-            if (!newPass.equals(confirm)) {
-                req.setAttribute("passError", "Mật khẩu mới và xác nhận không khớp!");
-                doGet(req, resp);
-                return;
-            }
-            if (!authDao.checkPassword(user.getId(), oldPass)) {
-                req.setAttribute("passError", "Mật khẩu hiện tại không đúng!");
-                doGet(req, resp);
-                return;
-            }
-
-            boolean ok = authDao.updatePassword(user.getId(), newPass);
-            if (ok) req.setAttribute("passMsg", "Đổi mật khẩu thành công!");
-            else req.setAttribute("passError", "Đổi mật khẩu thất bại, thử lại!");
-
-            doGet(req, resp);
-            return;
-        }
-
-        resp.sendRedirect(req.getContextPath() + "/account");
     }
 
+    //
     private String trim(String s) {
         return s == null ? "" : s.trim();
     }
@@ -232,6 +159,7 @@ public class AccountController extends HttpServlet {
         if (v instanceof Number) return ((Number) v).intValue();
         try { return Integer.parseInt(v.toString()); } catch (Exception e) { return 0; }
     }
+
     private double toDouble(Object v) {
         if (v == null) return 0.0;
         if (v instanceof Number) return ((Number) v).doubleValue();

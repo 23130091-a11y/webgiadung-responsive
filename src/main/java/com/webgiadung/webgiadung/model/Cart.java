@@ -17,13 +17,15 @@ public class Cart implements Serializable {
     public void addItem(Product product, int quantity) {
         if(quantity <= 0) quantity = 1;
 
+        double originalPrice = product.getFirstPrice();
+
         double discountPrice = product.getTotalPrice(); // giá sau giảm
 
         CartItem existing = data.get(product.getId());
         if (existing != null) {
             existing.upQuantity(quantity);
         } else {
-            data.put(product.getId(), new CartItem(product, quantity, discountPrice));
+            data.put(product.getId(), new CartItem(product, quantity, originalPrice, discountPrice));
         }
     }
 

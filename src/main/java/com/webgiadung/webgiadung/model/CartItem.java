@@ -19,10 +19,10 @@ public class CartItem implements Serializable {
 
     public CartItem() {}
 
-    public CartItem(Product product, int quantity, double discountPrice) {
+    public CartItem(Product product, int quantity, double originalPrice, double discountPrice) {
         this.product = product;
         this.quantity = quantity <= 0 ? 1 : quantity;
-        this.originalPrice = product.getFirstPrice();
+        this.originalPrice = originalPrice;
         this.discountPrice = discountPrice;
         this.addedAt = LocalDateTime.now(); // thời gian hiện tại thêm vào giỏ hàng
     }
