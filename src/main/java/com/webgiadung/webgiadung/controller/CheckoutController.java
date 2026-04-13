@@ -157,7 +157,7 @@ public class CheckoutController extends HttpServlet {
         int shipFee = "express".equalsIgnoreCase(shipMethod) ? SHIP_EXPRESS : SHIP_STANDARD;
 
         try {
-            orderDao.placeOrder(user, orderCart, shipFee);
+//            orderDao.placeOrder(user, orderCart, shipFee);
 
             if (idsParam != null && !idsParam.isBlank()) {
                 for (String p : idsParam.split(",")) {

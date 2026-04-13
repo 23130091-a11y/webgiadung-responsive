@@ -387,6 +387,11 @@
     padding: 20px 0;
 }
 
+.btn-comt {
+    min-width: 200px;
+    border-radius: 5px;
+}
+
 .product-comment__vote {
     margin-top: 10px;
     display: flex;

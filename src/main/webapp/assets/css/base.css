@@ -6,6 +6,8 @@
     --line-clamp: 2;
     --soft-color: #f2c160;
     --star-color-gold: #ffb91e;
+
+    --navbar-height: 38px;
 }
 
 * {

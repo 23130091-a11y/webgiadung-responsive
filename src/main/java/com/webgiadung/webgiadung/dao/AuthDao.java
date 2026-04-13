@@ -49,8 +49,8 @@ public class AuthDao extends BaseDao {
 
         get().useHandle(h ->
                 h.createUpdate(
-                                "INSERT INTO users (name, email, password, phone, role, status) " +
-                                        "VALUES (:name, :email, :password, :phone, :role, :status)"
+                                "INSERT INTO users (name, email, password, phone, role, status, created_at, updated_at) " +
+                                        "VALUES (:name, :email, :password, :phone, :role, :status, NOW(), NOW())"
                         )
                         .bind("name", user.getName()) // Bổ sung dòng này
                         .bind("email", user.getEmail())
@@ -110,7 +110,7 @@ public class AuthDao extends BaseDao {
                                 "UPDATE users SET " +
                                         "name=:name, email=:email, " +
                                         "phone = CASE WHEN :phone IS NULL OR :phone = '' THEN phone ELSE :phone END, " +
-                                        "address=:address, role=:role, status=:status " +
+                                        "address=:address, role=:role, status=:status, updated_at=NOW() " +
                                         "WHERE id=:id"
                         )
                         .bindBean(u)
@@ -124,7 +124,7 @@ public class AuthDao extends BaseDao {
                                 "UPDATE users SET " +
                                         "name=:name, email=:email, " +
                                         "phone = CASE WHEN :phone IS NULL OR :phone = '' THEN phone ELSE :phone END, " +
-                                        "address=:address, role=:role, status=:status, password=:password " +
+                                        "address=:address, role=:role, status=:status, password=:password, updated_at=NOW() " +
                                         "WHERE id=:id"
                         )
                         .bindBean(u)
@@ -135,7 +135,7 @@ public class AuthDao extends BaseDao {
     // khóa user để tránh lỗi FK (đơn hàng)
     public void adminSoftDeleteUser(int id) {
         get().useHandle(h ->
-                h.createUpdate("UPDATE users SET status = 0 WHERE id=:id")
+                h.createUpdate("UPDATE users SET status = 0, updated_at = NOW() WHERE id=:id")
                         .bind("id", id)
                         .execute()
         );
@@ -145,7 +145,7 @@ public class AuthDao extends BaseDao {
     public void activateUser(String email) {
         String e = (email == null) ? "" : email.trim().toLowerCase();
         get().useHandle(h ->
-                h.createUpdate("UPDATE users SET status = 1 WHERE LOWER(email) = :email")
+                h.createUpdate("UPDATE users SET status = 1, updated_at = NOW() WHERE LOWER(email) = :email")
                         .bind("email", e)
                         .execute()
         );
@@ -188,17 +188,17 @@ public class AuthDao extends BaseDao {
     }
 
     // update name, phone, address của user
-    public boolean updateProfile(int id, String name, String phone, String address) {
-        int updated = get().withHandle(h ->
-                h.createUpdate("UPDATE users SET name = :name, phone = :phone, address = :address, updated_at = NOW() WHERE id = :id")
-                        .bind("id", id)
-                        .bind("name", name)
-                        .bind("phone", phone)
-                        .bind("address", address)
-                        .execute()
-        );
-        return updated > 0;
-    }
+//    public boolean updateProfile(int id, String name, String phone, String address) {
+//        int updated = get().withHandle(h ->
+//                h.createUpdate("UPDATE users SET name = :name, phone = :phone, address = :address, updated_at = NOW() WHERE id = :id")
+//                        .bind("id", id)
+//                        .bind("name", name)
+//                        .bind("phone", phone)
+//                        .bind("address", address)
+//                        .execute()
+//        );
+//        return updated > 0;
+//    }
 
     // hàm xác minh user có oldPass đúng không trước khi đổi mk mới
     public boolean checkPassword(int id, String oldPass) {
@@ -217,6 +217,27 @@ public class AuthDao extends BaseDao {
                 h.createUpdate("UPDATE users SET password=:pass, updated_at=NOW() WHERE id=:id")
                         .bind("id", id)
                         .bind("pass", newPass)
+                        .execute()
+        );
+        return updated > 0;
+    }
+
+    public boolean updateAddress(int id, String fullAddress) {
+        int updated = get().withHandle(h ->
+                h.createUpdate("UPDATE users SET address = :address, updated_at = NOW() WHERE id = :id")
+                        .bind("id", id)
+                        .bind("address", fullAddress)
+                        .execute()
+        );
+        return updated > 0;
+    }
+
+    public boolean updateInfo(int id, String name, String phone) {
+        int updated = get().withHandle(h ->
+                h.createUpdate("UPDATE users SET name = :name, phone = :phone, updated_at = NOW() WHERE id = :id")
+                        .bind("id", id)
+                        .bind("name", name)
+                        .bind("phone", phone)
                         .execute()
         );
         return updated > 0;

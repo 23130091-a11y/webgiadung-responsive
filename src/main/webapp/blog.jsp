@@ -29,7 +29,7 @@
             <div class="header-top">
                 <nav class="navbar">
                     <ul class="navbar__list">
-                        <li class="navbar__item navbar__item--saparate navbar__item--fade-qr">
+                        <li class="navbar__item navbar__item--separate navbar__item--fade-qr">
                             Vào cửa hàng trên ứng dụng
                             <div class="navbar-qr">
                                 <img src="assets/img/qr_code.jpg" alt="QR Code" class="navbar-qr__img">
@@ -71,7 +71,7 @@
                             <a href="#!" class="navbar__link">Trợ giúp</a>
                         </li>
                         <c:if test="${empty sessionScope.USER_LOGIN}">
-                            <li class="navbar__item navbar__item--strong-weight navbar__item--saparate">
+                            <li class="navbar__item navbar__item--strong-weight navbar__item--separate">
                                 <a href="register.jsp" class="navbar__link">Đăng ký</a>
                             </li>
 
