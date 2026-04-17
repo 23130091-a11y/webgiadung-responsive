@@ -35,6 +35,11 @@ public class WarehouseTransactionDao extends BaseDao{
                     .bind("id", productId)
                     .execute();
 
+            // update nếu hết hàng thì bỏ gd
+            if (updated == 0 && ("EXPORT".equals(type) || "DAMAGED".equals(type))) {
+                throw new RuntimeException("Sản phẩm ID " + productId + " không đủ tồn kho!");
+            }
+
             // Trả về true nếu cả 2 thao tác thành công
             return inserted > 0 && updated > 0;
         });

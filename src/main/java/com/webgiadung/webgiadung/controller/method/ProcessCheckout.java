@@ -2,10 +2,12 @@ package com.webgiadung.webgiadung.controller.method;
 
 import com.webgiadung.webgiadung.dao.OrderDao;
 import com.webgiadung.webgiadung.dao.UserAddressDao;
+import com.webgiadung.webgiadung.dao.WarehouseTransactionDao;
 import com.webgiadung.webgiadung.model.Cart;
 import com.webgiadung.webgiadung.model.CartItem;
 import com.webgiadung.webgiadung.model.User;
 import com.webgiadung.webgiadung.model.UserAddress;
+import com.webgiadung.webgiadung.services.ProductService;
 import com.webgiadung.webgiadung.utils.ShippingUtils;
 import jakarta.servlet.*;
 import jakarta.servlet.http.*;
@@ -62,23 +64,54 @@ public class ProcessCheckout extends HttpServlet {
 
                 double finalTotal = subTotal + fee;
 
-                OrderDao orderDao = new OrderDao();
-                int orderId = orderDao.placeOrder(u, selectedAddr, method, fee, payMethod, finalTotal, orderCart);
-
-                if("e-wallet".equals(payMethod)) {
-                    orderDao.updateStatusPayment(orderId, 1);
-
-                    response.sendRedirect(request.getContextPath() + "/ajax-vnpay?orderId=" + orderId);
-                    return;
-                } else if ("viet-qr".equals(payMethod)) {
-                    // ToDo
-                } else {
-                    // Mặc định là COD
-                    // Xóa các sản phẩm đã mua khỏi giỏ hàng chính trong session
-                    for (String idStr : productIds.split(",")) {
-                        fullCart.deleteItem(Integer.parseInt(idStr.trim()));
+                try {
+                    ProductService productService = new ProductService();
+                    for (CartItem item : orderCart.getItems()) {
+                        int stock = productService.getAvailableStock(item.getProduct().getId());
+                        if (item.getQuantity() > stock) {
+                            session.setAttribute("error_msg", "Sản phẩm " + item.getProduct().getName() + " vừa hết hàng!");
+                            response.sendRedirect(request.getContextPath() + "/cart");
+                            return;
+                        }
                     }
-                    response.sendRedirect(request.getContextPath() + "/account?tab=processing");
+
+                    OrderDao orderDao = new OrderDao();
+                    int orderId = orderDao.placeOrder(u, selectedAddr, method, fee, payMethod, finalTotal, orderCart);
+
+                    if(orderId > 0) {
+                        WarehouseTransactionDao warehouseDao = new WarehouseTransactionDao();
+                        for (CartItem item : orderCart.getItems()) {
+                            warehouseDao.executeTransactionAndUpdateStock (
+                                    item.getProduct().getId(),
+                                    orderId,
+                                    "EXPORT",
+                                    item.getQuantity(),
+                                    "Xuất kho đơn hàng #" + orderId
+                            );
+                        }
+                    }
+
+                    if("e-wallet".equals(payMethod)) {
+                        orderDao.updateStatusPayment(orderId, 1);
+
+                        response.sendRedirect(request.getContextPath() + "/ajax-vnpay?orderId=" + orderId);
+                        return;
+                    } else if ("viet-qr".equals(payMethod)) {
+                        // ToDo
+                    } else {
+                        // Mặc định là COD
+                        // Xóa các sản phẩm đã mua khỏi giỏ hàng chính trong session
+                        for (String idStr : productIds.split(",")) {
+                            fullCart.deleteItem(Integer.parseInt(idStr.trim()));
+                        }
+                        response.sendRedirect(request.getContextPath() + "/account?tab=processing");
+                    }
+                } catch (RuntimeException e) {
+                    e.printStackTrace();
+                    String msg = "Rất tiếc! Sản phẩm bạn chọn vừa mới hết hàng do có khách hàng khác đặt mua trước đó vài giây. Vui lòng kiểm tra lại số lượng tồn kho.";
+                    request.getSession().setAttribute("error_msg", msg);
+                    response.sendRedirect(request.getContextPath() + "/cart");
+//                    response.sendRedirect(request.getContextPath() + "/checkout-error?msg=out-of-stock");
                 }
             }
             catch (Exception e){

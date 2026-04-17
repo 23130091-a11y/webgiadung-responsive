@@ -374,6 +374,16 @@
                     <section class="checkout-section order-summary sticky-summary">
                         <h2 class="section-title">Tóm tắt Đơn hàng</h2>
 
+                        <c:if test="${not empty stockError}">
+                            <div class="checkout-alert-error" style="background-color: #fff2f2; border: 1px solid #ffcccc; color: #d9534f; padding: 12px; border-radius: 4px; margin-bottom: 15px; font-size: 1.4rem; line-height: 1.6;">
+                                <i class="fa-solid fa-triangle-exclamation"></i> <strong>Lỗi tồn kho:</strong><br>
+                                    ${stockError}
+                                <div style="margin-top: 8px;">
+                                    <a href="${pageContext.request.contextPath}/cart" style="color: #0056b3; font-weight: bold; text-decoration: underline;">Quay lại giỏ hàng</a>
+                                </div>
+                            </div>
+                        </c:if>
+
                         <div class="product-list-summary">
                             <c:choose>
                                 <c:when test="${empty items}">
@@ -426,7 +436,12 @@
                             </span>
                         </div>
 
-                        <button type="submit" class="btn btn--default-color btn-place-order">ĐẶT HÀNG</button>
+                        <button type="submit"
+                                class="btn btn--default-color btn-place-order ${not empty stockError ? 'btn--disabled' : ''}"
+                        ${not empty stockError ? 'disabled' : ''}
+                                style="${not empty stockError ? 'background-color: #ccc; cursor: not-allowed;' : ''}">
+                            ${not empty stockError ? 'KHÔNG THỂ ĐẶT HÀNG' : 'ĐẶT HÀNG'}
+                        </button>
 
                     </section>
                 </div>
@@ -700,6 +715,20 @@
         updateShippingFee();
     });
 
+    document.querySelector('form[action*="process-checkout"]').addEventListener('submit', function(e) {
+        const btn = this.querySelector('.btn-place-order');
+        // BỔ SUNG: Nếu nút đang bị disabled do lỗi kho, không làm gì cả
+        if (btn.disabled) {
+            e.preventDefault();
+            return;
+        }
+
+        if (btn) {
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> ĐANG XỬ LÝ...';
+            btn.style.pointerEvents = 'none';
+            btn.style.opacity = '0.7';
+        }
+    });
 </script>
 
 </body>

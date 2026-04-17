@@ -78,11 +78,27 @@ public class CheckoutController extends HttpServlet {
             orderCart = buildSelectedCart(fullCart, idsParam);
         }
 
-        //todo
-
         if (orderCart.getItems().isEmpty()) {
             resp.sendRedirect(req.getContextPath() + "/cart");
             return;
+        }
+
+        //todo
+        StringBuilder stockWarning = new StringBuilder();
+        boolean isStockOk = true;
+
+        for (CartItem item : orderCart.getItems()) {
+            int available = productService.getAvailableStock(item.getProduct().getId());
+            if (item.getQuantity() > available) {
+                isStockOk = false;
+                stockWarning.append("Sản phẩm '").append(item.getProduct().getName())
+                        .append("' chỉ còn ").append(available).append(" cái. ");
+            }
+        }
+
+        if (!isStockOk) {
+            req.setAttribute("stockError", stockWarning.toString());
+            // Bạn vẫn cho vào trang checkout nhưng sẽ khóa nút "Đặt hàng" ở JSP
         }
 
         UserAddressDao addrDao = new UserAddressDao();

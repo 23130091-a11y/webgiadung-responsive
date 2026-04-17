@@ -49,6 +49,33 @@
         <div class="cart-container">
             <c:set var="cart" value="${sessionScope.cart}" />
             <div id="cart-content-wrapper">
+                <c:if test="${not empty sessionScope.error_msg}">
+                    <div class="cart-error-alert" style="
+                        background-color: #fff2f2;
+                        color: #d93025;
+                        padding: 15px 20px;
+                        border: 1px solid #f8d7da;
+                        border-radius: 8px;
+                        margin-bottom: 20px;
+                        display: flex;
+                        align-items: center;
+                        font-size: 1.5rem;
+                        box-shadow: 0 2px 4px rgba(0,0,0,0.05);">
+
+                        <i class="fa-solid fa-circle-exclamation" style="margin-right: 12px; font-size: 2rem;"></i>
+                        <span style="flex: 1;">${sessionScope.error_msg}</span>
+
+                        <button type="button" onclick="this.parentElement.style.display='none'" style="
+                background: none;
+                border: none;
+                font-size: 2.2rem;
+                cursor: pointer;
+                color: #d93025;
+                line-height: 1;">&times;</button>
+                    </div>
+                    <c:remove var="error_msg" scope="session" />
+                </c:if>
+
                 <c:choose>
 
                     <c:when test="${empty cart.items}">
