@@ -33,23 +33,23 @@ public class Cart implements Serializable {
         return data.get(id);
     }
 
-    public boolean updateItem(int productId, int quantity) {
-        if(get(productId) == null) return false;
-        if(quantity <= 0) quantity = 1;
-        data.get(productId).setQuantity(quantity);
-        return true;
-    }
+//    public boolean updateItem(int productId, int quantity) {
+//        if(get(productId) == null) return false;
+//        if(quantity <= 0) quantity = 1;
+//        data.get(productId).setQuantity(quantity);
+//        return true;
+//    }
 
     public CartItem deleteItem(int productId) {
         if(get(productId) == null) return null;
         return data.remove(productId);
     }
 
-    public ArrayList<CartItem> deleteAll() {
-        ArrayList<CartItem> list = new ArrayList<>(data.values());
-        data.clear();
-        return list;
-    }
+//    public ArrayList<CartItem> deleteAll() {
+//        ArrayList<CartItem> list = new ArrayList<>(data.values());
+//        data.clear();
+//        return list;
+//    }
 
     public ArrayList<CartItem> getItems() {
         return new ArrayList<>(data.values());
@@ -69,9 +69,9 @@ public class Cart implements Serializable {
                 .sum();
     }
 
-    public void updateCustomerInfo(User user) {
-        this.user = user;
-    }
+//    public void updateCustomerInfo(User user) {
+//        this.user = user;
+//    }
 
     public void increaseQuantity(int productId) {
         CartItem item = data.get(productId);
@@ -93,5 +93,15 @@ public class Cart implements Serializable {
                 return;
             }
         }
+    }
+
+    public int getQuantityByProductId(int productId) {
+        CartItem item = data.get(productId);
+
+        if (item != null) {
+            return item.getQuantity();
+        }
+
+        return 0;
     }
 }

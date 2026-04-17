@@ -12,6 +12,7 @@ import jakarta.servlet.http.*;
 import jakarta.servlet.annotation.*;
 import java.io.IOException;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 @WebServlet(name = "ProcessCheckout", value = "/process-checkout")
@@ -49,6 +50,9 @@ public class ProcessCheckout extends HttpServlet {
                 }
 
                 Cart orderCart = buildSelectedCart(fullCart, productIds);
+                // kiểm tra tồn kho một lần nunawx trước khi gọi insert order đó vào bảng
+                // todo
+
                 // lấy tổng tiền từ cart
                 double subTotal = orderCart.getTotalPrice();
                 // lấy ôg địa chỉ đc chọn ra
