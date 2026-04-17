@@ -2754,6 +2754,21 @@
         align-items: stretch;
     }
 }
+.revenue-box--danger-soft {
+    background: linear-gradient(135deg, #fff2f2, #fff);
+    border-color: #f5c9c9;
+}
+
+.revenue-box__value--danger {
+    color: #d93025;
+}
+
+.revenue-empty {
+    padding: 24px 12px;
+    text-align: center;
+    color: #777;
+    font-style: italic;
+}
 .purchase-history-card {
     background: #fff;
     border-radius: 8px;
