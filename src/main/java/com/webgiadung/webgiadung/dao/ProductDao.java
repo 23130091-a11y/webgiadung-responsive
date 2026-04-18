@@ -664,6 +664,33 @@ public Product getProductFullInfo(int id) {
                     .one();
         });
     }
+    public List<Product> getLowStockProducts() {
+        String sql = "SELECT * FROM (" + BASE_SELECT + ") AS p WHERE p.quantity <= 50 ORDER BY p.quantity ASC";
+
+        return get().withHandle(h ->
+                h.createQuery(sql)
+                        .mapToBean(Product.class)
+                        .list()
+        );
+    }
+    public boolean updateStockAndPrice(int productId, int quantityToAdd, double newPrice) {
+        return get().withHandle(handle -> {
+            int rowsUpdated = handle.createUpdate("""
+            UPDATE products 
+            SET 
+                quantity = quantity + :quantityToAdd,
+                price_first = :newPrice,
+                updated_at = NOW()
+            WHERE id = :productId
+        """)
+                    .bind("quantityToAdd", quantityToAdd)
+                    .bind("newPrice", newPrice)
+                    .bind("productId", productId)
+                    .execute();
+
+            return rowsUpdated > 0;
+        });
+    }
 }
 
 

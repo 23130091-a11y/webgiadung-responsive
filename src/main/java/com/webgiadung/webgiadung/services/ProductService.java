@@ -133,9 +133,14 @@ public class ProductService {
         return pdao.removeDiscount(discountId);
     }
 
-    // xử lý tồn kho
     public int getAvailableStock(int productId) {
         return pdao.getAvailableStock(productId);
+    }
+    public List<Product> getLowStockProducts() {
+        return pdao.getLowStockProducts();
+    }
+    public boolean updateStockAndPrice(int productId, int quantityToAdd, double newPrice) {
+        return pdao.updateStockAndPrice( productId, quantityToAdd, newPrice);
     }
 }
 
