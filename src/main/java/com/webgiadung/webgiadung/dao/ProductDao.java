@@ -355,10 +355,22 @@ public Product getProductFullInfo(int id) {
                     .bind("pid", id)
                     .mapToBean(Keywords.class)
                     .list();
-
+            List<ProductImage> images = handle.createQuery("""
+                SELECT 
+                    id, path, 
+                    product_id AS productId, 
+                    created_at AS createdAt, 
+                    updated_at AS updatedAt
+                FROM product_images 
+                WHERE product_id = :pid
+            """)
+                    .bind("pid", id)
+                    .mapToBean(ProductImage.class)
+                    .list();
             product.setDescriptions(descriptions);
             product.setDetails(details);
             product.setKeywords(keywords);
+            product.setImages(images);
         }
 
         return product;
@@ -650,6 +662,33 @@ public Product getProductFullInfo(int id) {
                     .bind("productId", productId)
                     .mapTo(Integer.class)
                     .one();
+        });
+    }
+    public List<Product> getLowStockProducts() {
+        String sql = "SELECT * FROM (" + BASE_SELECT + ") AS p WHERE p.quantity <= 50 ORDER BY p.quantity ASC";
+
+        return get().withHandle(h ->
+                h.createQuery(sql)
+                        .mapToBean(Product.class)
+                        .list()
+        );
+    }
+    public boolean updateStockAndPrice(int productId, int quantityToAdd, double newPrice) {
+        return get().withHandle(handle -> {
+            int rowsUpdated = handle.createUpdate("""
+            UPDATE products 
+            SET 
+                quantity = quantity + :quantityToAdd,
+                price_first = :newPrice,
+                updated_at = NOW()
+            WHERE id = :productId
+        """)
+                    .bind("quantityToAdd", quantityToAdd)
+                    .bind("newPrice", newPrice)
+                    .bind("productId", productId)
+                    .execute();
+
+            return rowsUpdated > 0;
         });
     }
 }

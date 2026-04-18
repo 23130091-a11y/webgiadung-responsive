@@ -32,7 +32,7 @@
     <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/grid.css">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/base.css">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/style.css">
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/admin.css?v=99">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/admin.css?v=999">
     <!-- Include stylesheet -->
     <link href="https://cdn.jsdelivr.net/npm/quill@2.0.3/dist/quill.snow.css" rel="stylesheet" />
 </head>
@@ -73,6 +73,9 @@
                                 <a href="#config" class="manage-nav__link">Quản lý doanh thu</a>
                             </li>
                             <li class="manage-nav__item">
+                                <a href="#warehouse" class="manage-nav__link">Vận hành kho</a>
+                            </li>
+                            <li class="manage-nav__item">
                                 <a href="#news" class="manage-nav__link">Tin tức</a>
                             </li>
                             <li class="manage-nav__item">
@@ -99,6 +102,115 @@
                 </div>
 
                 <div class="col l-10 m-12 c-12">
+                    <section id="warehouse" class="manage-detail" style="display:none;">
+                        <div class="sub-tab-container">
+                            <div class="sub-tab-item active" onclick="switchSubTab(event, 'tab-inbound')">Nhập hàng</div>
+                            <div class="sub-tab-item" onclick="switchSubTab(event, 'tab-damage')">Quản lý hàng hư hỏng</div>
+                            <div class="sub-tab-item" onclick="switchSubTab(event, 'tab-transactions')">Sổ vận hành kho</div>
+                        </div>
+
+                        <div class="warehouse-content-wrapper">
+                            <div id="tab-inbound" class="sub-tab-content active">
+                                <div class="warehouse-grid">
+
+                                    <div class="low-stock-panel">
+                                        <h3 class="panel-title">Hàng sắp hết</h3>
+                                        <div id="low-stock-list">
+                                            <p style="text-align: center; padding: 20px; color: #888;">Đang tải danh sách...</p>
+                                        </div>
+                                    </div>
+                                    <div class="inbound-main">
+                                        <div class="inbound-form-card">
+                                            <h3 style="margin-bottom: 20px; color: var(--primary-color);">Tạo Phiếu Nhập Kho</h3>
+
+                                            <div class="search-product-box">
+                                                <label>Tìm kiếm sản phẩm để nhập:</label>
+                                                <div class="search-input-wrapper">
+                                                    <input type="text" id="search-prod" placeholder="Gõ tên sản phẩm..." onkeyup="handleProductSearch(this.value)">
+                                                    <div id="search-dropdown" class="search-results-dropdown" style="display:none;">
+                                                        <div class="search-item" onclick="onSelectProduct('Nồi cơm Sunhouse 1.8L', 5, 'https://via.placeholder.com/100', 450000)">
+                                                            <img src="https://via.placeholder.com/40">
+                                                            <span>Nồi cơm Sunhouse 1.8L - (Hệ thống còn: 5)</span>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <div class="inbound-detail-fields">
+                                                <div class="form-row">
+                                                    <div class="form-group">
+                                                        <label>Mã phiếu nhập</label>
+                                                        <input type="text" id="receipt-code" placeholder="Nhập mã phiếu (VD: PN-001)...">
+                                                    </div>
+                                                    <div class="form-group">
+                                                        <label>Nhà cung cấp</label>
+                                                        <input type="text" id="supplier-name" placeholder="Ví dụ: Công ty Sunhouse...">
+                                                    </div>
+                                                </div>
+
+                                                <div id="selected-product-box" class="selected-product-display">
+                                                    <img id="display-img" src="https://via.placeholder.com/100" alt="Ảnh">
+                                                    <div class="display-text">
+                                                        <h4 id="display-name">Chưa chọn sản phẩm</h4>
+                                                        <p>Số tồn kho hệ thống (trước nhập): <strong id="display-pre-stock">0</strong></p>
+                                                    </div>
+                                                </div>
+
+                                                <div class="form-row">
+                                                    <div class="form-group">
+                                                        <label>Số lượng nhập thêm thực tế</label>
+                                                        <input type="number" id="import-qty" placeholder="0" oninput="calculateTotalPrice()">
+                                                    </div>
+                                                    <div class="form-group">
+                                                        <label>Giá nhập đợt này (VNĐ)</label>
+                                                        <input type="number" id="unit-cost" placeholder="0" oninput="calculateTotalPrice()">
+                                                    </div>
+                                                </div>
+
+                                                <div class="form-group" style="margin-top: 15px; margin-bottom: 10px;">
+                                                    <label>Thành tiền dự kiến (VNĐ)</label>
+                                                    <input type="text" id="total-price-display" readonly class="readonly-bg"
+                                                           style="font-weight: bold; color: #f39c12; font-size: 1.1rem;" value="0">
+                                                </div>
+                                            </div>
+
+                                            <button class="btn-confirm-warehouse">XÁC NHẬN NHẬP KHO & CẬP NHẬT TỒN</button>
+                                        </div>
+
+                                        <div class="inbound-history-list">
+                                            <h3 style="margin: 25px 0 15px 0; color: #333;">Lịch sử các đợt nhập hàng</h3>
+                                            <table class="warehouse-table">
+                                                <thead>
+                                                <tr>
+                                                    <th>Ngày nhập</th>
+                                                    <th>Mã phiếu</th>
+                                                    <th>Tên sản phẩm</th>
+                                                    <th>Số lượng</th>
+                                                    <th>Tổng tiền</th>
+                                                    <th>Tổng tồn hiện tại</th>
+                                                    <th>Thao tác</th>
+                                                </tr>
+                                                </thead>
+                                                <tbody>
+                                                <tr>
+                                                    <td>18/04/2026</td>
+                                                    <td><strong>PN-001</strong></td>
+                                                    <td>Nồi cơm Sunhouse 1.8L</td>
+                                                    <td>100</td>
+                                                    <td>45.000.000</td>
+                                                    <td>105</td> <td><button class="btn-detail">Xem chi tiết</button></td>
+                                                </tr>
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div id="tab-damage" class="sub-tab-content"><h3>Giao diện Hủy / Hư hỏng</h3></div>
+                            <div id="tab-transactions" class="sub-tab-content"><h3>Sổ kho (Transactions)</h3></div>
+                        </div>
+                    </section>
                     <section id="config" class="manage-detail">
                         <h2 class="manage__heading">Quản lý doanh thu</h2>
 
@@ -1646,6 +1758,7 @@
 </body>
 
 <script>
+    const sectionWarehouse = document.getElementById("warehouse");
     const sectionConfig = document.getElementById("config");
     const sectionProduct = document.getElementById("product");
     const sectionAdd = document.getElementById("add-product");
@@ -1715,6 +1828,7 @@
         sectionEventAdd.style.display = "none";
         sectionEventView.style.display = "none";
         sectionEventEdit.style.display = "none";
+        sectionWarehouse.style.display = "none";
 
     }
 
@@ -1733,6 +1847,9 @@
                 link.classList.add("manage-nav__link--active");
             }
             if (targetKey === "product" && href === "#product") {
+                link.classList.add("manage-nav__link--active");
+            }
+            if (targetKey === "warehouse" && href === "#warehouse") {
                 link.classList.add("manage-nav__link--active");
             }
             if (targetKey === "order" && href.includes("/order-admin")) {
@@ -1761,7 +1878,10 @@
         } else if (targetKey === "news") {
             sectionNews.style.display = "block";
             showNewsDefault();
-        } else {
+        }
+        else if (targetKey === "warehouse") {
+            sectionWarehouse.style.display = "block";
+        }else {
             sectionConfig.style.display = "block";
         }
 
@@ -1804,6 +1924,7 @@
             if (targetId === "product") openMainSection("product");
             if (targetId === "order") openMainSection("order");
             if (targetId === "customer" || targetId === "customers") openMainSection("customers");
+            if (targetId === "warehouse") openMainSection("warehouse");
         });
     });
     productMenuButtons.forEach(btn => {
@@ -2617,7 +2738,7 @@
             .then(data => {
                 if (data.status === "success") {
                     const select = document.getElementById('cateSelect');
-                    // Server trả về cateName, cateID
+
                     const newOption = new Option(data.cateName, data.cateID, true, true);
                     select.add(newOption, select.options[select.length - 1]);
 
@@ -3970,308 +4091,355 @@
     });
 </script>
 <script>
-    function deleteDiscount(id) {
-        if (!confirm("Bạn có chắc chắn muốn xóa khuyến mãi này?")) return;
 
-        const url = contextPath + '/api/admin/delete-discount';
-        const params = new URLSearchParams();
-        params.append('id', id);
+    let selectedProductId = null;
 
-        fetch(url, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-            body: params.toString()
-        })
-            .then(async res => {
-                const data = await res.json();
+    function truncateName(name) {
+        if (!name) return "";
+        var words = name.split(/\s+/);
+        return words.length > 5 ? words.slice(0, 5).join(' ') + '...' : name;
+    }
 
-                if (res.ok && data.status === "success") {
-                    alert("Xóa thành công!");
-                    location.reload();
-                } else {
-                    // Hiển thị lỗi cụ thể từ Server (status: fail hoặc status: error)
-                    const msg = data.message || "Lỗi hệ thống không xác định.";
-                    alert("THẤT BẠI: " + msg);
-                    console.error("Chi tiết lỗi:", data);
+
+    function onSelectProduct(id, name, stock, img, price) {
+        selectedProductId = id;
+
+        document.getElementById('display-name').innerText = name;
+        document.getElementById('display-pre-stock').innerText = stock;
+        document.getElementById('display-img').src = img;
+        document.getElementById('unit-cost').value = price;
+
+        document.getElementById('import-qty').value = "";
+        if (typeof calculateTotalPrice === "function") calculateTotalPrice();
+
+        var dropdown = document.getElementById('search-dropdown');
+        if (dropdown) dropdown.style.display = 'none';
+        document.getElementById('import-qty').focus();
+
+        console.log("Đã chọn SP ID:", id);
+    }
+
+    function loadLowStockProducts() {
+        var container = document.getElementById('low-stock-list');
+        var contextPath = '${pageContext.request.contextPath}';
+
+        fetch(contextPath + '/api/low-stock-products')
+            .then(res => res.json())
+            .then(data => {
+                container.innerHTML = '';
+                if (!data || data.length === 0) {
+                    container.innerHTML = '<p style="text-align:center; font-size:13px; color:#888;">Kho hiện tại đủ hàng.</p>';
+                    return;
                 }
+
+                data.forEach(p => {
+                    var displayImg = contextPath + '/assets/img/products/' + p.image;
+                    var safeName = p.name.replace(/'/g, "\\'");
+
+                    var card = '<div class="stock-card ' + (p.quantity <= 0 ? 'danger' : 'warning') + '">' +
+                        '<div class="img-wrapper">' +
+                        '<img src="' + displayImg + '" alt="product">' +
+                        '</div>' +
+                        '<div class="stock-info">' +
+                        '<h4 class="product-name-mini">' + p.name + '</h4>' +
+                        '<p class="stock-qty-mini">Tồn kho: <strong style="color: #ffc107;">' + p.quantity + '</strong></p>'  +
+                        '</div>' +
+
+                        '<button class="btn-add-mini" onclick="onSelectProduct(' + p.id + ', \'' + safeName + '\', ' + p.quantity + ', \'' + displayImg + '\', ' + p.firstPrice + ')">Nhập</button>' +
+                        '</div>';
+                    container.insertAdjacentHTML('beforeend', card);
+                });
             })
-            .catch(err => {
-                console.error("Fetch error:", err);
-                alert("Lỗi kết nối: Không thể gửi yêu cầu đến Server.");
-            });
+            .catch(err => console.error('Lỗi loadLowStock:', err));
     }
 
-</script>
-<script>
-(function () {
-    const revenueForm = document.getElementById('revenueFilterForm');
-    const revenueTableBody = document.getElementById('revenueTableBody');
-    const revenueCancelledOrdersValue = document.getElementById('revenueCancelledOrdersValue');
-    const revenueStatusCancelled = document.getElementById('revenueStatusCancelled');
-    const revenueContextPath = '${pageContext.request.contextPath}';
+    let searchTimeout = null;
+    function handleProductSearch(query) {
+        var dropdown = document.getElementById('search-dropdown');
+        var contextPath = '${pageContext.request.contextPath}';
 
-    if (!revenueForm || !revenueTableBody) return;
-
-    const revenueState = {
-        orders: [],
-        loaded: false
-    };
-
-    function normalizeText(value) {
-        return (value || '').replace(/\s+/g, ' ').trim();
-    }
-
-    function parseMoney(value) {
-        const digits = String(value || '').replace(/[^\d-]/g, '');
-        return digits ? Number(digits) : 0;
-    }
-
-    function formatMoney(value) {
-        return new Intl.NumberFormat('vi-VN').format(Number(value || 0)) + ' VND';
-    }
-
-    function pad(number) {
-        return String(number).padStart(2, '0');
-    }
-
-    function normalizeDate(rawValue) {
-        const value = normalizeText(rawValue);
-        if (!value) return null;
-
-        let match = value.match(/(\d{2})\/(\d{2})\/(\d{4})/);
-        if (match) return `${match[3]}-${match[2]}-${match[1]}`;
-
-        match = value.match(/(\d{4})-(\d{2})-(\d{2})/);
-        if (match) return `${match[1]}-${match[2]}-${match[3]}`;
-
-        const parsed = new Date(value);
-        if (!Number.isNaN(parsed.getTime())) {
-            return `${parsed.getFullYear()}-${pad(parsed.getMonth() + 1)}-${pad(parsed.getDate())}`;
-        }
-
-        return null;
-    }
-
-    function displayDate(dateKey) {
-        if (!dateKey) return '---';
-        const parts = dateKey.split('-');
-        return `${parts[2]}/${parts[1]}/${parts[0]}`;
-    }
-
-    function getCellText(cell) {
-        if (!cell) return '';
-        const select = cell.querySelector('select');
-        if (select) {
-            const option = select.options[select.selectedIndex];
-            if (option) return normalizeText(option.textContent || option.value);
-        }
-        return normalizeText(cell.textContent);
-    }
-
-    function deriveStatus(transportValue, paymentValue, row) {
-        const haystack = `${transportValue} ${paymentValue} ${row.className}`.toLowerCase();
-
-        if (/hủy|huỷ|cancel/.test(haystack)) return 'cancelled';
-        if (/hoàn tất|hoan tat|completed|done|đã giao|da giao|giao thành công/.test(haystack)) return 'done';
-        if (/đang giao|dang giao|shipping|vận chuyển|van chuyen/.test(haystack)) return 'shipping';
-        if (/chờ|cho xu ly|chờ xử lý|pending|xử lý|xu ly|processing/.test(haystack)) return 'pending';
-
-        return 'other';
-    }
-
-    function extractOrdersFromHtml(html) {
-        const parser = new DOMParser();
-        const doc = parser.parseFromString(html, 'text/html');
-        const rows = Array.from(doc.querySelectorAll('.order-table__row'));
-        const orders = [];
-
-        rows.forEach((row) => {
-            if (row.classList.contains('table-header')) return;
-
-            const cells = Array.from(row.querySelectorAll('.order-table__cell'));
-            if (cells.length < 6) return;
-
-            const offset = cells.length >= 7 ? 1 : 0;
-
-            const idCell = cells[offset];
-            const customerCell = cells[offset + 1];
-            const transportCell = cells[offset + 2];
-            const paymentCell = cells[offset + 3];
-            const createdCell = cells[offset + 4];
-            const totalCell = cells[offset + 5];
-
-            if (!idCell || !customerCell || !transportCell || !paymentCell || !createdCell || !totalCell) return;
-
-            const orderId = getCellText(idCell);
-            const customerName = getCellText(customerCell);
-            const statusTransport = getCellText(transportCell);
-            const statusPayment = getCellText(paymentCell);
-            const createdDate = normalizeDate(getCellText(createdCell));
-            const totalPrice = parseMoney(getCellText(totalCell));
-            const statusKey = deriveStatus(statusTransport, statusPayment, row);
-
-            if (!orderId || !createdDate) return;
-
-            orders.push({
-                orderId,
-                customerName,
-                createdDate,
-                totalPrice,
-                statusKey
-            });
-        });
-
-        return orders;
-    }
-
-    async function loadRevenueOrders() {
-        const response = await fetch(revenueContextPath + '/order-search?keyword=', {
-            method: 'GET',
-            headers: {
-                'X-Requested-With': 'XMLHttpRequest'
-            }
-        });
-
-        if (!response.ok) {
-            throw new Error('Không thể tải dữ liệu đơn hàng.');
-        }
-
-        const html = await response.text();
-        revenueState.orders = extractOrdersFromHtml(html);
-        revenueState.loaded = true;
-    }
-
-    function getFilters() {
-        const formData = new FormData(revenueForm);
-        return {
-            fromDate: normalizeText(formData.get('fromDate')),
-            toDate: normalizeText(formData.get('toDate')),
-            status: normalizeText(formData.get('status'))
-        };
-    }
-
-    function filterOrders(orders, filters) {
-        return orders.filter((order) => {
-            if (filters.fromDate && order.createdDate < filters.fromDate) return false;
-            if (filters.toDate && order.createdDate > filters.toDate) return false;
-            if (filters.status && order.statusKey !== filters.status) return false;
-            return true;
-        });
-    }
-
-    function getBadge(cancelledCount) {
-        if (cancelledCount > 0) {
-            return { className: 'revenue-badge--danger', label: 'Có đơn hủy' };
-        }
-        return { className: 'revenue-badge--success', label: 'Ổn định' };
-    }
-
-    function groupOrdersByDate(orders) {
-        const grouped = new Map();
-
-        orders.forEach((order) => {
-            if (!grouped.has(order.createdDate)) {
-                grouped.set(order.createdDate, []);
-            }
-            grouped.get(order.createdDate).push(order);
-        });
-
-        return Array.from(grouped.entries())
-            .sort((a, b) => b[0].localeCompare(a[0]))
-            .map(([dateKey, rows]) => {
-                const grossRevenue = rows.reduce((sum, item) => sum + item.totalPrice, 0);
-                const cancelledOrders = rows.filter(item => item.statusKey === 'cancelled');
-                const cancelledCount = cancelledOrders.length;
-                const cancelledValue = cancelledOrders.reduce((sum, item) => sum + item.totalPrice, 0);
-                const netRevenue = grossRevenue - cancelledValue;
-                const badge = getBadge(cancelledCount);
-
-                return {
-                    dateKey,
-                    totalOrders: rows.length,
-                    grossRevenue,
-                    cancelledCount,
-                    cancelledValue,
-                    netRevenue,
-                    badge
-                };
-            });
-    }
-
-    function renderCancelledSummary(filteredOrders) {
-        const cancelledCount = filteredOrders.filter(order => order.statusKey === 'cancelled').length;
-
-        if (revenueCancelledOrdersValue) {
-            revenueCancelledOrdersValue.textContent = String(cancelledCount);
-        }
-
-        if (revenueStatusCancelled) {
-            revenueStatusCancelled.textContent = String(cancelledCount);
-        }
-    }
-
-    function renderRevenueTable(filteredOrders) {
-        const rows = groupOrdersByDate(filteredOrders);
-
-        if (!rows.length) {
-            revenueTableBody.innerHTML = `
-                <tr>
-                    <td colspan="7" class="revenue-empty">Không có dữ liệu phù hợp với bộ lọc hiện tại.</td>
-                </tr>
-            `;
+        if (query.trim().length < 2) {
+            dropdown.style.display = 'none';
             return;
         }
 
-        revenueTableBody.innerHTML = rows.map((row) => `
-            <tr>
-                <td>${displayDate(row.dateKey)}</td>
-                <td>${row.totalOrders}</td>
-                <td>${formatMoney(row.grossRevenue)}</td>
-                <td>${row.cancelledCount}</td>
-                <td>${formatMoney(row.cancelledValue)}</td>
-                <td>${formatMoney(row.netRevenue)}</td>
-                <td><span class="revenue-badge ${row.badge.className}">${row.badge.label}</span></td>
-            </tr>
-        `).join('');
+        clearTimeout(searchTimeout);
+        searchTimeout = setTimeout(() => {
+            fetch(contextPath + '/api/search-products?query=' + encodeURIComponent(query))
+                .then(res => res.json())
+                .then(data => {
+                    dropdown.innerHTML = '';
+                    if (data && data.length > 0) {
+                        dropdown.style.display = 'block';
+                        data.forEach(p => {
+                            var displayImg = contextPath + '/assets/img/products/' + p.image;
+                            var safeName = p.name.replace(/'/g, "\\'");
+
+
+                            var item = `
+                                <div class="search-item" style="display:flex; align-items:center; padding:8px; cursor:pointer; border-bottom:1px solid #eee;"
+                                     onclick="onSelectProduct(${p.id}, '${safeName}', ${p.quantity}, '${displayImg}', ${p.firstPrice})">
+                                    <img src="${displayImg}" style="width:40px; height:40px; margin-right:10px; object-fit:cover;">
+                                    <div>
+                                        <div style="font-weight:bold; font-size:13px;">${p.name}</div>
+                                        <div style="font-size:11px; color:#666;">Tồn hệ thống: ${p.quantity}</div>
+                                    </div>
+                                </div>`;
+                            dropdown.insertAdjacentHTML('beforeend', item);
+                        });
+                    } else {
+                        dropdown.innerHTML = '<div style="padding:10px; color:#888;">Không tìm thấy...</div>';
+                    }
+                });
+        }, 300);
     }
 
-    async function renderRevenueCancelledOnly() {
-        try {
-            if (!revenueState.loaded) {
-                await loadRevenueOrders();
-            }
+    document.addEventListener('DOMContentLoaded', loadLowStockProducts);
+</script>
+<script>
 
-            const filters = getFilters();
-            const filteredOrders = filterOrders(revenueState.orders, filters);
+    let selectedProductId = null;
+    let searchTimeout = null;
 
-            renderCancelledSummary(filteredOrders);
-            renderRevenueTable(filteredOrders);
-        } catch (error) {
-            revenueTableBody.innerHTML = `
-                <tr>
-                    <td colspan="7" class="revenue-empty">Không thể tải dữ liệu đơn hàng.</td>
-                </tr>
-            `;
+    function onSelectProduct(id, name, stock, imgUrl, price) {
 
-            if (revenueCancelledOrdersValue) {
-                revenueCancelledOrdersValue.textContent = '0';
-            }
+        selectedProductId = id;
 
-            if (revenueStatusCancelled) {
-                revenueStatusCancelled.textContent = '0';
-            }
+        document.getElementById('display-name').innerText = name;
+        document.getElementById('display-pre-stock').innerText = stock;
+        document.getElementById('display-img').src = imgUrl;
 
-            console.error(error);
+        document.getElementById('unit-cost').value = price;
+        document.getElementById('import-qty').value = "";
+        calculateTotalPrice();
+
+        var dropdown = document.getElementById('search-dropdown');
+        if(dropdown) dropdown.style.display = 'none';
+
+        var searchInput = document.getElementById('search-prod');
+        if(searchInput) searchInput.value = name;
+
+        document.getElementById('import-qty').focus();
+
+        console.log("Đã chọn sản phẩm ID:", selectedProductId);
+    }
+
+    function calculateTotalPrice() {
+        const qtyEl = document.getElementById('import-qty');
+        const costEl = document.getElementById('unit-cost');
+        const displayEl = document.getElementById('total-price-display');
+
+        if (qtyEl && costEl && displayEl) {
+            const qty = parseFloat(qtyEl.value) || 0;
+            const unitCost = parseFloat(costEl.value) || 0;
+            const total = qty * unitCost;
+            displayEl.value = total.toLocaleString('vi-VN');
         }
     }
 
-    revenueForm.addEventListener('submit', function (event) {
-        event.preventDefault();
-        renderRevenueCancelledOnly();
+    function handleProductSearch(query) {
+        var dropdown = document.getElementById('search-dropdown');
+        var contextPath = '${pageContext.request.contextPath}';
+
+        if (query.trim().length === 0) {
+            dropdown.style.display = 'none';
+            return;
+        }
+
+        clearTimeout(searchTimeout);
+        searchTimeout = setTimeout(function() {
+            fetch(contextPath + '/api/search-products?query=' + encodeURIComponent(query.trim()))
+                .then(res => res.json())
+                .then(data => {
+                    dropdown.innerHTML = '';
+                    if (data && data.length > 0) {
+                        dropdown.style.display = 'block';
+                        data.forEach(function(p) {
+                            var displayImg = contextPath + '/assets/img/products/' + p.image;
+                            var safeName = p.name.replace(/'/g, "\\'");
+
+                            var itemHtml = `<div class="search-item" onclick="onSelectProduct(${p.id}, '${safeName}', ${p.quantity}, '${displayImg}', ${p.firstPrice})">
+                                <img src="${displayImg}" alt="img">
+                                <div>
+                                    <div style="font-weight:bold; font-size:14px; color:#333;">${p.name}</div>
+                                    <div style="font-size:12px; color:#666;">Tồn: <strong style="color:red">${p.quantity}</strong></div>
+                                </div>
+                            </div>`;
+
+                            dropdown.insertAdjacentHTML('beforeend', itemHtml);
+                        });
+                    } else {
+                        dropdown.innerHTML = '<div style="padding:15px; text-align:center; color:#888;">Không thấy sản phẩm!</div>';
+                        dropdown.style.display = 'block';
+                    }
+                });
+        }, 300);
+    }
+
+    document.querySelector('.btn-confirm-warehouse').addEventListener('click', function() {
+        const receiptCodeInput = document.querySelector('input[value^="PN-"]');
+        const supplierName = document.getElementById('supplier-name').value;
+        const importQty = parseInt(document.getElementById('import-qty').value) || 0;
+        const unitCost = parseFloat(document.getElementById('unit-cost').value) || 0;
+        const preStockQty = parseInt(document.getElementById('display-pre-stock').innerText) || 0;
+
+        if (!selectedProductId) {
+            alert("Vui lòng chọn một sản phẩm từ danh sách tìm kiếm!");
+            return;
+        }
+        if (importQty <= 0) {
+            alert("Số lượng nhập phải lớn hơn 0!");
+            return;
+        }
+
+        const data = {
+            receiptCode: receiptCodeInput ? receiptCodeInput.value : "PN-UNKNOWN",
+            supplierName: supplierName,
+            productId: selectedProductId,
+            preStockQty: preStockQty,
+            importQty: importQty,
+            unitCost: unitCost,
+            totalPrice: importQty * unitCost
+        };
+
+        fetch('${pageContext.request.contextPath}/api/admin/warehouse/import', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(data)
+        })
+            .then(response => response.json())
+            .then(result => {
+                if (result.success) {
+                    alert("Nhập kho thành công!");
+                    location.reload();
+                } else {
+                    alert("Lỗi: " + result.message);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert("Không thể kết nối đến máy chủ!");
+            });
     });
 
-    window.addEventListener('DOMContentLoaded', renderRevenueCancelledOnly);
-})();
+    document.addEventListener('click', function(event) {
+        var searchWrapper = document.querySelector('.search-input-wrapper');
+        var dropdown = document.getElementById('search-dropdown');
+        if (searchWrapper && !searchWrapper.contains(event.target)) {
+            if(dropdown) dropdown.style.display = 'none';
+        }
+    });
+</script>
+
+<script>
+    function calculateTotalPrice() {
+
+        const qtyEl = document.getElementById('import-qty');
+        const costEl = document.getElementById('unit-cost');
+        const displayEl = document.getElementById('total-price-display');
+
+
+        if (qtyEl && costEl && displayEl) {
+            const qty = parseFloat(qtyEl.value) || 0;
+            const unitCost = parseFloat(costEl.value) || 0;
+            const total = qty * unitCost;
+
+            displayEl.value = total.toLocaleString('vi-VN');
+        }
+    }
+
+    function onSelectProduct(id, name, stock, imgUrl, price) {
+        selectedProductId = id;
+
+        document.getElementById('display-name').innerText = name;
+        document.getElementById('display-pre-stock').innerText = stock;
+        document.getElementById('display-img').src = imgUrl;
+        document.getElementById('unit-cost').value = price;
+
+        document.getElementById('import-qty').value = "";
+        if (typeof calculateTotalPrice === "function") calculateTotalPrice();
+
+        var dropdown = document.getElementById('search-dropdown');
+        if(dropdown) dropdown.style.display = 'none';
+
+        var searchInput = document.getElementById('search-prod');
+        if(searchInput) searchInput.value = name;
+
+        document.getElementById('import-qty').focus();
+    }
+</script>
+<script>
+
+    function calculateTotalPrice() {
+        const preStockQty = parseInt(document.getElementById('display-pre-stock').innerText) || 0;
+        const qtyEl = document.getElementById('import-qty');
+        const costEl = document.getElementById('unit-cost');
+        const displayEl = document.getElementById('total-price-display');
+
+        if (qtyEl && costEl && displayEl) {
+            const qty = parseFloat(qtyEl.value) || 0;
+            const unitCost = parseFloat(costEl.value) || 0;
+            const total = qty * unitCost;
+
+            displayEl.value = total.toLocaleString('vi-VN');
+        }
+    }
+
+
+    document.querySelector('.btn-confirm-warehouse').addEventListener('click', function() {
+
+
+        const receiptCode = document.getElementById('receipt-code').value.trim();
+
+        const supplierName = document.getElementById('supplier-name').value;
+        const importQty = parseInt(document.getElementById('import-qty').value) || 0;
+        const unitCost = parseFloat(document.getElementById('unit-cost').value) || 0;
+
+        const preStockQty = parseInt(document.getElementById('display-pre-stock').innerText) || 0;
+
+        if (!receiptCode) {
+            alert("Vui lòng nhập mã phiếu!");
+            document.getElementById('receipt-code').focus();
+            return;
+        }
+
+        if (!selectedProductId) {
+            alert("Vui lòng chọn sản phẩm trước khi xác nhận!");
+            return;
+        }
+
+        if (importQty <= 0 || unitCost <= 0) {
+            alert("Vui lòng nhập số lượng và đơn giá hợp lệ!");
+            return;
+        }
+
+
+        const data = {
+            receiptCode: receiptCode,
+            supplierName: supplierName,
+            productId: selectedProductId,
+            preStockQty: preStockQty,
+            importQty: importQty,
+            unitCost: unitCost,
+            totalPrice: importQty * unitCost
+        };
+
+        fetch('${pageContext.request.contextPath}/api/admin/warehouse/import', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(data)
+        })
+            .then(res => res.json())
+            .then(result => {
+                if (result.success) {
+                    alert("Nhập kho thành công!");
+                    location.reload();
+                } else {
+                    alert("Lỗi: " + result.message);
+                }
+            })
+            .catch(err => alert("Lỗi kết nối server!"));
+    });
 </script>
 <script src="${pageContext.request.contextPath}/assets/js/script.js"></script>
 </html>

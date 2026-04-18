@@ -1,0 +1,43 @@
+plugins {
+    id 'java'
+    id 'war'
+}
+
+group = 'com.webgiadung'
+version = '1.0-SNAPSHOT'
+description = 'WebGiaDung'
+
+java {
+    sourceCompatibility = JavaVersion.VERSION_17
+    targetCompatibility = JavaVersion.VERSION_17
+}
+
+repositories {
+    mavenLocal()
+    mavenCentral()
+}
+dependencies {
+    implementation libs.jakarta.servlet.jsp.jstl.jakarta.servlet.jsp.jstl.api
+    implementation libs.org.jdbi.jdbi3.core
+    implementation libs.com.mysql.mysql.connector.j
+    implementation libs.com.google.code.gson.gson
+    implementation libs.org.apache.httpcomponents.httpclient
+    implementation libs.org.apache.httpcomponents.fluent.hc
+    implementation libs.com.sun.mail.jakarta.mail
+    implementation libs.jakarta.activation.jakarta.activation.api
+
+    runtimeOnly libs.org.glassfish.web.jakarta.servlet.jsp.jstl
+
+    testImplementation libs.org.junit.jupiter.junit.jupiter.api
+    testRuntimeOnly libs.org.junit.jupiter.junit.jupiter.engine
+
+    compileOnly libs.jakarta.servlet.jakarta.servlet.api
+}
+
+tasks.withType(JavaCompile) {
+    options.encoding = 'UTF-8'
+}
+
+tasks.withType(Javadoc) {
+    options.encoding = 'UTF-8'
+}
