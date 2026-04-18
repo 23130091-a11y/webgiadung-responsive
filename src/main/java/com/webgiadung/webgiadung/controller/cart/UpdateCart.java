@@ -3,6 +3,7 @@ package com.webgiadung.webgiadung.controller.cart;
 import com.webgiadung.webgiadung.model.Cart;
 import com.webgiadung.webgiadung.model.CartItem;
 
+import com.webgiadung.webgiadung.services.ProductService;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
@@ -26,6 +27,8 @@ public class UpdateCart extends HttpServlet {
         int productId;
         String action = request.getParameter("action");
 
+        ProductService productService = new ProductService();
+
         try {
             productId = Integer.parseInt(request.getParameter("productId"));
         } catch (Exception e) {
@@ -33,8 +36,8 @@ public class UpdateCart extends HttpServlet {
             return;
         }
 
-        HttpSession session = request.getSession();
         // kiểm tra đăng nhập của thằng user
+        HttpSession session = request.getSession();
         if (session.getAttribute("user") == null) {
             if (isAjax(request)) {
                 response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
@@ -44,12 +47,36 @@ public class UpdateCart extends HttpServlet {
             }
             return;
         }
+
         // lấy cart từ session
         Cart cart = (Cart) session.getAttribute("cart");
         if (cart == null) cart = new Cart();
 
+        // upgrade kt kho và giới hạn mua khi tăng số lượng sp
+        //todo
+
         // update, inc là tăng, dec là giảm
-        if ("inc".equals(action)) cart.increaseQuantity(productId);
+        if ("inc".equals(action)) {
+            int stockAvailable = productService.getAvailableStock(productId);
+            int currentQtyInCart = cart.getQuantityByProductId(productId);
+
+            if(currentQtyInCart + 1 > stockAvailable) {
+                if (isAjax(request)) {
+                    sendError(response, "Rất tiếc, kho hàng chỉ còn " + stockAvailable + " sản phẩm!", cart);
+                }
+                return;
+            }
+
+            int limit = 10;
+            if (currentQtyInCart + 1 > limit) {
+                if (isAjax(request)) {
+                    sendError(response, "Mỗi khách hàng chỉ được mua tối đa " + limit + " sản phẩm!", cart);
+                }
+                return;
+            }
+            cart.increaseQuantity(productId);
+
+        }
         else if ("dec".equals(action)) cart.decreaseQuantity(productId);
 
         // cập nhật lại session
@@ -81,8 +108,9 @@ public class UpdateCart extends HttpServlet {
             json.append("\"status\":\"success\",");
             json.append("\"newQuantity\":").append(newQuantity).append(",");
             json.append("\"newSubtotal\":\"").append(df.format(newSubtotal)).append(" đ\",");
-            json.append("\"cartTotal\":\"").append(df.format(cart.getTotalPrice())).append(" đ\",");
-            json.append("\"cartQty\":").append(cart.getTotalQuantity()).append(",");
+            json.append("\"rawSubtotal\":").append(newSubtotal).append(",");
+            json.append("\"cartTotal\":\"").append(df.format(cartTotal)).append(" đ\",");
+            json.append("\"cartQty\":").append(cartQty).append(",");
             json.append("\"removed\":").append(removed);
             json.append("}");
 
@@ -92,5 +120,14 @@ public class UpdateCart extends HttpServlet {
         } else {
             response.sendRedirect(request.getContextPath() + "/cart");
         }
+    }
+
+    private void sendError(HttpServletResponse response, String message, Cart cart) throws IOException {
+        response.setStatus(400);
+        response.setContentType("application/json");
+        response.setCharacterEncoding("UTF-8");
+        int currentTotalQty = (cart != null) ? cart.getTotalQuantity() : 0;
+
+        response.getWriter().print("{\"status\":\"error\", \"message\":\"" + message + "\", \"cartQty\":" + currentTotalQty + "}");
     }
 }

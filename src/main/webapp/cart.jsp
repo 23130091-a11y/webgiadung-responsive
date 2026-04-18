@@ -48,94 +48,133 @@
     <div class="grid wide">
         <div class="cart-container">
             <c:set var="cart" value="${sessionScope.cart}" />
-            <c:choose>
+            <div id="cart-content-wrapper">
+                <c:if test="${not empty sessionScope.error_msg}">
+                    <div class="cart-error-alert" style="
+                        background-color: #fff2f2;
+                        color: #d93025;
+                        padding: 15px 20px;
+                        border: 1px solid #f8d7da;
+                        border-radius: 8px;
+                        margin-bottom: 20px;
+                        display: flex;
+                        align-items: center;
+                        font-size: 1.5rem;
+                        box-shadow: 0 2px 4px rgba(0,0,0,0.05);">
 
-                <c:when test="${empty cart.items}">
-                    <div class="empty-cart-style" style="text-align: center; padding: 50px;">
-                        <img src="assets/img/empty-cart.png" alt="Empty" style="width: 200px;">
-                        <p>Giỏ hàng của bạn đang trống.</p>
-                        <a href="index.jsp" class="buy-btn">Mua sắm ngay</a>
+                        <i class="fa-solid fa-circle-exclamation" style="margin-right: 12px; font-size: 2rem;"></i>
+                        <span style="flex: 1;">${sessionScope.error_msg}</span>
+
+                        <button type="button" onclick="this.parentElement.style.display='none'" style="
+                background: none;
+                border: none;
+                font-size: 2.2rem;
+                cursor: pointer;
+                color: #d93025;
+                line-height: 1;">&times;</button>
                     </div>
-                </c:when>
+                    <c:remove var="error_msg" scope="session" />
+                </c:if>
 
-                <c:otherwise>
+                <c:choose>
 
-                    <div class="cart-header flex">
-                        <div class="colum product-col">Sản phẩm</div>
-                        <div class="colum price-col">Đơn giá</div>
-                        <div class="colum qty-col">Số lượng</div>
-                        <div class="colum total-col">Số tiền</div>
-                        <div class="colum action-col">Thao tác</div>
-                    </div>
-                    <div class="shop-block">
+                    <c:when test="${empty cart.items}">
+                        <div class="empty-cart-style" style="text-align: center; padding: 30px 20px; display: flex; flex-direction: column; align-items: center; justify-content: center;">
+                            <img src="assets/img/no-cart_img.png" alt="Empty" style="width: 200px; margin-bottom: 20px; display: block;">
+                            <p style="font-size: 18px; color: #666; margin: 0 0 25px 0; display: block;">Giỏ hàng của bạn đang trống.</p>
+                            <a href="${pageContext.request.contextPath}/list-product" class="buy-btn"
+                               style="background-color: #fca120;
+                              color: #fff;
+                              padding: 12px 30px;
+                              text-decoration: none;
+                              border-radius: 5px;
+                              font-weight: bold;
+                              display: inline-block;
+                              transition: background 0.3s;
+                              box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
+                                MUA SẮM NGAY
+                            </a>
+                        </div>
+                    </c:when>
 
-                        <c:forEach var="item" items="${cart.items}">
-                            <div class="cart-item flex"
-                                 id="product-row-${item.product.id}"
-                                 data-subtotal="${item.totalPrice}"
-                                 data-qty="${item.quantity}">
-                                <div class="colum product-col flex">
-                                    <input type="checkbox"
-                                           class="item-checkbox"
-                                           value="${item.product.id}">
-                                    <a href="${pageContext.request.contextPath}/product?id=${item.product.id}">
-                                        <img src="${pageContext.request.contextPath}/assets/img/products/${item.product.image}">
-                                    </a>
-                                    <a href="${pageContext.request.contextPath}/product?id=${item.product.id}">
-                                        <div class="item-info">
-                                            <p>${item.product.name}</p>
-                                        </div>
-                                    </a>
-                                </div>
-
-                                <div class="colum price-col">
-                                    <div class="price-wrapper ">
-                                        <div class="old-price-box">
-                                            <fmt:formatNumber value="${item.originalPrice}" type="number"/> đ
-                                        </div>
-                                        <div class="new-price-box">
-                                                <span class="new-price" id="price-${item.product.id}">
-                                                    <fmt:formatNumber value="${item.discountPrice}" type="number"/>
-                                                </span> đ
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div class="colum qty-col item-qty">
-                                    <button type="button" onclick="handleUpdate(${item.product.id}, 'dec')">-</button>
-                                    <input class="text" type="text" id="qty-input-${item.product.id}" value="${item.quantity}" readonly>
-                                    <button type="button" onclick="handleUpdate(${item.product.id}, 'inc')">+</button>
-                                </div>
-
-                                <div class="colum total-col">
-                                        <span id="subtotal-${item.product.id}">
-                                            <fmt:formatNumber value="${item.totalPrice}" type="number"/>
-                                        </span> đ
-                                </div>
-
-                                <div class="colum action-col">
-                                    <button type="button" class="item-delete" onclick="deleteItem(${item.product.id})">Xóa</button>
-                                </div>
-                            </div>
-                        </c:forEach>
-                    </div>
-
-                    <div class="cart-footer flex">
-                        <input type="checkbox" id="select-all" class="select-all-footer"> Chọn tất cả
-                        <button type="button" class="footer-btn"onclick="deleteSelected()">Xóa</button>
-                        <button type="button" class="footer-btn">Lưu vào mục yêu thích</button>
-
-                        <div class="cart-summary">
-                            Tổng cộng (<span id="cart-qty-total" class="total-items">${cart.totalQuantity}</span> sản phẩm):
-                            <span id="cart-grand-total" class="total-price">
-                                    <fmt:formatNumber value="${cart.totalPrice}" type="number"/> đ
-                                </span>
+                    <c:otherwise>
+                        <div class="cart-header flex">
+                            <div class="colum product-col">Sản phẩm</div>
+                            <div class="colum price-col">Đơn giá</div>
+                            <div class="colum qty-col">Số lượng</div>
+                            <div class="colum total-col">Số tiền</div>
+                            <div class="colum action-col">Thao tác</div>
                         </div>
 
-                        <button type="button" class="buy-btn" onclick="checkoutSelected()">Thanh toán</button>
-                    </div>
-                </c:otherwise>
-            </c:choose>
+                        <div class="shop-block">
+                            <c:forEach var="item" items="${cart.items}">
+                                <div class="cart-item flex"
+                                     id="product-row-${item.product.id}"
+                                     data-subtotal="${item.totalPrice}"
+                                     data-qty="${item.quantity}">
+                                    <div class="colum product-col flex">
+                                        <input type="checkbox"
+                                               class="item-checkbox"
+                                               value="${item.product.id}">
+                                        <a href="${pageContext.request.contextPath}/product?id=${item.product.id}">
+                                            <img src="${pageContext.request.contextPath}/assets/img/products/${item.product.image}">
+                                        </a>
+                                        <a href="${pageContext.request.contextPath}/product?id=${item.product.id}">
+                                            <div class="item-info">
+                                                <p>${item.product.name}</p>
+                                            </div>
+                                        </a>
+                                    </div>
+
+                                    <div class="colum price-col">
+                                        <div class="price-wrapper ">
+                                            <div class="old-price-box">
+                                                <fmt:formatNumber value="${item.originalPrice}" type="number"/> đ
+                                            </div>
+                                            <div class="new-price-box">
+                                                    <span class="new-price" id="price-${item.product.id}">
+                                                        <fmt:formatNumber value="${item.discountPrice}" type="number"/>
+                                                    </span> đ
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="colum qty-col item-qty">
+                                        <button type="button" onclick="handleUpdate(${item.product.id}, 'dec')">-</button>
+                                        <input class="text" type="text" id="qty-input-${item.product.id}" value="${item.quantity}" readonly>
+                                        <button type="button" onclick="handleUpdate(${item.product.id}, 'inc')">+</button>
+                                    </div>
+
+                                    <div class="colum total-col">
+                                            <span id="subtotal-${item.product.id}">
+                                                <fmt:formatNumber value="${item.totalPrice}" type="number"/>
+                                            </span>
+                                    </div>
+
+                                    <div class="colum action-col">
+                                        <button type="button" class="item-delete" onclick="deleteItem(${item.product.id})">Xóa</button>
+                                    </div>
+                                </div>
+                            </c:forEach>
+                        </div>
+
+                        <div class="cart-footer flex">
+                            <input type="checkbox" id="select-all" class="select-all-footer"> Chọn tất cả
+                            <button type="button" class="footer-btn"onclick="deleteSelected()">Xóa</button>
+                            <button type="button" class="footer-btn">Lưu vào mục yêu thích</button>
+
+                            <div class="cart-summary">
+                                Tổng cộng (<span id="cart-qty-total" class="total-items">${cart.totalQuantity}</span> sản phẩm):
+                                <span id="cart-grand-total" class="total-price">
+                                        <fmt:formatNumber value="${cart.totalPrice}" type="number"/> đ
+                                    </span>
+                            </div>
+
+                            <button type="button" class="buy-btn" onclick="checkoutSelected()">Thanh toán</button>
+                        </div>
+                    </c:otherwise>
+                </c:choose>
+            </div>
         </div>
 
         <div class="featured-list">
@@ -364,23 +403,7 @@
 <jsp:include page="/common/footer.jsp" />
 
 <script>
-
-    function goCheckoutSelected() {
-        const checked = Array.from(document.querySelectorAll('.item-checkbox:checked'))
-            .map(cb => cb.value);
-
-        const base = '${pageContext.request.contextPath}/checkout';
-
-        // Không chọn gì => checkout tất cả
-        if (checked.length === 0) {
-            window.location.href = base;
-            return;
-        }
-        // Có chọn => gửi ids
-        window.location.href = base + '?ids=' + checked.join(',');
-    }
-
-    // update
+    // update tăng giảm
     function handleUpdate(pId, actionType) {
         const params = new URLSearchParams();
         params.append('productId', pId);
@@ -395,65 +418,74 @@
                 'X-Requested-With': 'XMLHttpRequest'
             }
         })
-            .then(r => r.json())
+            .then(r => {
+                if(!r.ok) {
+                    return r.json().then(err => {
+                        throw err;
+                    });
+                }
+                return r.json();
+            })
             .then(data => {
                 if (data.newQuantity > 0) {
                     document.getElementById('qty-input-' + pId).value = data.newQuantity;
-                    document.getElementById('subtotal-' + pId).innerText = data.newSubtotal.toLocaleString('vi-VN');
+                    document.getElementById('subtotal-' + pId).innerText = data.newSubtotal;
 
                     const row = document.getElementById('product-row-' + pId);
                     if (row) {
-                        row.dataset.subtotal = data.newSubtotal;
+                        row.dataset.subtotal = data.rawSubtotal;
                         row.dataset.qty = data.newQuantity;
                     }
+
                 } else {
                     const row = document.getElementById('product-row-' + pId);
                     if (row) row.remove();
                 }
 
                 // cập nhật icon giỏ ở header
-                const headerCartNotify = document.querySelector('#headerCartQty') || document.querySelector('.header__cart-notice');
-                if (headerCartNotify) headerCartNotify.innerText = data.cartQty;
+                updateHeaderCartQty(data.cartQty);
 
                 // tính lại tổng tiền
                 recalcSelectedTotals();
             })
-            .catch(err => console.error('Lỗi Cart:', err));
+            .catch(err => {
+                console.error('Lỗi Cart:', err);
+                if (err.message) {
+                    alert(err.message);
+                }
+
+                if (err.cartQty !== undefined) {
+                    updateHeaderCartQty(err.cartQty);
+                }
+
+                location.reload();
+            });
     }
 
     // Xóa
     function deleteItem(pId) {
         if (!confirm("Bạn có chắc chắn muốn xóa sản phẩm này?")) return;
 
-        const params = new URLSearchParams();
-        params.append('productId', pId);
-        params.append('ajax', '1'); // yêu cầu này là ajax (tự đặt)
+        window.removeCartItemGlobal(pId, function(data) {
 
-        // gửi yêu cầu lên server đến đường dẫn /delete-cart
-        fetch('${pageContext.request.contextPath}/delete-cart', {
-            method: 'POST',
-            body: params,
-            headers: {
-                'Content-Type': 'application/x-www-form-urlencoded',
-                'X-Requested-With': 'XMLHttpRequest' // yêu cầu ajax
-            }
-        })
-            .then(r => r.json())
-            .then(data => {
-                // xóa
-                const row = document.getElementById('product-row-' + pId);
-                if (row) row.remove();
+            const row = document.getElementById('product-row-' + pId);
+            if (row) row.remove();
 
-                // cập nhật tổng số sản phẩm
-                const headerCartNotify = document.querySelector('.header__cart-notice');
-                if (headerCartNotify) headerCartNotify.innerText = data.cartQty;
-
-                // tính lại tổng tiền
+            // Tính toán lại các con số tổng tiền dưới bảng
+            if (typeof recalcSelectedTotals === "function") {
                 recalcSelectedTotals();
+            }
 
-                if (data.cartQty === 0) location.reload();
-            })
-            .catch(err => console.error('Lỗi xóa sản phẩm:', err));
+            const remain = document.querySelectorAll('.cart-item').length;
+            if (remain === 0) {
+                handleEmptyCartUI();
+            }
+        });
+    }
+
+    function updateHeaderCartQty(qty) {
+        const el = document.querySelector('#headerCartQty');
+        if (el) el.innerText = qty;
     }
 
     // hàm cập nhật tổng tiền và tổng số lượng sau mỗi lần update và xóa
@@ -463,105 +495,126 @@
         let qty = 0;
 
         checked.forEach(cb => {
-            const id = cb.dataset.id || cb.value;
+            const id = cb.value;
             const row = document.getElementById('product-row-' + id);
             if (!row) return;
 
-            total += Number(row.dataset.subtotal || 0);
+            // fix bug nan
+            let subtotalVal = parseFloat(row.dataset.subtotal);
+            if (isNaN(subtotalVal)) subtotalVal = 0;
+
+            total += subtotalVal;
             qty += Number(row.dataset.qty || 0);
         });
 
-        document.getElementById('cart-grand-total').innerText = total.toLocaleString('vi-VN') + ' đ';
-        document.getElementById('cart-qty-total').innerText = qty;
+        const totalElem = document.getElementById('cart-grand-total');
+        const qtyElem = document.getElementById('cart-qty-total');
+        // kt có tồn tại rồi mới gán
+        if (totalElem) {
+            totalElem.innerText = total.toLocaleString('vi-VN') + ' đ';
+        }
+
+        if (qtyElem) {
+            qtyElem.innerText = qty;
+        }
     }
 
+    // xử lý chọn 1, tất cả item, hiển thị tổng tiền
     document.addEventListener('change', function(e){
         if (e.target.classList.contains('item-checkbox')) {
             recalcSelectedTotals();
         }
 
-        if (e.target.classList.contains('select-all-footer') || e.target.classList.contains('shop-checkbox')) {
+        if (e.target.classList.contains('select-all-footer')) {
             const all = document.querySelectorAll('.item-checkbox');
             all.forEach(cb => cb.checked = e.target.checked);
 
-            // sync lại 2 nút chọn tất cả
+            // sync trạng thái đc chọn cho ông chọn tất cả
             const footerAll = document.querySelector('.select-all-footer');
-            const shopAll = document.querySelector('.shop-checkbox');
             if (footerAll) footerAll.checked = e.target.checked;
-            if (shopAll) shopAll.checked = e.target.checked;
 
             recalcSelectedTotals();
         }
     });
 
+    // gom nhóm các sp khách muốn mua
     function checkoutSelected() {
         const checked = document.querySelectorAll('.item-checkbox:checked');
         if (checked.length === 0) {
-            alert("Bạn phải chọn ít nhất 1 sản phẩm để thanh toán!");
+            alert("Bạn vui lòng chọn ít nhất một sản phẩm để thanh toán!");
             return;
         }
-        const ids = Array.from(checked).map(cb => cb.dataset.id || cb.value).join(',');
+        // Gom ID thành chuỗi cách nhau bởi dấu phẩy
+        const ids = Array.from(checked)
+            .map(cb => cb.value)
+            .join(',');
+
         window.location.href = '${pageContext.request.contextPath}/checkout?ids=' + ids;
     }
 
+    // remain
     window.addEventListener('load', recalcSelectedTotals);
 
-    function updateHeaderCartQty(qty) {
-        const el = document.querySelector('#headerCartQty')
-            || document.querySelector('.header__cart-notice')
-            || document.querySelector('.header-cart__notice');
-        if (el) el.innerText = qty;
-    }
-
-    function deleteSelected() {
+    //// xóa nhiều dòng đã chọn
+    async function deleteSelected() {
         const checked = document.querySelectorAll('.item-checkbox:checked');
         if (checked.length === 0) {
             alert("Bạn chưa chọn sản phẩm nào để xóa!");
             return;
         }
+
         if (!confirm("Xóa các sản phẩm đã chọn khỏi giỏ hàng?")) return;
 
-        const contextPath = '${pageContext.request.contextPath}';
-        const ids = Array.from(checked).map(cb => cb.dataset.id || cb.value);
+        const ids = Array.from(checked)
+            .map(cb => cb.value);
 
-        Promise.all(ids.map(pid => {
-            const params = new URLSearchParams();
-            params.append('id', pid);
-            params.append('ajax', '1');
-
-            return fetch(contextPath + '/delete-cart', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
-                    'X-Requested-With': 'XMLHttpRequest'
-                },
-                body: params
-            }).then(r => r.json());
-        }))
-            .then(results => {
-                // remove row khỏi UI
-                ids.forEach(pid => {
-                    const row = document.getElementById('product-row-' + pid);
-                    if (row) row.remove();
-                });
-
-                // lấy kết quả cuối cùng để update badge
-                const last = results[results.length - 1];
-                if (last && typeof last.cartQty !== 'undefined') {
-                    updateHeaderCartQty(last.cartQty);
-                }
-
-                // cập nhật lại tổng tiền đã chọn
-                if (typeof recalcSelectedTotals === 'function') recalcSelectedTotals();
-
-                // nếu hết item thì reload để hiện block "giỏ trống"
-                const remain = document.querySelectorAll('[id^="product-row-"]').length;
-                if (remain === 0) location.reload();
-            })
-            .catch(err => {
-                console.error(err);
-                location.reload();
+        for (const pid of ids) {
+            await new Promise(resolve => {
+                window.removeCartItemGlobal(pid, () => resolve());
             });
+
+            const row = document.getElementById('product-row-' + pid);
+            if (row) row.remove();
+        }
+
+        // Sau khi xóa hết các món đã chọn:
+        if (typeof recalcSelectedTotals === 'function') {
+            recalcSelectedTotals();
+        }
+
+        // Kiểm tra nếu giỏ hàng trống hoàn toàn thì hiện giao diện trống
+        const remain = document.querySelectorAll('[id^="product-row-"]').length;
+        if (remain === 0) {
+            if (typeof handleEmptyCartUI === 'function') {
+                handleEmptyCartUI();
+            } else {
+                location.reload();
+            }
+        }
+    }
+
+    function handleEmptyCartUI() {
+        const wrapper = document.getElementById('cart-content-wrapper');
+        if (wrapper) {
+            wrapper.innerHTML = `
+        <div class="empty-cart-style" style="text-align: center; padding: 30px 20px; display: flex; flex-direction: column; align-items: center; justify-content: center;">
+            <img src="assets/img/no-cart_img.png" alt="Empty" style="width: 200px; margin-bottom: 20px; display: block;">
+            <p style="font-size: 18px; color: #666; margin: 0 0 25px 0; display: block;">Giỏ hàng của bạn đang trống.</p>
+            <a href="${pageContext.request.contextPath}/list-product" class="buy-btn"
+               style="background-color: #fca120;
+                      color: #fff;
+                      padding: 12px 30px;
+                      text-decoration: none;
+                      border-radius: 5px;
+                      font-weight: bold;
+                      display: inline-block;
+                      transition: background 0.3s;
+                      box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
+               MUA SẮM NGAY
+            </a>
+        </div>
+    `;
+        }
     }
 
 </script>

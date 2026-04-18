@@ -187,8 +187,7 @@
                         <c:set var="user" value="${sessionScope.user}" />
                         <c:set var="cart" value="${sessionScope.cart}" />
 
-                        <!-- ICON CART -->
-                        <a href="${pageContext.request.contextPath}/cart">
+                        <a href="#!">
                             <i class="header-cart__icon fa-solid fa-cart-shopping"></i>
                             <span class="header-cart__notice header__cart-notice" id="headerCartQty">
                                  <c:choose>
@@ -200,7 +199,6 @@
                             </span>
                         </a>
 
-                        <!-- DROPDOWN CART -->
                         <div class="cart-list">
                             <c:choose>
 
@@ -237,7 +235,9 @@
                                                                 <h4 class="cart-list__heading">${item.product.name}</h4>
 
                                                                 <div class="cart-list__price-wrap">
-                                                                    <span class="cart-list__price">${item.totalPrice} đ</span>
+                                                                    <span class="cart-list__price">
+                                                                        <fmt:formatNumber value="${item.totalPrice}" type="number" /> đ
+                                                                    </span>
                                                                     <span class="cart-list__multiply">x</span>
                                                                     <span class="cart-list__qnt">${item.quantity}</span>
                                                                 </div>
@@ -251,15 +251,13 @@
                                                         </section>
                                                     </a>
 
-                                                    <!-- nút xóa để ngoài <a> để bấm xóa không bị nhảy sang trang product -->
                                                     <a href="${pageContext.request.contextPath}/delete-cart?id=${item.product.id}"
                                                        class="cart-list__remove"
-                                                       onclick="event.preventDefault(); removeMiniCartItem(${item.product.id});">
+                                                       onclick="event.preventDefault(); removeCartItemGlobal(${item.product.id});">
                                                         Xóa
                                                     </a>
                                                 </li>
-
-                                                </c:forEach>
+                                            </c:forEach>
                                         </ul>
 
                                         <a href="${pageContext.request.contextPath}/cart"
@@ -268,7 +266,6 @@
                                         </a>
                                     </div>
                                 </c:otherwise>
-
                             </c:choose>
                         </div>
                     </div>
@@ -285,93 +282,61 @@
         </div>
     </div>
 </header>
+
 <script>
-  function removeMiniCartItem(pid) {
-    const params = new URLSearchParams();
-    params.append('id', pid);
-    params.append('ajax', '1');
+    // hàm cập nhật nguyên cái cart
+    function applyMiniCartUpdate(data) {
+        if (!data) return;
 
-    fetch('${pageContext.request.contextPath}/delete-cart', {
-      method: 'POST',
-      body: params,
-      headers: {
-        'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
-        'X-Requested-With': 'XMLHttpRequest'
-      }
-    })
-    .then(r => r.json())
-    .then((data) => {
-      // update badge số lượng giỏ ngay
-      const badge = document.querySelector('#headerCartQty')
-        || document.querySelector('.header__cart-notice')
-        || document.querySelector('.header-cart__notice');
-      if (badge && data && typeof data.cartQty !== 'undefined') {
-        badge.innerText = data.cartQty;
-      }
+        // update badge số lượng
+        const badge = document.querySelector('#headerCartQty');
 
-      // remove item khỏi dropdown
-      const li = document.getElementById('mini-cart-item-' + pid);
-      if (li) li.remove();
+        if (badge && typeof data.cartQty !== 'undefined') {
+            badge.innerText = data.cartQty;
+        }
 
-      // nếu hết item => reload để hiện "Chưa có sản phẩm"
-      const remain = document.querySelectorAll('.cart-list__item').length;
-      if (remain === 0) location.reload();
-    })
-    .catch(() => location.reload());
-  }
-</script>
-<script>
-  function applyMiniCartUpdate(data) {
-    if (!data) return;
-
-    // update badge số lượng
-    const badge = document.querySelector('#headerCartQty')
-      || document.querySelector('.header__cart-notice')
-      || document.querySelector('.header-cart__notice');
-    if (badge && typeof data.cartQty !== 'undefined') {
-      badge.innerText = data.cartQty;
+        // update dropdown HTML
+        if (data.miniCartHtml) {
+            const box = document.querySelector('.cart-list');
+            if (box) box.innerHTML = data.miniCartHtml;
+        }
     }
 
-    // update dropdown HTML
-    if (data.miniCartHtml) {
-      const box = document.querySelector('.cart-list');
-      if (box) box.innerHTML = data.miniCartHtml;
+    window.applyMiniCartUpdate = applyMiniCartUpdate;
+
+    // hàm xóa cart item
+    window.removeCartItemGlobal = function (pid, callback) {
+        const params = new URLSearchParams({ id: pid, ajax: '1' });
+
+        fetch('${pageContext.request.contextPath}/delete-cart', {
+            method: 'POST',
+            body: params,
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
+                'X-Requested-With': 'XMLHttpRequest'
+            }
+        })
+            .then(r => r.json())
+            .then((data) => {
+
+                // gọi cập nhật nguyên cái cart
+                if (window.applyMiniCartUpdate) {
+                    window.applyMiniCartUpdate(data);
+                }
+
+                // Xóa phần tử trên giao diện
+                const li = document.getElementById('mini-cart-item-' + pid);
+                if (li) li.remove();
+
+                if (typeof callback === "function") {
+                    callback(data);
+                }
+
+                // nếu giỏ hàng trống thì reload
+                if (data.cartQty === 0) {
+                    location.reload();
+                }
+            })
+            .catch(err => console.error("Lỗi xóa hàng:", err));
     }
-  }
-
-  window.applyMiniCartUpdate = applyMiniCartUpdate;
-
-  function removeMiniCartItem(pid) {
-    const params = new URLSearchParams();
-    params.append('id', pid);
-    params.append('ajax', '1');
-
-    fetch('${pageContext.request.contextPath}/delete-cart', {
-      method: 'POST',
-      body: params,
-      headers: {
-        'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
-        'X-Requested-With': 'XMLHttpRequest'
-      }
-    })
-    .then(r => r.json())
-    .then((data) => {
-      // update badge số lượng giỏ ngay
-      const badge = document.querySelector('#headerCartQty')
-        || document.querySelector('.header__cart-notice')
-        || document.querySelector('.header-cart__notice');
-      if (badge && data && typeof data.cartQty !== 'undefined') {
-        badge.innerText = data.cartQty;
-      }
-
-      // remove item khỏi dropdown
-      const li = document.getElementById('mini-cart-item-' + pid);
-      if (li) li.remove();
-
-      // nếu hết item => reload để hiện "Chưa có sản phẩm"
-      const remain = document.querySelectorAll('.cart-list__item').length;
-      if (remain === 0) location.reload();
-    })
-    .catch(() => location.reload());
-  }
 </script>

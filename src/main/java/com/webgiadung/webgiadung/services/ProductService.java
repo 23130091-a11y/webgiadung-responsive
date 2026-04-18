@@ -121,7 +121,6 @@ public class ProductService {
         return pdao.searchWithFilters(keyword, brands, priceRanges,categoryId);
     }
 
-
     public List<Product> getProductsFromIds(List<Integer> viewedIds) {
         return pdao.getProductsFromIds(viewedIds);
     }
@@ -132,6 +131,11 @@ public class ProductService {
 
     public int removeDiscount(int discountId) {
         return pdao.removeDiscount(discountId);
+    }
+
+    // xử lý tồn kho
+    public int getAvailableStock(int productId) {
+        return pdao.getAvailableStock(productId);
     }
 }
 

@@ -646,6 +646,24 @@ public Product getProductFullInfo(int id) {
                     .execute();
         });
     }
+
+    public int getAvailableStock(int productId) {
+        return get().withHandle(handle -> {
+            return handle.createQuery("""
+            SELECT COALESCE(
+                SUM(CASE 
+                    WHEN type IN ('IMPORT', 'RETURN') THEN quantity 
+                    WHEN type IN ('EXPORT', 'DAMAGED') THEN -quantity 
+                    ELSE 0 
+                END), 0)
+            FROM warehouse_transactions 
+            WHERE product_id = :productId
+        """)
+                    .bind("productId", productId)
+                    .mapTo(Integer.class)
+                    .one();
+        });
+    }
 }
 
 

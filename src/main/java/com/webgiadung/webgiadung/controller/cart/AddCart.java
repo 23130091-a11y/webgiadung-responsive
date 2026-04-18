@@ -138,6 +138,8 @@ public class AddCart extends HttpServlet {
 
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        ProductService productService = new ProductService();
+
         HttpSession session = request.getSession();
         boolean ajax = isAjax(request);
 
@@ -173,16 +175,13 @@ public class AddCart extends HttpServlet {
                 response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Số lượng không hợp lệ");
                 return;
             }
-        };
+        }
+
         if (quantity <= 0) quantity = 1;
 
-        // lấy, tạo giỏ hàng từ session
-        Cart cart = (Cart) session.getAttribute("cart");
-        if (cart == null) cart = new Cart();
-
         // lấy sp có id
-        ProductService productService = new ProductService();
         Product product = productService.getProductFullInfo(productId);
+
         if (product == null) {
             if (ajax) writeJson(response, HttpServletResponse.SC_NOT_FOUND,
                     "{\"status\":\"error\",\"message\":\"Product not found\"}");
@@ -190,11 +189,39 @@ public class AddCart extends HttpServlet {
             return;
         }
 
+        // lấy, tạo giỏ hàng từ session
+        Cart cart = (Cart) session.getAttribute("cart");
+        if (cart == null) cart = new Cart();
+
+        // kt tồn kho khả dụng
+        //todo
+        int stockAvailable = productService.getAvailableStock(productId);
+        int currentQty = cart.getQuantityByProductId(productId);
+        int totalRequested = currentQty + quantity;
+        if(totalRequested > stockAvailable) {
+            String msg = "Kho hàng chỉ còn " + stockAvailable + " sản phẩm. Giỏ hàng của bạn đã có " + currentQty + ".";
+            if (ajax) writeJson(response, HttpServletResponse.SC_BAD_REQUEST,
+                    "{\"status\":\"error\", \"message\":\"" + jsonEscape(msg) + "\"}");
+            else response.sendRedirect(request.getContextPath() + "/cart?error=stock");
+            return;
+        }
+
+        // kt giới hạn mua
+        //todo
+        int purchaseLimit = 10;
+        if(totalRequested > purchaseLimit) {
+            String msg = "Mỗi khách hàng chỉ được mua tối đa " + purchaseLimit + " sản phẩm cho mỗi đơn hàng.";
+            if (ajax) writeJson(response, HttpServletResponse.SC_BAD_REQUEST,
+                    "{\"status\":\"error\", \"message\":\"" + jsonEscape(msg) + "\"}");
+            else response.sendRedirect(request.getContextPath() + "/cart?error=limit");
+            return;
+        }
+
         // thêm vào giỏ hàng
         cart.addItem(product, quantity);
         session.setAttribute("cart", cart);
 
-        // trả về cập nhật giỏ hàng sau khi thêm
+        // trả về tsl & list cart cập nhật giỏ hàng sau khi thêm
         if (ajax) {
             String miniHtml = buildMiniCartHtml(request, cart);
             writeJson(response, HttpServletResponse.SC_OK,

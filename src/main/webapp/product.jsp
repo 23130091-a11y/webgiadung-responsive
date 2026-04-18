@@ -25,7 +25,7 @@
     <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/grid.css">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/base.css">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/style.css">
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/product.css?v=1">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/product.css?v=99">
     <!-- Link favicon -->
 </head>
 
@@ -374,156 +374,153 @@
         });
     });
 
-   function getCurrentQty() {
-       const el = document.querySelector(".content-quantity__number");
-       const q = el ? parseInt(el.textContent.trim()) : 1;
-       return (isNaN(q) || q <= 0) ? 1 : q;
-   }
+    //
+    function getCurrentQty() {
+        const el = document.querySelector(".content-quantity__number");
+        const q = el ? parseInt(el.textContent.trim()) : 1;
+        return (isNaN(q) || q <= 0) ? 1 : q;
+    }
 
-   function updateHeaderCartQty(cartQty) {
-       const el = document.querySelector('#headerCartQty')
-           || document.querySelector('.header__cart-notice')
-           || document.querySelector('.header-cart__notice');
-       if (el) el.innerText = cartQty;
-   }
+    //
+    function showToast(msg) {
+      let t = document.getElementById('toast-add-cart');
+      if (!t) {
+          t = document.createElement('div');
+          t.id = 'toast-add-cart';
+          t.style.position = 'fixed';
+          t.style.right = '20px';
+          t.style.bottom = '20px';
+          t.style.padding = '12px 16px';
+          t.style.background = '#333';
+          t.style.color = '#fff';
+          t.style.borderRadius = '10px';
+          t.style.zIndex = '99999';
+          t.style.opacity = '0';
+          t.style.transition = 'opacity .2s ease';
+          document.body.appendChild(t);
+      }
+        t.textContent = msg;
+        t.style.opacity = '1';
+        clearTimeout(window.__toastTimer);
+        window.__toastTimer = setTimeout(() => t.style.opacity = '0', 1200);
+    }
 
-function showToast(msg) {
-  let t = document.getElementById('toast-addcart');
-  if (!t) {
-    t = document.createElement('div');
-    t.id = 'toast-addcart';
-    t.style.position = 'fixed';
-    t.style.right = '20px';
-    t.style.bottom = '20px';
-    t.style.padding = '12px 16px';
-    t.style.background = '#333';
-    t.style.color = '#fff';
-    t.style.borderRadius = '10px';
-    t.style.zIndex = '99999';
-    t.style.opacity = '0';
-    t.style.transition = 'opacity .2s ease';
-    document.body.appendChild(t);
-  }
-  t.textContent = msg;
-  t.style.opacity = '1';
-  clearTimeout(window.__toastTimer);
-  window.__toastTimer = setTimeout(() => t.style.opacity = '0', 1200);
-}
+    //
+    function addToCart(productId) {
+        const contextPath = '${pageContext.request.contextPath}';
+        // lấy số lượng đã chọn
+        const qty = getCurrentQty();
 
+        fetch(contextPath + '/add-cart', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
+                'X-Requested-With': 'XMLHttpRequest' //
+            },
+            body: new URLSearchParams({
+                productId: productId,
+                quantity: qty,
+                ajax: '1' // flag
+            })
+        })
+            .then(res => {
+                if (res.status === 401) {
+                    alert("Vui lòng đăng nhập để thêm vào giỏ hàng!");
+                    window.location.href = contextPath + '/login';
+                    return null;
+                }
+                return res.json();
+            })
+            .then(data => {
+                if (!data) return;
 
-   function addToCart(productId) {
-       const contextPath = '${pageContext.request.contextPath}';
-       const qty = getCurrentQty();
+                if (data.status === 'success') {
+                    if (window.applyMiniCartUpdate) window.applyMiniCartUpdate(data);
 
-       fetch(contextPath + '/add-cart', {
-           method: 'POST',
-           headers: {
-               'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
-               'X-Requested-With': 'XMLHttpRequest'
-           },
-           body: new URLSearchParams({
-               productId: productId,
-               quantity: qty,
-               ajax: '1'
-           })
-       })
-       .then(res => {
-           if (res.status === 401) {
-               alert("Vui lòng đăng nhập để thêm vào giỏ hàng!");
-               window.location.href = contextPath + '/login';
-               return null;
-           }
-           return res.ok ? res.json() : null;
-       })
-       .then(data => {
-         if (data && data.status === 'success') {
-           // update badge + dropdown ngay lập tức
-           if (window.applyMiniCartUpdate) window.applyMiniCartUpdate(data);
+                    showToast("Đã thêm vào giỏ hàng!");
+                } else if(data.status === 'error') {
+                    alert(data.message);
+                }
+            })
+            .catch(err => {
+                console.error("Lỗi addToCart:", err);
+                alert("Không thể kết nối đến máy chủ!");
+            });
+    }
 
-           showToast("Đã thêm vào giỏ hàng!");
-         }
-       })
-       .catch(err => console.error("Lỗi addToCart:", err));
-   }
+    // xử lý nút mua ngay
+    function buyNow(productId) {
+        const contextPath = '${pageContext.request.contextPath}';
+        const qty = getCurrentQty();
 
-   function buyNow(productId) {
-       const contextPath = '${pageContext.request.contextPath}';
-       const qty = getCurrentQty();
+        // đảm bảo sản phẩm đã được add vào cart
+        fetch(contextPath + '/add-cart', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
+                'X-Requested-With': 'XMLHttpRequest'
+            },
+            body: new URLSearchParams({
+                productId: productId,
+                quantity: qty,
+                ajax: '1'
+            })
+        })
+            .then(res => {
+                if (res.status === 401) {
+                    alert("Vui lòng đăng nhập để mua ngay!");
+                    window.location.href = contextPath + '/login';
+                    return null;
+                }
+                return res.json();
+            })
+            .then(data => {
+                if(!data) return;
 
-       // đảm bảo sản phẩm đã được add vào cart
-       fetch(contextPath + '/add-cart', {
-           method: 'POST',
-           headers: {
-               'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
-               'X-Requested-With': 'XMLHttpRequest'
-           },
-           body: new URLSearchParams({
-               productId: productId,
-               quantity: qty,
-               ajax: '1'
-           })
-       })
-       .then(res => {
-           if (res.status === 401) {
-               alert("Vui lòng đăng nhập để mua ngay!");
-               window.location.href = contextPath + '/login';
-               return null;
-           }
-           return res.ok ? res.json() : null;
-       })
-       .then(data => {
-           if (data && data.status === 'success') {
-               updateHeaderCartQty(data.cartQty);
+                if (data.status === 'success') {
+                    const el = document.querySelector('#headerCartQty');
+                    if (el) el.innerText = data.cartQty;
 
-               // checkout chỉ 1 sản phẩm
-               window.location.href = contextPath + '/checkout?ids=' + productId;
-           }
-       })
-       .catch(err => console.error("Lỗi buyNow:", err));
-   }
-
-</script>
-<script>
-(function () {
-  const stars = document.querySelectorAll('#ratingStars .rating__star');
-  const input = document.getElementById('ratingValue');
-
-  function paint(val) {
-    stars.forEach(s => {
-      const v = Number(s.dataset.val);
-      if (v <= val) s.classList.add('rating__star--gold');
-      else s.classList.remove('rating__star--gold');
-    });
-  }
-
-  stars.forEach(s => {
-    s.addEventListener('click', () => {
-      const val = Number(s.dataset.val);
-      input.value = val;
-      paint(val);
-    });
-
-    s.addEventListener('mouseenter', () => paint(Number(s.dataset.val)));
-  });
-
-  const wrap = document.getElementById('ratingStars');
-  wrap.addEventListener('mouseleave', () => paint(Number(input.value) || 5));
-
-  paint(Number(input.value) || 5);
-})();
-</script>
-<script>
-    function changeMainImage(thumbnail) {
-
-        const mainProductImage = document.getElementById('main-product-image');
-        mainProductImage.src = thumbnail.src;
-        const allThumbnails = document.querySelectorAll('.media-thumbnails__img');
-        allThumbnails.forEach(function(img) {
-            img.classList.remove('active');
-        });
-        thumbnail.classList.add('active');
+                    // checkout chỉ 1 sản phẩm
+                    window.location.href = contextPath + '/checkout?ids=' + productId + '&qty=' + qty;
+                } else if (data.status === 'error') {
+                    alert(data.message);
+                }
+            })
+            .catch(err => console.error("Lỗi buyNow:", err));
     }
 </script>
+
+<script>
+    (function () {
+      const stars = document.querySelectorAll('#ratingStars .rating__star');
+      const input = document.getElementById('ratingValue');
+
+      function paint(val) {
+        stars.forEach(s => {
+          const v = Number(s.dataset.val);
+          if (v <= val) s.classList.add('rating__star--gold');
+          else s.classList.remove('rating__star--gold');
+        });
+      }
+
+      stars.forEach(s => {
+        s.addEventListener('click', () => {
+          const val = Number(s.dataset.val);
+          input.value = val;
+          paint(val);
+        });
+
+        s.addEventListener('mouseenter', () => paint(Number(s.dataset.val)));
+      });
+
+      const wrap = document.getElementById('ratingStars');
+      wrap.addEventListener('mouseleave', () => paint(Number(input.value) || 5));
+
+      paint(Number(input.value) || 5);
+    })();
+</script>
+
 <!-- Link JS -->
 <script src="assets/js/script.js"></script>
 
