@@ -24,7 +24,6 @@ public class WarehouseImportController extends HttpServlet {
     private final InboundDetailsService inboundService = new InboundDetailsService();
     private final ProductService productService = new ProductService();
 
-    // Khởi tạo Gson với adapter cho LocalDateTime tương tự controller cũ của bạn
     private final Gson gson = new GsonBuilder()
             .registerTypeAdapter(LocalDateTime.class, (JsonSerializer<LocalDateTime>) (src, typeOfSrc, context) ->
                     new JsonPrimitive(src.format(DateTimeFormatter.ISO_LOCAL_DATE_TIME)))
