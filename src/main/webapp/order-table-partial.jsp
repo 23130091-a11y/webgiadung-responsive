@@ -19,7 +19,7 @@
             </div>
 
             <div class="order-table__cell">
-                <span class="order-table__text">${order.customer_name}</span>
+                <span class="order-table__text">${order.customerName}</span>
             </div>
 
             <div class="order-table__cell">
@@ -34,9 +34,9 @@
                 </span>
             </div>
 
-            <div class="order-table__cell">${order.created_at}</div>
+            <div class="order-table__cell">${order.createdAt}</div>
 
-            <div class="order-table__cell">${order.total_price}đ</div>
+            <div class="order-table__cell">${order.totalPrice}đ</div>
         </article>
     </c:forEach>
 

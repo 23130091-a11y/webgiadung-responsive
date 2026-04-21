@@ -1634,7 +1634,7 @@
                             </form>
 
                             <div class="order-table" id="order-main-content">
-                                <%-- <jsp:include page="_order_list.jsp" /> --%>
+                                <jsp:include page="_order_list.jsp" />
                             </div>
                         </div>
                     </section>
