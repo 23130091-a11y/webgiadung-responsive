@@ -240,7 +240,75 @@
                             </div>
                             </div>
 
-                            <div id="tab-damage" class="sub-tab-content"><h3>Giao diện Hủy / Hư hỏng</h3></div>
+                            <div id="tab-damage" class="sub-tab-content">
+                                <div class="dmg-grid-layout">
+                                    <div class="dmg-main-section">
+                                        <div class="dmg-card-panel">
+                                            <h3 style="margin-bottom: 20px; color: #d9534f;">Báo cáo Hủy & Hư hỏng</h3>
+
+                                            <div class="dmg-search-area">
+                                                <label>Tìm kiếm sản phẩm hoặc mã đơn hàng:</label>
+                                                <div class="dmg-input-group">
+                                                    <input type="text" id="search-dmg-input" placeholder="Nhập tên SP hoặc mã ĐH..." onkeyup="handleDamageSearch(this.value)">
+                                                    <div id="search-dmg-dropdown" class="dmg-dropdown-list" style="display:none;">
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <div id="selected-dmg-preview" class="dmg-preview-box">
+                                                <img id="dmg-preview-img" src="${pageContext.request.contextPath}/assets/img/products/default.png" alt="Ảnh">
+                                                <div class="dmg-preview-info">
+                                                    <h4 id="dmg-preview-name">Chưa chọn sản phẩm/đơn hàng</h4>
+                                                    <p>Loại đối tượng: <span id="dmg-type-tag" class="dmg-badge">N/A</span></p>
+                                                </div>
+                                            </div>
+
+                                            <div class="dmg-form-fields">
+                                                <div class="dmg-row">
+                                                    <div class="dmg-col">
+                                                        <label>Số lượng hư hỏng</label>
+                                                        <input type="number" id="dmg-qty-input" placeholder="0">
+                                                    </div>
+                                                    <div class="dmg-col">
+                                                        <label>Hiện trạng</label>
+                                                        <select id="dmg-status-select">
+                                                            <option value="Vỡ/Móp">Vỡ / Móp méo</option>
+                                                            <option value="Lỗi kỹ thuật">Lỗi kỹ thuật</option>
+                                                            <option value="Hết hạn">Hết hạn</option>
+                                                            <option value="Mất hàng">Mất hàng / Thất lạc</option>
+                                                        </select>
+                                                    </div>
+                                                </div>
+
+                                                <div class="dmg-full-row" style="margin-top: 15px;">
+                                                    <label>Ghi chú & Lý do</label>
+                                                    <textarea id="dmg-note-area" rows="3" placeholder="Nhập lý do chi tiết tại đây..."></textarea>
+                                                </div>
+                                            </div>
+
+                                            <button class="dmg-btn-submit">XÁC NHẬN HOÀN TẤT</button>
+                                        </div>
+
+                                        <div class="dmg-history-section">
+                                            <h3 style="margin: 25px 0 15px 0; color: #333;">Danh sách đã xử lý</h3>
+                                            <table class="dmg-data-table">
+                                                <thead>
+                                                <tr>
+                                                    <th>Ngày báo cáo</th>
+                                                    <th>Tên SP / Mã ĐH</th>
+                                                    <th>Số lượng</th>
+                                                    <th>Hiện trạng</th>
+                                                    <th>Lý do</th>
+                                                    <th>Phục hồi</th> <th>Thao tác</th>
+                                                </tr>
+                                                </thead>
+                                                <tbody id="damage-table-body">
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
                             <div id="tab-transactions" class="sub-tab-content"><h3>Sổ kho (Transactions)</h3></div>
                         </div>
                     </section>
@@ -1779,7 +1847,7 @@
                             </form>
 
                             <div class="order-table" id="order-main-content">
-                                <%-- <jsp:include page="_order_list.jsp" /> --%>
+                                <jsp:include page="_order_list.jsp" />
                             </div>
                         </div>
                     </section>
@@ -1828,13 +1896,16 @@
     const uploadGroup = document.getElementById('eventUploadGroup');
     const editScopeRadios = document.querySelectorAll('input[name="editApplyScope"]');
     const editBoxCategory = document.getElementById('editScopeCategory');
-    const editBoxSpecific = document.getElementById('editScopeSpecific');
+    const editBoxSpecific = null;
     const sectionEventView = document.getElementById("view-event-page");
     const sectionEventEdit = document.getElementById("edit-event-page");
     const editSlideSelect = document.getElementById('editEventSlideSelect');
     const sidebarItems = document.querySelectorAll(".product-sidebar__item");
     const sidebarSubLinks = document.querySelectorAll(".product-sub__link");
-
+    const productContents = {
+        "product-list": document.getElementById("product-list-section"),
+        "product-event": document.getElementById("product-event-section")
+    };
 
 
     const newsSections = {
@@ -2094,7 +2165,7 @@
 
     const scopeRadios = document.querySelectorAll('input[name="applyScope"]');
     const boxCategory = document.getElementById('scopeCategory');
-    const boxSpecific = document.getElementById('scopeSpecific');
+    const boxSpecific = null;
 
     scopeRadios.forEach(radio => {
         radio.addEventListener('change', (e) => {
@@ -2102,13 +2173,9 @@
 
 
             boxCategory.style.display = "none";
-            boxSpecific.style.display = "none";
-
 
             if (val === "category") {
                 boxCategory.style.display = "block";
-            } else if (val === "specific") {
-                boxSpecific.style.display = "block";
             }
         });
     });
@@ -2150,7 +2217,6 @@
     editScopeRadios.forEach(radio => {
         radio.addEventListener('change', (e) => {
             editBoxCategory.style.display = (e.target.value === "category") ? "block" : "none";
-            editBoxSpecific.style.display = (e.target.value === "specific") ? "block" : "none";
         });
     });
     document.querySelectorAll(".event-table__row .event-col-action:nth-child(5)").forEach(btn => {
@@ -2522,7 +2588,7 @@
         if (newsSections[tabId]) {
             newsSections[tabId].style.display = "block";
             document
-                .querySelector(`.news-menu__btn[data-target='${tabId}']`)
+                .querySelector(".news-menu__btn[data-target='" + tabId + "']")
                 .classList.add("active");
         }
 
@@ -2673,7 +2739,6 @@
 
         if (id === 'brandModal') document.getElementById('brandSelect').value = '';
         if (id === 'tagModal') document.getElementById('tagSelect').value = '';
-
         if (id === 'cateModal') document.getElementById('cateSelect').value = '';
     }
 
@@ -2868,15 +2933,14 @@
         newFileInput.style.display = 'none';
         newFileInput.name = "detImages[]";
 
-        const html = `
-    <div class="added-item" id="det-item-\${itemIdx}">
-        <span><strong></strong> (Đã chọn ảnh)</span>
-        <span><strong>\${title}:</strong> \${content}</span>
-        <input type="hidden" name="detTitles[]" value="\${title}">
-        <input type="hidden" name="detContents[]" value="\${content}">
-        <button type="button" onclick="removeItem('det-item-\${itemIdx}')" class="btn-remove">Xóa</button>
-    </div>
-`;
+    const html =
+        '<div class="added-item" id="det-item-' + itemIdx + '">' +
+        '<span><strong></strong> (Đã chọn ảnh)</span>' +
+        '<span><strong>' + title + ':</strong> ' + content + '</span>' +
+        '<input type="hidden" name="detTitles[]" value="' + title + '">' +
+        '<input type="hidden" name="detContents[]" value="' + content + '">' +
+        '<button type="button" onclick="removeItem(\'det-item-' + itemIdx + '\')" class="btn-remove">Xóa</button>' +
+        '</div>';
 
         const wrapper = document.createElement('div');
         wrapper.innerHTML = html;
@@ -2908,7 +2972,7 @@
                 return response.json();
             })
             .then(data => {
-                selectElem.innerHTML = `<option value="">${defaultText}</option>`;
+                selectElem.innerHTML = '<option value="">' + defaultText + '</option>';
 
                 data.forEach(item => {
                     let opt = document.createElement('option');
@@ -3525,12 +3589,11 @@
         var div = document.createElement('div');
         div.className = 'edit-item-box';
 
-        div.innerHTML = `
-        <input type="hidden" name="descId" value="${id}">
-        <input type="text" class="form-input edit-sub-title" name="descTitle" placeholder="Tiêu đề">
-        <textarea class="form-textarea" name="descContent" rows="2" placeholder="Nội dung mô tả..."></textarea>
-        <button type="button" class="btn-remove-item" onclick="this.parentElement.remove()" style="color:red; margin-top:5px; cursor:pointer;">Xóa dòng này</button>
-    `;
+       div.innerHTML =
+           '<input type="hidden" name="descId" value="' + id + '">' +
+           '<input type="text" class="form-input edit-sub-title" name="descTitle" placeholder="Tiêu đề">' +
+           '<textarea class="form-textarea" name="descContent" rows="2" placeholder="Nội dung mô tả..."></textarea>' +
+           '<button type="button" class="btn-remove-item" onclick="this.parentElement.remove()" style="color:red; margin-top:5px; cursor:pointer;">Xóa dòng này</button>';
 
         div.querySelector('input[name="descTitle"]').value = title;
         div.querySelector('textarea[name="descContent"]').value = content;
@@ -3984,7 +4047,7 @@
 </script>
 <script>
 
-
+    // --- HÀM XEM (GIỮ NGUYÊN) ---
     function viewDiscount(id) {
         fetch(contextPath + '/api/admin/discount-detail?id=' + id)
             .then(res => res.json())
@@ -4010,6 +4073,7 @@
             .catch(err => alert("Lỗi tải: " + err.message));
     }
 
+    // --- HÀM SỬA (FIX DẤU NGOẶC + DATE) ---
     async function editDiscount(id) {
         try {
             const res = await fetch(contextPath + '/api/admin/discount-detail?id=' + id);
@@ -4029,11 +4093,12 @@
             document.getElementById('edit-eventDesc').value = d.description || "";
             document.getElementById('editEventForm').dataset.currentId = id;
 
+            // Chuyển dd/MM/yyyy (từ Controller) sang yyyy-MM-dd (cho input date)
             const formatDateForInput = (dateStr) => {
                 if (!dateStr || !dateStr.includes('/')) return "";
                 const parts = dateStr.split('/');
                 if(parts.length !== 3) return "";
-                return `${parts[2]}-${parts[1].padStart(2, '0')}-${parts[0].padStart(2, '0')}`;
+                return parts[2] + '-' + parts[1].padStart(2, '0') + '-' + parts[0].padStart(2, '0');
             };
 
             document.getElementById('edit-startDate').value = formatDateForInput(d.startDate);
@@ -4438,6 +4503,30 @@
             closeInboundModal();
         }
     };
+</script>
+<script>
+    function switchSubTab(event, tabId) {
+
+        const tabItems = document.querySelectorAll('.sub-tab-item');
+        tabItems.forEach(item => {
+            item.classList.remove('active');
+        });
+
+
+        const tabContents = document.querySelectorAll('.sub-tab-content');
+        tabContents.forEach(content => {
+            content.classList.remove('active');
+            content.style.display = 'none';
+        });
+
+        event.currentTarget.classList.add('active');
+
+        const activeContent = document.getElementById(tabId);
+        if (activeContent) {
+            activeContent.classList.add('active');
+            activeContent.style.display = 'block';
+        }
+    }
 </script>
 <script src="${pageContext.request.contextPath}/assets/js/script.js"></script>
 </html>
