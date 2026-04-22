@@ -1746,7 +1746,7 @@
                             </form>
 
                             <div class="order-table" id="order-main-content">
-                                <%-- <jsp:include page="_order_list.jsp" /> --%>
+                                <jsp:include page="_order_list.jsp" />
                             </div>
                         </div>
                     </section>
@@ -1795,13 +1795,16 @@
     const uploadGroup = document.getElementById('eventUploadGroup');
     const editScopeRadios = document.querySelectorAll('input[name="editApplyScope"]');
     const editBoxCategory = document.getElementById('editScopeCategory');
-    const editBoxSpecific = document.getElementById('editScopeSpecific');
+    const editBoxSpecific = null;
     const sectionEventView = document.getElementById("view-event-page");
     const sectionEventEdit = document.getElementById("edit-event-page");
     const editSlideSelect = document.getElementById('editEventSlideSelect');
     const sidebarItems = document.querySelectorAll(".product-sidebar__item");
     const sidebarSubLinks = document.querySelectorAll(".product-sub__link");
-
+    const productContents = {
+        "product-list": document.getElementById("product-list-section"),
+        "product-event": document.getElementById("product-event-section")
+    };
 
 
     const newsSections = {
@@ -2061,7 +2064,7 @@
 
     const scopeRadios = document.querySelectorAll('input[name="applyScope"]');
     const boxCategory = document.getElementById('scopeCategory');
-    const boxSpecific = document.getElementById('scopeSpecific');
+    const boxSpecific = null;
 
     scopeRadios.forEach(radio => {
         radio.addEventListener('change', (e) => {
@@ -2069,13 +2072,9 @@
 
 
             boxCategory.style.display = "none";
-            boxSpecific.style.display = "none";
-
 
             if (val === "category") {
                 boxCategory.style.display = "block";
-            } else if (val === "specific") {
-                boxSpecific.style.display = "block";
             }
         });
     });
@@ -2117,7 +2116,6 @@
     editScopeRadios.forEach(radio => {
         radio.addEventListener('change', (e) => {
             editBoxCategory.style.display = (e.target.value === "category") ? "block" : "none";
-            editBoxSpecific.style.display = (e.target.value === "specific") ? "block" : "none";
         });
     });
     document.querySelectorAll(".event-table__row .event-col-action:nth-child(5)").forEach(btn => {
@@ -2489,7 +2487,7 @@
         if (newsSections[tabId]) {
             newsSections[tabId].style.display = "block";
             document
-                .querySelector(`.news-menu__btn[data-target='${tabId}']`)
+                .querySelector(".news-menu__btn[data-target='" + tabId + "']")
                 .classList.add("active");
         }
 
@@ -2636,11 +2634,11 @@
     function closeModal(id) {
         const modal = document.getElementById(id);
         if (modal) {
+            modal.style.display = 'none';
         }
 
         if (id === 'brandModal') document.getElementById('brandSelect').value = '';
         if (id === 'tagModal') document.getElementById('tagSelect').value = '';
-
         if (id === 'cateModal') document.getElementById('cateSelect').value = '';
     }
 
@@ -2835,15 +2833,14 @@
         newFileInput.style.display = 'none';
         newFileInput.name = "detImages[]";
 
-        const html = `
-    <div class="added-item" id="det-item-\${itemIdx}">
-        <span><strong></strong> (Đã chọn ảnh)</span>
-        <span><strong>\${title}:</strong> \${content}</span>
-        <input type="hidden" name="detTitles[]" value="\${title}">
-        <input type="hidden" name="detContents[]" value="\${content}">
-        <button type="button" onclick="removeItem('det-item-\${itemIdx}')" class="btn-remove">Xóa</button>
-    </div>
-`;
+    const html =
+        '<div class="added-item" id="det-item-' + itemIdx + '">' +
+        '<span><strong></strong> (Đã chọn ảnh)</span>' +
+        '<span><strong>' + title + ':</strong> ' + content + '</span>' +
+        '<input type="hidden" name="detTitles[]" value="' + title + '">' +
+        '<input type="hidden" name="detContents[]" value="' + content + '">' +
+        '<button type="button" onclick="removeItem(\'det-item-' + itemIdx + '\')" class="btn-remove">Xóa</button>' +
+        '</div>';
 
         const wrapper = document.createElement('div');
         wrapper.innerHTML = html;
@@ -2875,7 +2872,7 @@
                 return response.json();
             })
             .then(data => {
-                selectElem.innerHTML = `<option value="">${defaultText}</option>`;
+                selectElem.innerHTML = '<option value="">' + defaultText + '</option>';
 
                 data.forEach(item => {
                     let opt = document.createElement('option');
@@ -3492,12 +3489,11 @@
         var div = document.createElement('div');
         div.className = 'edit-item-box';
 
-        div.innerHTML = `
-        <input type="hidden" name="descId" value="${id}">
-        <input type="text" class="form-input edit-sub-title" name="descTitle" placeholder="Tiêu đề">
-        <textarea class="form-textarea" name="descContent" rows="2" placeholder="Nội dung mô tả..."></textarea>
-        <button type="button" class="btn-remove-item" onclick="this.parentElement.remove()" style="color:red; margin-top:5px; cursor:pointer;">Xóa dòng này</button>
-    `;
+       div.innerHTML =
+           '<input type="hidden" name="descId" value="' + id + '">' +
+           '<input type="text" class="form-input edit-sub-title" name="descTitle" placeholder="Tiêu đề">' +
+           '<textarea class="form-textarea" name="descContent" rows="2" placeholder="Nội dung mô tả..."></textarea>' +
+           '<button type="button" class="btn-remove-item" onclick="this.parentElement.remove()" style="color:red; margin-top:5px; cursor:pointer;">Xóa dòng này</button>';
 
         div.querySelector('input[name="descTitle"]').value = title;
         div.querySelector('textarea[name="descContent"]').value = content;
@@ -4002,7 +3998,7 @@
                 if (!dateStr || !dateStr.includes('/')) return "";
                 const parts = dateStr.split('/');
                 if(parts.length !== 3) return "";
-                return `${parts[2]}-${parts[1].padStart(2, '0')}-${parts[0].padStart(2, '0')}`;
+                return parts[2] + '-' + parts[1].padStart(2, '0') + '-' + parts[0].padStart(2, '0');
             };
 
             document.getElementById('edit-startDate').value = formatDateForInput(d.startDate);
@@ -4396,7 +4392,63 @@
         const unitCost = parseFloat(document.getElementById('unit-cost').value) || 0;
 
         const preStockQty = parseInt(document.getElementById('display-pre-stock').innerText) || 0;
+           return Array.from(grouped.entries())
+                    .sort((a, b) => b[0].localeCompare(a[0]))
+                    .map(([dateKey, rows]) => {
+                        const grossRevenue = rows.reduce((sum, item) => sum + item.totalPrice, 0);
+                        const cancelledOrders = rows.filter(item => item.statusKey === 'cancelled');
+                        const cancelledCount = cancelledOrders.length;
+                        const cancelledValue = cancelledOrders.reduce((sum, item) => sum + item.totalPrice, 0);
+                        const netRevenue = grossRevenue - cancelledValue;
+                        const badge = getBadge(cancelledCount);
 
+                        return {
+                            dateKey,
+                            totalOrders: rows.length,
+                            grossRevenue,
+                            cancelledCount,
+                            cancelledValue,
+                            netRevenue,
+                            badge
+                        };
+                    });
+            }
+
+            function renderCancelledSummary(filteredOrders) {
+                const cancelledCount = filteredOrders.filter(order => order.statusKey === 'cancelled').length;
+
+                if (revenueCancelledOrdersValue) {
+                    revenueCancelledOrdersValue.textContent = String(cancelledCount);
+                }
+
+                if (revenueStatusCancelled) {
+                    revenueStatusCancelled.textContent = String(cancelledCount);
+                }
+            }
+
+            function renderRevenueTable(filteredOrders) {
+                const rows = groupOrdersByDate(filteredOrders);
+
+                if (!rows.length) {
+                   revenueTableBody.innerHTML =
+                       '<tr>' +
+                       '<td colspan="7" class="revenue-empty">Không có dữ liệu phù hợp với bộ lọc hiện tại.</td>' +
+                       '</tr>';
+                    return;
+                }
+
+                revenueTableBody.innerHTML = rows.map(function(row) {
+                    return '<tr>' +
+                        '<td>' + displayDate(row.dateKey) + '</td>' +
+                        '<td>' + row.totalOrders + '</td>' +
+                        '<td>' + formatMoney(row.grossRevenue) + '</td>' +
+                        '<td>' + row.cancelledCount + '</td>' +
+                        '<td>' + formatMoney(row.cancelledValue) + '</td>' +
+                        '<td>' + formatMoney(row.netRevenue) + '</td>' +
+                        '<td><span class="revenue-badge ' + row.badge.className + '">' + row.badge.label + '</span></td>' +
+                        '</tr>';
+                }).join('');
+            }
         if (!receiptCode) {
             alert("Vui lòng nhập mã phiếu!");
             document.getElementById('receipt-code').focus();
@@ -4413,6 +4465,20 @@
             return;
         }
 
+            const filters = getFilters();
+            const filteredOrders = filterOrders(revenueState.orders, filters);
+
+            renderCancelledSummary(filteredOrders);
+            renderRevenueTable(filteredOrders);
+        } catch (error) {
+           revenueTableBody.innerHTML =
+               '<tr>' +
+               '<td colspan="7" class="revenue-empty">Không thể tải dữ liệu đơn hàng.</td>' +
+               '</tr>';
+
+            if (revenueCancelledOrdersValue) {
+                revenueCancelledOrdersValue.textContent = '0';
+            }
 
         const data = {
             receiptCode: receiptCode,
