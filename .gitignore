@@ -38,3 +38,12 @@ build/
 ### Mac OS ###
 .DS_Store.smarttomcat/
 .smarttomcat/
+
+# Chặn file chứa mật khẩu
+gradle.properties
+
+# Chặn các thư mục rác hệ thống (để tránh lỗi xung đột như lúc nãy)
+.gradle/
+build/
+out/
+.idea/

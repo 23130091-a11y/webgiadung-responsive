@@ -52,11 +52,27 @@
 
                 <div class="product-details__inner">
                     <!-- Media Details -->
-                    <figure class="media-details">
-                        <img src="${pageContext.request.contextPath}/assets/img/products/${product.image}"  alt="${product.name}" class="media-details__img">
+                    <div class="product-image-wrapper">
+                     <figure class="media-details">
+                        <img src="${pageContext.request.contextPath}/assets/img/products/${product.image}"
+                             alt="${product.name}"
+                             class="media-details__img"
+                             id="main-product-image">
+                     </figure>
 
-                    </figure>
+                     <div class="media-thumbnails">
 
+                        <c:if test="${not empty product.images}">
+                            <c:forEach var="imgObj" items="${product.images}">
+                                <img src="${pageContext.request.contextPath}/assets/img/products/${imgObj.path}"
+                                     alt="Thumbnail"
+                                     class="media-thumbnails__img"
+                                     onclick="changeMainImage(this)">
+                            </c:forEach>
+                        </c:if>
+
+                      </div>
+                    </div>
                     <!-- Content Details -->
                     <div class="content-details">
                         <h1 class="content-details__heading">
