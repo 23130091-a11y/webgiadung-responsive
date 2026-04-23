@@ -2,7 +2,7 @@ package com.webgiadung.webgiadung.dao;
 
 import com.webgiadung.webgiadung.model.*;
 import org.jdbi.v3.core.Handle;
-
+import org.jdbi.v3.core.statement.Query;
 import java.util.List;
 import java.util.Map;
 
@@ -317,6 +317,301 @@ public class OrderDao extends BaseDao {
                         .mapToBean(OrderAdmin.class)
                         .findOne()
                         .orElse(null)
+        );
+    }
+    private String buildDateAndStatusFilter(String fromDate, String toDate, String status) {
+        StringBuilder sql = new StringBuilder(" WHERE 1=1 ");
+
+        if (fromDate != null && !fromDate.isBlank()) {
+            sql.append(" AND DATE(o.created_at) >= :fromDate ");
+        }
+        if (toDate != null && !toDate.isBlank()) {
+            sql.append(" AND DATE(o.created_at) <= :toDate ");
+        }
+
+        sql.append(resolveStatusFilter(status));
+        return sql.toString();
+    }
+
+    private void bindDateFilters(Query query, String fromDate, String toDate) {
+        if (fromDate != null && !fromDate.isBlank()) {
+            query.bind("fromDate", fromDate);
+        }
+        if (toDate != null && !toDate.isBlank()) {
+            query.bind("toDate", toDate);
+        }
+    }
+
+    private String resolveStatusFilter(String status) {
+        if (status == null || status.isBlank()) {
+            return "";
+        }
+
+        // Nếu project của bạn dùng completed = 2 hoặc = 3 thì để IN (2, 3) là an toàn.
+        return switch (status) {
+            case "pending" -> " AND o.status_transport = 0 ";
+            case "shipping" -> " AND o.status_transport = 1 ";
+            case "done" -> " AND o.status_transport IN (2, 3) ";
+            case "cancelled" -> " AND o.status_transport = 4 ";
+            default -> "";
+        };
+    }
+
+    public Map<String, Object> getRevenueSummary(String fromDate, String toDate, String status,
+                                                 String monthA, String monthB) {
+        String sql = """
+            SELECT
+                (
+                    SELECT COALESCE(SUM(o1.total_price), 0)
+                    FROM orders o1
+                    WHERE DATE(o1.created_at) = CURDATE()
+                      AND o1.status_transport <> 4
+                ) AS today_revenue,
+
+                (
+                    SELECT COALESCE(SUM(o2.total_price), 0)
+                    FROM orders o2
+                    WHERE DATE_FORMAT(o2.created_at, '%Y-%m') = :monthA
+                      AND o2.status_transport <> 4
+                ) AS month_a_revenue,
+
+                (
+                    SELECT COALESCE(SUM(o3.total_price), 0)
+                    FROM orders o3
+                    WHERE DATE_FORMAT(o3.created_at, '%Y-%m') = :monthB
+                      AND o3.status_transport <> 4
+                ) AS month_b_revenue,
+
+                COUNT(*) AS total_orders,
+
+                COALESCE(SUM(CASE WHEN o.status_transport = 4 THEN 1 ELSE 0 END), 0) AS cancelled_orders,
+
+                COALESCE(
+                    ROUND(
+                        SUM(CASE WHEN o.status_transport = 4 THEN 1 ELSE 0 END) * 100.0 / NULLIF(COUNT(*), 0),
+                        2
+                    ),
+                    0
+                ) AS cancel_rate
+            FROM orders o
+            """ + buildDateAndStatusFilter(fromDate, toDate, status);
+
+        return get().withHandle(handle -> {
+            Query query = handle.createQuery(sql)
+                    .bind("monthA", monthA)
+                    .bind("monthB", monthB);
+
+            bindDateFilters(query, fromDate, toDate);
+            return query.mapToMap().one();
+        });
+    }
+
+    public List<Map<String, Object>> getRevenueByDate(String fromDate, String toDate, String status) {
+        String sql = """
+            SELECT
+                DATE(o.created_at) AS order_date,
+                COUNT(*) AS total_orders,
+                COALESCE(SUM(o.total_price), 0) AS gross_revenue,
+                COALESCE(SUM(CASE WHEN o.status_transport = 4 THEN 1 ELSE 0 END), 0) AS cancelled_orders,
+                COALESCE(SUM(CASE WHEN o.status_transport = 4 THEN o.total_price ELSE 0 END), 0) AS cancelled_value,
+                COALESCE(SUM(CASE WHEN o.status_transport <> 4 THEN o.total_price ELSE 0 END), 0) AS net_revenue
+            FROM orders o
+            """ + buildDateAndStatusFilter(fromDate, toDate, status) + """
+            GROUP BY DATE(o.created_at)
+            ORDER BY DATE(o.created_at) DESC
+            """;
+
+        return get().withHandle(handle -> {
+            Query query = handle.createQuery(sql);
+            bindDateFilters(query, fromDate, toDate);
+            return query.mapToMap().list();
+        });
+    }
+
+    public List<Map<String, Object>> getTopSellingProducts(String fromDate, String toDate, String status, int limit) {
+        String sql = """
+            SELECT
+                oi.product_id AS product_id,
+                oi.product_name AS product_name,
+                COALESCE(SUM(oi.quantity), 0) AS sold_qty,
+                COALESCE(SUM(oi.price * oi.quantity), 0) AS revenue
+            FROM order_items oi
+            JOIN orders o ON o.id = oi.order_id
+            """ + buildDateAndStatusFilter(fromDate, toDate, status) + """
+              AND o.status_transport <> 4
+            GROUP BY oi.product_id, oi.product_name
+            ORDER BY sold_qty DESC, revenue DESC
+            LIMIT :limit
+            """;
+
+        return get().withHandle(handle -> {
+            Query query = handle.createQuery(sql).bind("limit", limit);
+            bindDateFilters(query, fromDate, toDate);
+            return query.mapToMap().list();
+        });
+    }
+
+    public Map<String, Object> getOrderStatusStats(String fromDate, String toDate) {
+        String sql = """
+            SELECT
+                COALESCE(SUM(CASE WHEN o.status_transport = 0 THEN 1 ELSE 0 END), 0) AS pending_orders,
+                COALESCE(SUM(CASE WHEN o.status_transport = 1 THEN 1 ELSE 0 END), 0) AS shipping_orders,
+                COALESCE(SUM(CASE WHEN o.status_transport IN (2, 3) THEN 1 ELSE 0 END), 0) AS completed_orders,
+                COALESCE(SUM(CASE WHEN o.status_transport = 4 THEN 1 ELSE 0 END), 0) AS cancelled_orders
+            FROM orders o
+            """ + buildDateAndStatusFilter(fromDate, toDate, null);
+
+        return get().withHandle(handle -> {
+            Query query = handle.createQuery(sql);
+            bindDateFilters(query, fromDate, toDate);
+            return query.mapToMap().one();
+        });
+    }
+
+    public List<Map<String, Object>> getProductMonthComparison(String monthA, String monthB, int limit) {
+        String sql = """
+            SELECT
+                oi.product_id AS product_id,
+                oi.product_name AS product_name,
+
+                COALESCE(SUM(
+                    CASE
+                        WHEN DATE_FORMAT(o.created_at, '%Y-%m') = :monthA
+                         AND o.status_transport <> 4
+                        THEN oi.quantity ELSE 0
+                    END
+                ), 0) AS month_a_qty,
+
+                COALESCE(SUM(
+                    CASE
+                        WHEN DATE_FORMAT(o.created_at, '%Y-%m') = :monthB
+                         AND o.status_transport <> 4
+                        THEN oi.quantity ELSE 0
+                    END
+                ), 0) AS month_b_qty,
+
+                COALESCE(SUM(
+                    CASE
+                        WHEN DATE_FORMAT(o.created_at, '%Y-%m') = :monthA
+                         AND o.status_transport <> 4
+                        THEN oi.price * oi.quantity ELSE 0
+                    END
+                ), 0) AS month_a_revenue,
+
+                COALESCE(SUM(
+                    CASE
+                        WHEN DATE_FORMAT(o.created_at, '%Y-%m') = :monthB
+                         AND o.status_transport <> 4
+                        THEN oi.price * oi.quantity ELSE 0
+                    END
+                ), 0) AS month_b_revenue
+
+            FROM order_items oi
+            JOIN orders o ON o.id = oi.order_id
+            GROUP BY oi.product_id, oi.product_name
+            HAVING month_a_qty > 0 OR month_b_qty > 0
+            ORDER BY month_b_qty DESC, month_b_revenue DESC
+            LIMIT :limit
+            """;
+
+        return get().withHandle(handle ->
+                handle.createQuery(sql)
+                        .bind("monthA", monthA)
+                        .bind("monthB", monthB)
+                        .bind("limit", limit)
+                        .mapToMap()
+                        .list()
+        );
+    }
+
+    public List<Map<String, Object>> getImportBatchSalesReport(int limit) {
+        String sql = """
+            WITH inbound_ranked AS (
+                SELECT
+                    i.id,
+                    i.receipt_code,
+                    i.supplier_name,
+                    i.product_id,
+                    p.name AS product_name,
+                    i.pre_stock_qty,
+                    i.import_qty,
+                    i.unit_cost,
+                    i.total_price,
+                    i.created_at,
+                    LEAD(i.created_at) OVER (
+                        PARTITION BY i.product_id
+                        ORDER BY i.created_at
+                    ) AS next_import_at
+                FROM inbound_details i
+                LEFT JOIN products p ON p.id = i.product_id
+            )
+            SELECT
+                ib.id AS inbound_id,
+                ib.receipt_code AS receipt_code,
+                COALESCE(ib.supplier_name, '') AS supplier_name,
+                ib.product_id AS product_id,
+                COALESCE(ib.product_name, CONCAT('Sản phẩm #', ib.product_id)) AS product_name,
+                ib.pre_stock_qty AS pre_stock_qty,
+                ib.import_qty AS import_qty,
+                ib.unit_cost AS unit_cost,
+                ib.total_price AS total_price,
+                ib.created_at AS imported_at,
+                ib.next_import_at AS next_import_at,
+
+                COALESCE(SUM(
+                    CASE
+                        WHEN o.status_transport <> 4 THEN oi.quantity
+                        ELSE 0
+                    END
+                ), 0) AS sold_qty_since_import,
+
+                COALESCE(COUNT(DISTINCT
+                    CASE
+                        WHEN o.status_transport <> 4 THEN o.id
+                        ELSE NULL
+                    END
+                ), 0) AS sold_order_count,
+
+                GREATEST(
+                    ib.import_qty - COALESCE(SUM(
+                        CASE
+                            WHEN o.status_transport <> 4 THEN oi.quantity
+                            ELSE 0
+                        END
+                    ), 0),
+                    0
+                ) AS estimated_remaining_qty
+
+            FROM inbound_ranked ib
+            LEFT JOIN order_items oi
+                ON oi.product_id = ib.product_id
+            LEFT JOIN orders o
+                ON o.id = oi.order_id
+               AND o.created_at >= ib.created_at
+               AND (ib.next_import_at IS NULL OR o.created_at < ib.next_import_at)
+
+            GROUP BY
+                ib.id,
+                ib.receipt_code,
+                ib.supplier_name,
+                ib.product_id,
+                ib.product_name,
+                ib.pre_stock_qty,
+                ib.import_qty,
+                ib.unit_cost,
+                ib.total_price,
+                ib.created_at,
+                ib.next_import_at
+
+            ORDER BY ib.created_at DESC
+            LIMIT :limit
+            """;
+
+        return get().withHandle(handle ->
+                handle.createQuery(sql)
+                        .bind("limit", limit)
+                        .mapToMap()
+                        .list()
         );
     }
 }
