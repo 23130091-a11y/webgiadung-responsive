@@ -10,7 +10,8 @@ import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.time.YearMonth;
 import java.time.format.DateTimeFormatter;
-
+import java.util.List;
+import java.util.Map;
 @WebServlet(name = "AdminRevenueServlet", value = "/admin/revenue")
 public class AdminRevenueServlet extends HttpServlet {
 
@@ -44,8 +45,42 @@ public class AdminRevenueServlet extends HttpServlet {
         request.setAttribute("monthALabel", formatMonthLabel(monthA));
         request.setAttribute("monthBLabel", formatMonthLabel(monthB));
 
-        request.setAttribute("revenueSummary",
-                orderDao.getRevenueSummary(fromDate, toDate, status, monthA, monthB));
+        Map<String, Object> revenueSummary =
+                orderDao.getRevenueSummary(fromDate, toDate, status, monthA, monthB);
+
+        Map<String, Object> orderStatusStats =
+                orderDao.getOrderStatusStats(fromDate, toDate);
+
+        double totalOrders = 0;
+        double completedOrders = 0;
+
+        if (revenueSummary.get("total_orders") != null) {
+            totalOrders = ((Number) revenueSummary.get("total_orders")).doubleValue();
+        }
+
+        if (orderStatusStats.get("completed_orders") != null) {
+            completedOrders = ((Number) orderStatusStats.get("completed_orders")).doubleValue();
+        }
+
+        double completionRate = totalOrders == 0 ? 0 : (completedOrders * 100.0 / totalOrders);
+
+        List<Map<String, Object>> monthlyRevenueChart = orderDao.getMonthlyRevenueChart(12);
+        double maxMonthlyRevenue = 0;
+
+        for (Map<String, Object> item : monthlyRevenueChart) {
+            double revenue = item.get("revenue") == null ? 0 : ((Number) item.get("revenue")).doubleValue();
+            if (revenue > maxMonthlyRevenue) {
+                maxMonthlyRevenue = revenue;
+            }
+        }
+
+        for (Map<String, Object> item : monthlyRevenueChart) {
+            double revenue = item.get("revenue") == null ? 0 : ((Number) item.get("revenue")).doubleValue();
+            double heightPercent = maxMonthlyRevenue == 0 ? 8 : Math.max(8, revenue * 100.0 / maxMonthlyRevenue);
+            item.put("heightPercent", heightPercent);
+        }
+
+        request.setAttribute("revenueSummary", revenueSummary);
 
         request.setAttribute("dailyRevenueList",
                 orderDao.getRevenueByDate(fromDate, toDate, status));
@@ -53,8 +88,9 @@ public class AdminRevenueServlet extends HttpServlet {
         request.setAttribute("topSellingProducts",
                 orderDao.getTopSellingProducts(fromDate, toDate, status, 10));
 
-        request.setAttribute("orderStatusStats",
-                orderDao.getOrderStatusStats(fromDate, toDate));
+        request.setAttribute("orderStatusStats", orderStatusStats);
+        request.setAttribute("completionRate", completionRate);
+        request.setAttribute("monthlyRevenueChart", monthlyRevenueChart);
 
         request.setAttribute("productMonthCompareList",
                 orderDao.getProductMonthComparison(monthA, monthB, 20));

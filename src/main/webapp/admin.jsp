@@ -32,7 +32,7 @@
     <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/grid.css">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/base.css">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/style.css">
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/admin.css?v=199">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/admin.css?v=200">
     <!-- Include stylesheet -->
     <link href="https://cdn.jsdelivr.net/npm/quill@2.0.3/dist/quill.snow.css" rel="stylesheet" />
 </head>
@@ -409,8 +409,34 @@
                                             <fmt:formatNumber value="${revenueSummary['cancel_rate']}" type="number" groupingUsed="true" minFractionDigits="0" maxFractionDigits="2"/>%
                                         </strong>
                                     </div>
+                                    <div class="revenue-box revenue-box--success-soft">
+                                        <span class="revenue-box__label">Tỉ lệ hoàn tất</span>
+                                        <strong class="revenue-box__value revenue-box__value--success">
+                                            <fmt:formatNumber value="${completionRate}" type="number" groupingUsed="true"
+                                                              minFractionDigits="1" maxFractionDigits="1"/>%
+                                        </strong>
+                                    </div>
                                 </div>
+                               <div class="revenue-table-wrap revenue-chart-wrap">
+                                   <div class="revenue-panel revenue-panel--chart">
+                                       <h4 class="revenue-panel__title revenue-panel__title--chart">Doanh thu 12 tháng gần nhất</h4>
 
+                                       <div class="revenue-month-chart revenue-month-chart--full">
+                                           <c:forEach var="item" items="${monthlyRevenueChart}" varStatus="loop">
+                                               <div class="revenue-month-chart__item">
+                                                   <div class="revenue-month-chart__tooltip">
+                                                       <fmt:formatNumber value="${item['revenue']}" type="number" groupingUsed="true"/> VND
+                                                   </div>
+                                                   <div class="revenue-month-chart__bar-wrap">
+                                                       <div class="revenue-month-chart__bar ${loop.last ? 'revenue-month-chart__bar--active' : ''}"
+                                                            style="height: ${item['heightPercent']}%;"></div>
+                                                   </div>
+                                                   <div class="revenue-month-chart__label">${item['month_label']}</div>
+                                               </div>
+                                           </c:forEach>
+                                       </div>
+                                   </div>
+                               </div>
                                 <div class="revenue-table-wrap">
                                     <h4 class="revenue-panel__title">Doanh thu theo ngày</h4>
                                     <table class="revenue-table">
