@@ -9,7 +9,7 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <%@ taglib prefix="c" uri="jakarta.tags.core" %>
 <%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
-
+<%@ taglib prefix="fmt" uri="jakarta.tags.fmt" %>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -70,7 +70,10 @@
 
                         <ul class="manage-nav__list">
                             <li class="manage-nav__item">
-                                <a href="#config" class="manage-nav__link">Quản lý doanh thu</a>
+                                <a href="${pageContext.request.contextPath}/admin/revenue"
+                                   class="manage-nav__link ${tab == 'config' ? 'manage-nav__link--active' : ''}">
+                                    Quản lý doanh thu
+                                </a>
                             </li>
                             <li class="manage-nav__item">
                                 <a href="#warehouse" class="manage-nav__link">Vận hành kho</a>
@@ -321,65 +324,95 @@
                                     <div>
                                         <h3 class="revenue-title">Báo cáo doanh thu cửa hàng</h3>
                                         <p class="revenue-subtitle">
-                                            Theo dõi tổng doanh thu, số đơn hàng, đơn hoàn tất và hiệu suất bán hàng.
+                                            Theo dõi doanh thu, tỷ lệ hủy, so sánh bán ra theo tháng và hiệu quả từng đợt nhập hàng.
                                         </p>
                                     </div>
                                 </div>
 
-
-                                <form id="revenueFilterForm" class="revenue-filter" method="get" action="#">
+                                <form class="revenue-filter" method="get" action="${pageContext.request.contextPath}/admin/revenue">
                                     <div class="revenue-filter__group">
                                         <label>Từ ngày</label>
-                                        <input type="date" name="fromDate">
+                                        <input type="date" name="fromDate" value="${fromDate}">
                                     </div>
 
                                     <div class="revenue-filter__group">
                                         <label>Đến ngày</label>
-                                        <input type="date" name="toDate">
+                                        <input type="date" name="toDate" value="${toDate}">
                                     </div>
 
                                     <div class="revenue-filter__group">
                                         <label>Trạng thái đơn</label>
                                         <select name="status">
-                                            <option value="">Tất cả</option>
-                                            <option value="done">Hoàn tất</option>
-                                            <option value="shipping">Đang giao</option>
-                                            <option value="pending">Chờ xử lý</option>
-                                            <option value="cancelled">Đã hủy</option>
+                                            <option value="" ${empty status ? 'selected' : ''}>Tất cả</option>
+                                            <option value="done" ${status == 'done' ? 'selected' : ''}>Hoàn tất</option>
+                                            <option value="shipping" ${status == 'shipping' ? 'selected' : ''}>Đang giao</option>
+                                            <option value="pending" ${status == 'pending' ? 'selected' : ''}>Chờ xử lý</option>
+                                            <option value="cancelled" ${status == 'cancelled' ? 'selected' : ''}>Đã hủy</option>
                                         </select>
+                                    </div>
+
+                                    <div class="revenue-filter__group">
+                                        <label>Tháng A</label>
+                                        <input type="month" name="monthA" value="${monthA}">
+                                    </div>
+
+                                    <div class="revenue-filter__group">
+                                        <label>Tháng B</label>
+                                        <input type="month" name="monthB" value="${monthB}">
                                     </div>
 
                                     <div class="revenue-filter__actions">
                                         <button type="submit" class="btn-ui btn-ui--primary">Lọc dữ liệu</button>
-                                        <button type="reset" class="btn-ui btn-ui--ghost">Đặt lại</button>
+                                        <a href="${pageContext.request.contextPath}/admin/revenue" class="btn-ui btn-ui--ghost">Đặt lại</a>
                                     </div>
                                 </form>
-
 
                                 <div class="revenue-summary">
                                     <div class="revenue-box">
                                         <span class="revenue-box__label">Doanh thu hôm nay</span>
-                                        <strong class="revenue-box__value">15.250.000 VND</strong>
+                                        <strong class="revenue-box__value">
+                                            <fmt:formatNumber value="${revenueSummary['today_revenue']}" type="number" groupingUsed="true"/> VND
+                                        </strong>
                                     </div>
 
                                     <div class="revenue-box">
-                                        <span class="revenue-box__label">Doanh thu tháng này</span>
-                                        <strong class="revenue-box__value">248.900.000 VND</strong>
+                                        <span class="revenue-box__label">Doanh thu tháng ${monthALabel}</span>
+                                        <strong class="revenue-box__value">
+                                            <fmt:formatNumber value="${revenueSummary['month_a_revenue']}" type="number" groupingUsed="true"/> VND
+                                        </strong>
+                                    </div>
+
+                                    <div class="revenue-box">
+                                        <span class="revenue-box__label">Doanh thu tháng ${monthBLabel}</span>
+                                        <strong class="revenue-box__value">
+                                            <fmt:formatNumber value="${revenueSummary['month_b_revenue']}" type="number" groupingUsed="true"/> VND
+                                        </strong>
                                     </div>
 
                                     <div class="revenue-box">
                                         <span class="revenue-box__label">Tổng đơn hàng</span>
-                                        <strong class="revenue-box__value">186</strong>
+                                        <strong class="revenue-box__value">
+                                            <fmt:formatNumber value="${revenueSummary['total_orders']}" type="number" groupingUsed="true"/>
+                                        </strong>
                                     </div>
 
-                                  <div class="revenue-box revenue-box--danger-soft">
-                                      <span class="revenue-box__label">Đơn đã hủy</span>
-                                      <strong class="revenue-box__value revenue-box__value--danger" id="revenueCancelledOrdersValue">0</strong>
-                                  </div>
+                                    <div class="revenue-box revenue-box--danger-soft">
+                                        <span class="revenue-box__label">Đơn đã hủy</span>
+                                        <strong class="revenue-box__value revenue-box__value--danger">
+                                            <fmt:formatNumber value="${revenueSummary['cancelled_orders']}" type="number" groupingUsed="true"/>
+                                        </strong>
+                                    </div>
+
+                                    <div class="revenue-box revenue-box--danger-soft">
+                                        <span class="revenue-box__label">Tỉ lệ hủy đơn</span>
+                                        <strong class="revenue-box__value revenue-box__value--danger">
+                                            <fmt:formatNumber value="${revenueSummary['cancel_rate']}" type="number" groupingUsed="true" minFractionDigits="0" maxFractionDigits="2"/>%
+                                        </strong>
+                                    </div>
                                 </div>
 
-
                                 <div class="revenue-table-wrap">
+                                    <h4 class="revenue-panel__title">Doanh thu theo ngày</h4>
                                     <table class="revenue-table">
                                         <thead>
                                         <tr>
@@ -392,35 +425,60 @@
                                             <th>Trạng thái nổi bật</th>
                                         </tr>
                                         </thead>
-                                        <tbody id="revenueTableBody">
-                                        <tr>
-                                            <td colspan="7" class="revenue-empty">Đang tải dữ liệu đơn hàng...</td>
-                                        </tr>
+                                        <tbody>
+                                        <c:choose>
+                                            <c:when test="${empty dailyRevenueList}">
+                                                <tr>
+                                                    <td colspan="7" class="revenue-empty">Không có dữ liệu phù hợp.</td>
+                                                </tr>
+                                            </c:when>
+                                            <c:otherwise>
+                                                <c:forEach var="row" items="${dailyRevenueList}">
+                                                    <tr>
+                                                        <td>${row['order_date']}</td>
+                                                        <td><fmt:formatNumber value="${row['total_orders']}" type="number" groupingUsed="true"/></td>
+                                                        <td><fmt:formatNumber value="${row['gross_revenue']}" type="number" groupingUsed="true"/> VND</td>
+                                                        <td><fmt:formatNumber value="${row['cancelled_orders']}" type="number" groupingUsed="true"/></td>
+                                                        <td><fmt:formatNumber value="${row['cancelled_value']}" type="number" groupingUsed="true"/> VND</td>
+                                                        <td><fmt:formatNumber value="${row['net_revenue']}" type="number" groupingUsed="true"/> VND</td>
+                                                        <td>
+                                                            <c:choose>
+                                                                <c:when test="${row['cancelled_orders'] == 0}">
+                                                                    <span class="revenue-badge revenue-badge--success">Ổn định</span>
+                                                                </c:when>
+                                                                <c:when test="${row['cancelled_orders'] < 3}">
+                                                                    <span class="revenue-badge revenue-badge--warning">Có hủy nhẹ</span>
+                                                                </c:when>
+                                                                <c:otherwise>
+                                                                    <span class="revenue-badge revenue-badge--danger">Hủy cao</span>
+                                                                </c:otherwise>
+                                                            </c:choose>
+                                                        </td>
+                                                    </tr>
+                                                </c:forEach>
+                                            </c:otherwise>
+                                        </c:choose>
                                         </tbody>
                                     </table>
                                 </div>
-
 
                                 <div class="revenue-grid">
                                     <div class="revenue-panel">
                                         <h4 class="revenue-panel__title">Sản phẩm bán chạy</h4>
                                         <ul class="revenue-list">
-                                            <li>
-                                                <span>Nồi chiên không dầu Lock&Lock</span>
-                                                <strong>45.000.000 VND</strong>
-                                            </li>
-                                            <li>
-                                                <span>Máy xay sinh tố Philips</span>
-                                                <strong>31.500.000 VND</strong>
-                                            </li>
-                                            <li>
-                                                <span>Bếp điện đôi Sunhouse</span>
-                                                <strong>28.200.000 VND</strong>
-                                            </li>
-                                            <li>
-                                                <span>Nồi cơm điện Sharp</span>
-                                                <strong>24.700.000 VND</strong>
-                                            </li>
+                                            <c:choose>
+                                                <c:when test="${empty topSellingProducts}">
+                                                    <li><span>Chưa có dữ liệu</span><strong>0</strong></li>
+                                                </c:when>
+                                                <c:otherwise>
+                                                    <c:forEach var="item" items="${topSellingProducts}">
+                                                        <li>
+                                                            <span>${item['product_name']} (<fmt:formatNumber value="${item['sold_qty']}" type="number" groupingUsed="true"/> SP)</span>
+                                                            <strong><fmt:formatNumber value="${item['revenue']}" type="number" groupingUsed="true"/> VND</strong>
+                                                        </li>
+                                                    </c:forEach>
+                                                </c:otherwise>
+                                            </c:choose>
                                         </ul>
                                     </div>
 
@@ -429,22 +487,116 @@
                                         <ul class="revenue-list">
                                             <li>
                                                 <span>Đơn hoàn tất</span>
-                                                <strong>152</strong>
+                                                <strong><fmt:formatNumber value="${orderStatusStats['completed_orders']}" type="number" groupingUsed="true"/></strong>
                                             </li>
                                             <li>
                                                 <span>Đơn đang giao</span>
-                                                <strong>21</strong>
+                                                <strong><fmt:formatNumber value="${orderStatusStats['shipping_orders']}" type="number" groupingUsed="true"/></strong>
                                             </li>
                                             <li>
                                                 <span>Đơn chờ xử lý</span>
-                                                <strong>9</strong>
+                                                <strong><fmt:formatNumber value="${orderStatusStats['pending_orders']}" type="number" groupingUsed="true"/></strong>
                                             </li>
                                             <li>
                                                 <span>Đơn đã hủy</span>
-                                                <strong id="revenueStatusCancelled">0</strong>
+                                                <strong><fmt:formatNumber value="${orderStatusStats['cancelled_orders']}" type="number" groupingUsed="true"/></strong>
                                             </li>
                                         </ul>
                                     </div>
+                                </div>
+
+                                <div class="revenue-table-wrap">
+                                    <h4 class="revenue-panel__title">So sánh bán ra theo tháng (${monthALabel} vs ${monthBLabel})</h4>
+                                    <table class="revenue-table">
+                                        <thead>
+                                        <tr>
+                                            <th>Sản phẩm</th>
+                                            <th>SL tháng trước</th>
+                                            <th>SL tháng này</th>
+                                            <th>Chênh lệch</th>
+                                            <th>DT tháng trước</th>
+                                            <th>DT tháng này</th>
+                                        </tr>
+                                        </thead>
+                                        <tbody>
+                                        <c:choose>
+                                            <c:when test="${empty productMonthCompareList}">
+                                                <tr>
+                                                    <td colspan="6" class="revenue-empty">Chưa có dữ liệu so sánh theo tháng.</td>
+                                                </tr>
+                                            </c:when>
+                                            <c:otherwise>
+                                                <c:forEach var="item" items="${productMonthCompareList}">
+                                                    <tr>
+                                                        <td>${item['product_name']}</td>
+                                                        <td><fmt:formatNumber value="${item['month_a_qty']}" type="number" groupingUsed="true"/></td>
+                                                        <td><fmt:formatNumber value="${item['month_b_qty']}" type="number" groupingUsed="true"/></td>
+                                                        <td>
+                                                            <c:choose>
+                                                                <c:when test="${item['month_b_qty'] > item['month_a_qty']}">
+                                                                    <span class="revenue-badge revenue-badge--success">
+                                                                       +<fmt:formatNumber value="${item['month_b_qty'] - item['month_a_qty']}" type="number" groupingUsed="true"/>
+                                                                    </span>
+                                                                </c:when>
+                                                                <c:when test="${item['month_b_qty'] < item['month_a_qty']}">
+                                                                    <span class="revenue-badge revenue-badge--danger">
+                                                                        <fmt:formatNumber value="${item['month_b_qty'] - item['month_a_qty']}" type="number" groupingUsed="true"/>
+                                                                    </span>
+                                                                </c:when>
+                                                                <c:otherwise>
+                                                                    <span class="revenue-badge revenue-badge--info">Không đổi</span>
+                                                                </c:otherwise>
+                                                            </c:choose>
+                                                        </td>
+                                                        <td><fmt:formatNumber value="${item['month_a_revenue']}" type="number" groupingUsed="true"/> VND</td>
+                                                        <td><fmt:formatNumber value="${item['month_b_revenue']}" type="number" groupingUsed="true"/> VND</td>
+                                                    </tr>
+                                                </c:forEach>
+                                            </c:otherwise>
+                                        </c:choose>
+                                        </tbody>
+                                    </table>
+                                </div>
+
+                                <div class="revenue-table-wrap">
+                                    <h4 class="revenue-panel__title">Theo dõi bán ra theo từng đợt nhập</h4>
+                                    <table class="revenue-table">
+                                        <thead>
+                                        <tr>
+                                            <th>Ngày nhập</th>
+                                            <th>Mã phiếu</th>
+                                            <th>Sản phẩm</th>
+                                            <th>SL nhập</th>
+                                            <th>Đã bán từ đợt này</th>
+                                            <th>Số đơn bán</th>
+                                            <th>Còn ước tính</th>
+                                            <th>Giá nhập</th>
+                                        </tr>
+                                        </thead>
+                                        <tbody>
+                                        <c:choose>
+                                            <c:when test="${empty importBatchSalesList}">
+                                                <tr>
+                                                    <td colspan="8" class="revenue-empty">Chưa có dữ liệu đợt nhập.</td>
+                                                </tr>
+                                            </c:when>
+                                            <c:otherwise>
+                                                <c:forEach var="item" items="${importBatchSalesList}">
+                                                    <tr>
+                                                        <td>${item['imported_at']}</td>
+                                                        <td>${item['receipt_code']}</td>
+                                                        <td>${item['product_name']}</td>
+                                                        <td><fmt:formatNumber value="${item['import_qty']}" type="number" groupingUsed="true"/></td>
+                                                        <td><fmt:formatNumber value="${item['sold_qty_since_import']}" type="number" groupingUsed="true"/></td>
+                                                        <td><fmt:formatNumber value="${item['sold_order_count']}" type="number" groupingUsed="true"/></td>
+                                                        <td><fmt:formatNumber value="${item['estimated_remaining_qty']}" type="number" groupingUsed="true"/></td>
+                                                        <td><fmt:formatNumber value="${item['total_price']}" type="number" groupingUsed="true"/> VND</td>
+                                                    </tr>
+                                                </c:forEach>
+                                            </c:otherwise>
+                                        </c:choose>
+                                        </tbody>
+                                    </table>
                                 </div>
                             </div>
                         </div>
@@ -1944,7 +2096,7 @@
         menuLinks.forEach(link => {
             const href = link.getAttribute("href") || "";
 
-            if (targetKey === "config" && href === "#config") {
+            if (targetKey === "config" && (href === "#config" || href.includes("/admin/revenue"))) {
                 link.classList.add("manage-nav__link--active");
             }
             if (targetKey === "news" && href === "#news") {
