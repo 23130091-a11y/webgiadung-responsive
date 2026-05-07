@@ -49,6 +49,44 @@
         <div class="cart-container">
             <c:set var="cart" value="${sessionScope.cart}" />
             <div id="cart-content-wrapper">
+
+                <c:if test="${not empty sessionScope.successMsg}">
+                    <div class="alert alert--success" style="
+                        background-color: #d4edda;
+                        color: #155724;
+                        padding: 15px 20px;
+                        border: 1px solid #c3e6cb;
+                        border-radius: 8px;
+                        margin-bottom: 20px;
+                        display: flex;
+                        align-items: center;
+                        font-size: 1.5rem;">
+                        <i class="fa-solid fa-circle-check" style="margin-right: 12px; font-size: 2rem;"></i>
+                        <span style="flex: 1;">${sessionScope.successMsg}</span>
+                        <button type="button" onclick="this.parentElement.style.display='none'" style="background:none; border:none; cursor:pointer; color:#155724; font-size:2rem;">&times;</button>
+                    </div>
+                    <c:remove var="successMsg" scope="session" />
+                </c:if>
+
+                <c:if test="${not empty sessionScope.errorMsg}">
+                    <div class="alert alert--warning" style="
+                        background-color: #fff3cd;
+                        color: #856404;
+                        padding: 15px 20px;
+                        border: 1px solid #ffeeba;
+                        border-radius: 8px;
+                        margin-bottom: 20px;
+                        display: flex;
+                        align-items: center;
+                        font-size: 1.5rem;
+                        white-space: pre-wrap;">
+                        <i class="fa-solid fa-triangle-exclamation" style="margin-right: 12px; font-size: 2rem;"></i>
+                        <span style="flex: 1;">${sessionScope.errorMsg}</span>
+                        <button type="button" onclick="this.parentElement.style.display='none'" style="background:none; border:none; cursor:pointer; color:#856404; font-size:2rem;">&times;</button>
+                    </div>
+                    <c:remove var="errorMsg" scope="session" />
+                </c:if>
+
                 <c:if test="${not empty sessionScope.error_msg}">
                     <div class="cart-error-alert" style="
                         background-color: #fff2f2;

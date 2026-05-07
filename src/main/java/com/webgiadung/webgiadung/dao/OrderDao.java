@@ -143,13 +143,14 @@ public class OrderDao extends BaseDao {
             if (updated <= 0) return false;
 
             String paymentMethod = (String) order.get("payment_method");
-            int statusPayment = (int) order.get("status_payment");
+            int statusPayment = ((Number) order.get("status_payment")).intValue();
+            double totalPrice = ((Number) order.get("total_price")).doubleValue();
 
             if ("e-wallet".equalsIgnoreCase(paymentMethod) && statusPayment == 1) {
                 handle.createUpdate("INSERT INTO refunds (order_id, amount, reason, status) " +
                                 "VALUES (:oid, :amount, :reason, 0)")
                         .bind("oid", orderId)
-                        .bind("amount", order.get("total_price"))
+                        .bind("amount", totalPrice)
                         .bind("reason", "Hủy đơn hàng: " + reason)
                         .execute();
             }
@@ -203,8 +204,9 @@ public class OrderDao extends BaseDao {
             oi.product_id   AS product_id,
             oi.product_name AS name,
             COALESCE(p.image, 'assets/img/no-image.png') AS image,
-            oi.price        AS first_price,
-            (oi.price * oi.quantity) AS total_price,
+            oi.price        AS old_price,
+            p.price_first         AS current_price,
+            p.status        AS product_status,
             oi.quantity     AS quantity
         FROM order_items oi
         LEFT JOIN products p ON p.id = oi.product_id
@@ -379,6 +381,7 @@ public class OrderDao extends BaseDao {
                         .orElse(null)
         );
     }
+
     private String buildDateAndStatusFilter(String fromDate, String toDate, String status) {
         StringBuilder sql = new StringBuilder(" WHERE 1=1 ");
 
