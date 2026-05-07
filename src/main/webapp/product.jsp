@@ -426,7 +426,9 @@
             .then(res => {
                 if (res.status === 401) {
                     alert("Vui lòng đăng nhập để thêm vào giỏ hàng!");
-                    window.location.href = contextPath + '/login';
+                    // Lấy đường dẫn hiện tại, /product?id=2
+                    const currentUrl = window.location.pathname.replace(contextPath, '') + window.location.search;
+                    window.location.href = contextPath + '/login?redirect=' + encodeURIComponent(currentUrl);
                     return null;
                 }
                 return res.json();
@@ -469,7 +471,8 @@
             .then(res => {
                 if (res.status === 401) {
                     alert("Vui lòng đăng nhập để mua ngay!");
-                    window.location.href = contextPath + '/login';
+                    const checkoutAction = '/checkout?ids=' + productId + '&qty=' + qty;
+                    window.location.href = contextPath + '/login?redirect=' + encodeURIComponent(checkoutAction);
                     return null;
                 }
                 return res.json();
