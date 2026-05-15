@@ -53,21 +53,33 @@ public class CheckoutController extends HttpServlet {
         HttpSession session = req.getSession();
 
         User u = (User) req.getSession().getAttribute("user");
+
         if (u == null) {
-            resp.sendRedirect(req.getContextPath() + "/login");
+            String currentUrl = req.getServletPath(); // "/checkout"
+            String query = req.getQueryString(); // "ids=2&qty=1"
+
+            if (query != null) {
+                currentUrl += "?" + query;
+            }
+
+            resp.sendRedirect(req.getContextPath() + "/login?redirect=" + java.net.URLEncoder.encode(currentUrl, "UTF-8"));
             return;
         }
 
         Cart fullCart = (Cart) session.getAttribute("cart");
         if (fullCart == null) fullCart = new Cart();
 
-        if (fullCart.getItems() == null || fullCart.getItems().isEmpty()) {
+        String idsParam = req.getParameter("ids");
+        String buyNowQty = req.getParameter("qty");
+
+        boolean isBuyNow = (idsParam != null && buyNowQty != null);
+        boolean isCartEmpty = (fullCart.getItems() == null || fullCart.getItems().isEmpty());
+
+        if (isCartEmpty && !isBuyNow) {
             resp.sendRedirect(req.getContextPath() + "/cart");
             return;
         }
 
-        String idsParam = req.getParameter("ids");
-        String buyNowQty = req.getParameter("qty");
         Cart orderCart = new Cart();
 
         if(buyNowQty != null && idsParam != null && !idsParam.contains(",")) {

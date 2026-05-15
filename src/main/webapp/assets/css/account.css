@@ -467,3 +467,13 @@
 /*    margin-left: 10px;*/
 /*    cursor: pointer;*/
 /*}*/
+.refund-badge {
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 1.2rem;
+    font-weight: 500;
+    margin-left: 10px;
+}
+.refund-pending { background-color: #fff3e0; color: #ff9800; border: 1px solid #ffe0b2; }
+.refund-success { background-color: #e8f5e9; color: #2e7d32; border: 1px solid #c8e6c9; }
+.refund-rejected { background-color: #ffebee; color: #c62828; border: 1px solid #ffcdd2; }

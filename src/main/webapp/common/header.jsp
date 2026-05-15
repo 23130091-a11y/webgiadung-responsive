@@ -109,7 +109,10 @@
                         </li>
 
                         <li class="navbar__item navbar__item--strong-weight">
-                            <a href="login.jsp" class="navbar__link">Đăng nhập</a>
+                            <a href="${pageContext.request.contextPath}/login?redirect=${requestScope['jakarta.servlet.forward.servlet_path']}${not empty requestScope['jakarta.servlet.forward.query_string'] ? '?' : ''}${requestScope['jakarta.servlet.forward.query_string']}"
+                               class="navbar__link">
+                                Đăng nhập
+                            </a>
                         </li>
                     </c:if>
 

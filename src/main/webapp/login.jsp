@@ -55,8 +55,8 @@
                 <span>hoặc</span>
             </div>
             <!-- Login thường -->
-            <form class="login-form" action="login" method="post" >
-            <input type="hidden" name="redirect" value="${param.redirect}" />
+            <form class="login-form" action="${pageContext.request.contextPath}/login" method="post" >
+                <input type="hidden" name="redirect" value="${not empty redirect ? redirect : param.redirect}" />
                 <h3>Đăng nhập</h3>
 
                 <!-- Xác nhận -->
