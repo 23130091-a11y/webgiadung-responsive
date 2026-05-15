@@ -4669,5 +4669,45 @@
         }
     }
 </script>
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        const startDateInput = document.querySelector('input[name="startDate"]');
+        const endDateInput = document.querySelector('input[name="endDate"]');
+
+        const getLocalToday = () => {
+            const now = new Date();
+            const offset = now.getTimezoneOffset() * 60000;
+            return new Date(now - offset).toISOString().split('T')[0];
+        };
+
+        const today = getLocalToday();
+
+
+        startDateInput.setAttribute('min', today);
+        endDateInput.setAttribute('min', today);
+
+
+        startDateInput.addEventListener('change', function() {
+            const startVal = this.value;
+
+            endDateInput.setAttribute('min', startVal);
+
+            if (endDateInput.value && startVal > endDateInput.value) {
+                alert("Lỗi: Ngày bắt đầu không được sau ngày kết thúc!");
+                this.value = ""; // Xóa giá trị sai
+            }
+        });
+
+        endDateInput.addEventListener('change', function() {
+            const startVal = startDateInput.value;
+            const endVal = this.value;
+
+            if (startVal && endVal < startVal) {
+                alert("Lỗi: Ngày kết thúc không được trước ngày bắt đầu!");
+                this.value = "";
+            }
+        });
+    });
+</script>
 <script src="${pageContext.request.contextPath}/assets/js/script.js"></script>
 </html>

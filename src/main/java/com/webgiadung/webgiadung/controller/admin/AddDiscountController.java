@@ -30,7 +30,6 @@ public class AddDiscountController extends HttpServlet {
         response.setCharacterEncoding("UTF-8");
 
         try {
-
             String name = request.getParameter("eventName");
             String discountValueRaw = request.getParameter("discountValue");
             String startDateRaw = request.getParameter("startDate");
@@ -44,15 +43,39 @@ public class AddDiscountController extends HttpServlet {
                 return;
             }
 
-            int idCate = 0;
-            if ("category".equals(scope)) {
-                idCate = (catIdRaw != null && !catIdRaw.isEmpty()) ? Integer.parseInt(catIdRaw) : 0;
+            double value = Double.parseDouble(discountValueRaw);
+            if (value <= 0) {
+                response.getWriter().write("{\"status\":\"error\", \"message\":\"Mức giảm phải lớn hơn 0!\"}");
+                return;
+            }
+            if ("percentage".equals(type) && value > 100) {
+                response.getWriter().write("{\"status\":\"error\", \"message\":\"Giảm theo phần trăm không được quá 100%!\"}");
+                return;
             }
 
-            double value = Double.parseDouble(discountValueRaw);
+            int idCate = 0;
+            if ("category".equals(scope)) {
+                if (catIdRaw == null || catIdRaw.isEmpty() || "0".equals(catIdRaw)) {
+                    response.getWriter().write("{\"status\":\"error\", \"message\":\"Vui lòng chọn danh mục áp dụng!\"}");
+                    return;
+                }
+                idCate = Integer.parseInt(catIdRaw);
+            }
 
             LocalDateTime start = LocalDate.parse(startDateRaw).atStartOfDay();
             LocalDateTime end = LocalDate.parse(endDateRaw).atTime(23, 59, 59);
+            LocalDateTime todayStart = LocalDate.now().atStartOfDay();
+
+
+            if (start.isBefore(todayStart)) {
+                response.getWriter().write("{\"status\":\"error\", \"message\":\"Ngày bắt đầu không được nhỏ hơn ngày hôm nay!\"}");
+                return;
+            }
+
+            if (start.isAfter(end)) {
+                response.getWriter().write("{\"status\":\"error\", \"message\":\"Lỗi: Ngày bắt đầu phải trước ngày kết thúc!\"}");
+                return;
+            }
 
             Discounts d = new Discounts();
             d.setName(name);
@@ -70,12 +93,16 @@ public class AddDiscountController extends HttpServlet {
                 }
                 response.getWriter().write("{\"status\":\"success\"}");
             } else {
-                response.getWriter().write("{\"status\":\"error\", \"message\":\"Lỗi Database: Không thể lưu Discount\"}");
+                response.getWriter().write("{\"status\":\"error\", \"message\":\"Lỗi hệ thống: Không thể lưu Discount vào database.\"}");
             }
 
+        } catch (java.time.format.DateTimeParseException e) {
+            response.getWriter().write("{\"status\":\"error\", \"message\":\"Ngày tháng không đúng định dạng!\"}");
+        } catch (NumberFormatException e) {
+            response.getWriter().write("{\"status\":\"error\", \"message\":\"Giá trị giảm giá phải là số!\"}");
         } catch (Exception e) {
             e.printStackTrace();
-
-            response.getWriter().write("{\"status\":\"error\", \"message\":\"Lỗi Server: " + e.getMessage() + "\"}");
+            response.getWriter().write("{\"status\":\"error\", \"message\":\"Lỗi không xác định: " + e.getMessage() + "\"}");
         }
-    }}
+    }
+}
