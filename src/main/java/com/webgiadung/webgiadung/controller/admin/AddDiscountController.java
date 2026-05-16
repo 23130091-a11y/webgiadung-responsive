@@ -34,7 +34,10 @@ public class AddDiscountController extends HttpServlet {
             String discountValueRaw = request.getParameter("discountValue");
             String startDateRaw = request.getParameter("startDate");
             String endDateRaw = request.getParameter("endDate");
+
             String scope = request.getParameter("applyScope");
+            String safeScope = (scope != null) ? scope.trim().toLowerCase() : "";
+
             String type = request.getParameter("discountType");
             String catIdRaw = request.getParameter("applyCategories");
 
@@ -48,13 +51,15 @@ public class AddDiscountController extends HttpServlet {
                 response.getWriter().write("{\"status\":\"error\", \"message\":\"Mức giảm phải lớn hơn 0!\"}");
                 return;
             }
+
             if ("percentage".equals(type) && value > 100) {
                 response.getWriter().write("{\"status\":\"error\", \"message\":\"Giảm theo phần trăm không được quá 100%!\"}");
                 return;
             }
 
             int idCate = 0;
-            if ("category".equals(scope)) {
+
+            if ("category".equals(safeScope)) {
                 if (catIdRaw == null || catIdRaw.isEmpty() || "0".equals(catIdRaw)) {
                     response.getWriter().write("{\"status\":\"error\", \"message\":\"Vui lòng chọn danh mục áp dụng!\"}");
                     return;
@@ -65,7 +70,6 @@ public class AddDiscountController extends HttpServlet {
             LocalDateTime start = LocalDate.parse(startDateRaw).atStartOfDay();
             LocalDateTime end = LocalDate.parse(endDateRaw).atTime(23, 59, 59);
             LocalDateTime todayStart = LocalDate.now().atStartOfDay();
-
 
             if (start.isBefore(todayStart)) {
                 response.getWriter().write("{\"status\":\"error\", \"message\":\"Ngày bắt đầu không được nhỏ hơn ngày hôm nay!\"}");
@@ -82,15 +86,25 @@ public class AddDiscountController extends HttpServlet {
             d.setDiscountValue(value);
             d.setStartDate(start);
             d.setEndDate(end);
-            d.setDiscountType("percentage".equals(type) ? "percentage" : "fixed");
             d.setCategoryId(idCate);
+
+            d.setStatus(1);
+
+            if ("percentage".equals(type)) {
+                d.setDiscountType("percentage");
+            } else {
+                d.setDiscountType("fixed");
+            }
 
             int newDiscountId = discountService.insertDiscount(d);
 
             if (newDiscountId > 0) {
-                if ("category".equals(scope) && idCate > 0) {
+                if ("category".equals(safeScope) && idCate > 0) {
                     productService.applyDiscountToCategory(idCate, newDiscountId);
+                } else if ("all".equals(safeScope)) {
+                    productService.applyDiscountToAll(newDiscountId);
                 }
+
                 response.getWriter().write("{\"status\":\"success\"}");
             } else {
                 response.getWriter().write("{\"status\":\"error\", \"message\":\"Lỗi hệ thống: Không thể lưu Discount vào database.\"}");
