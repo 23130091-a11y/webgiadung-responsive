@@ -4,12 +4,13 @@ import java.io.Serializable;
 import java.time.LocalDateTime;
 
 public class ProductReview implements Serializable {
-    private int id; // id review
-    private int productId; // id sản phẩm
-    private int userId; // id user
-    private double rating; // đánh giá 0-5 sao
-    private String comment; // bình luận
-    private LocalDateTime createdAt; // ngày tạo đánh giá
+    private int id;
+    private int productId;
+    private int userId;
+    private double rating;
+    private String comment;
+    private LocalDateTime createdAt;
+    private String authorName; // thêm mới
 
     public ProductReview() {}
 
@@ -22,53 +23,26 @@ public class ProductReview implements Serializable {
         this.createdAt = createdAt;
     }
 
-    public int getId() {
-        return id;
-    }
+    public int getId() { return id; }
+    public void setId(int id) { this.id = id; }
 
-    public void setId(int id) {
-        this.id = id;
-    }
+    public int getProductId() { return productId; }
+    public void setProductId(int productId) { this.productId = productId; }
 
-    public int getProductId() {
-        return productId;
-    }
+    public int getUserId() { return userId; }
+    public void setUserId(int userId) { this.userId = userId; }
 
-    public void setProductId(int productId) {
-        this.productId = productId;
-    }
+    public double getRating() { return rating; }
+    public void setRating(double rating) { this.rating = rating; }
 
-    public int getUserId() {
-        return userId;
-    }
+    public String getComment() { return comment; }
+    public void setComment(String comment) { this.comment = comment; }
 
-    public void setUserId(int userId) {
-        this.userId = userId;
-    }
+    public LocalDateTime getCreatedAt() { return createdAt; }
+    public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
 
-    public double getRating() {
-        return rating;
-    }
-
-    public void setRating(double rating) {
-        this.rating = rating;
-    }
-
-    public String getComment() {
-        return comment;
-    }
-
-    public void setComment(String comment) {
-        this.comment = comment;
-    }
-
-    public LocalDateTime getCreatedAt() {
-        return createdAt;
-    }
-
-    public void setCreatedAt(LocalDateTime createdAt) {
-        this.createdAt = createdAt;
-    }
+    public String getAuthorName() { return authorName; }
+    public void setAuthorName(String authorName) { this.authorName = authorName; }
 
     @Override
     public String toString() {
@@ -79,6 +53,7 @@ public class ProductReview implements Serializable {
                 ", rating=" + rating +
                 ", comment='" + comment + '\'' +
                 ", createdAt=" + createdAt +
+                ", authorName='" + authorName + '\'' +
                 '}';
     }
 }
