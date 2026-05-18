@@ -165,16 +165,9 @@
                                     </div>
 
                                     <div class="colum price-col">
-                                        <div class="price-wrapper ">
-                                            <div class="old-price-box">
-                                                <fmt:formatNumber value="${item.originalPrice}" type="number"/> đ
-                                            </div>
-                                            <div class="new-price-box">
-                                                    <span class="new-price" id="price-${item.product.id}">
-                                                        <fmt:formatNumber value="${item.discountPrice}" type="number"/>
-                                                    </span> đ
-                                            </div>
-                                        </div>
+                                        <span class="new-price" id="price-${item.product.id}">
+                                            <fmt:formatNumber value="${item.discountPrice}" type="number"/> đ
+                                        </span>
                                     </div>
 
                                     <div class="colum qty-col item-qty">
@@ -184,9 +177,9 @@
                                     </div>
 
                                     <div class="colum total-col">
-                                            <span id="subtotal-${item.product.id}">
-                                                <fmt:formatNumber value="${item.totalPrice}" type="number"/>
-                                            </span>
+                                        <span id="subtotal-${item.product.id}">
+                                            <fmt:formatNumber value="${item.totalPrice}" type="number"/> đ
+                                        </span>
                                     </div>
 
                                     <div class="colum action-col">
