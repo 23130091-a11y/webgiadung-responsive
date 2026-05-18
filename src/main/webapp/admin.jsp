@@ -32,7 +32,7 @@
     <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/grid.css">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/base.css">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/style.css">
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/admin.css?v=199">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/admin.css?v=99">
     <!-- Include stylesheet -->
     <link href="https://cdn.jsdelivr.net/npm/quill@2.0.3/dist/quill.snow.css" rel="stylesheet" />
 </head>
@@ -247,7 +247,6 @@
                                 <div class="dmg-grid-layout">
                                     <div class="dmg-main-section">
                                         <div class="dmg-card-panel">
-                                            <h3 style="margin-bottom: 20px; color: #d9534f;">Báo cáo Hủy & Hư hỏng</h3>
 
                                             <div class="dmg-search-area">
                                                 <label>Tìm kiếm sản phẩm hoặc mã đơn hàng:</label>
@@ -261,8 +260,7 @@
                                             <div id="selected-dmg-preview" class="dmg-preview-box">
                                                 <img id="dmg-preview-img" src="${pageContext.request.contextPath}/assets/img/products/default.png" alt="Ảnh">
                                                 <div class="dmg-preview-info">
-                                                    <h4 id="dmg-preview-name">Chưa chọn sản phẩm/đơn hàng</h4>
-                                                    <p>Loại đối tượng: <span id="dmg-type-tag" class="dmg-badge">N/A</span></p>
+                                                    <h4 id="dmg-preview-name">Chưa chọn sản phẩm</h4>
                                                 </div>
                                             </div>
 
@@ -271,15 +269,6 @@
                                                     <div class="dmg-col">
                                                         <label>Số lượng hư hỏng</label>
                                                         <input type="number" id="dmg-qty-input" placeholder="0">
-                                                    </div>
-                                                    <div class="dmg-col">
-                                                        <label>Hiện trạng</label>
-                                                        <select id="dmg-status-select">
-                                                            <option value="Vỡ/Móp">Vỡ / Móp méo</option>
-                                                            <option value="Lỗi kỹ thuật">Lỗi kỹ thuật</option>
-                                                            <option value="Hết hạn">Hết hạn</option>
-                                                            <option value="Mất hàng">Mất hàng / Thất lạc</option>
-                                                        </select>
                                                     </div>
                                                 </div>
 
@@ -4679,6 +4668,46 @@
             activeContent.style.display = 'block';
         }
     }
+</script>
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        const startDateInput = document.querySelector('input[name="startDate"]');
+        const endDateInput = document.querySelector('input[name="endDate"]');
+
+        const getLocalToday = () => {
+            const now = new Date();
+            const offset = now.getTimezoneOffset() * 60000;
+            return new Date(now - offset).toISOString().split('T')[0];
+        };
+
+        const today = getLocalToday();
+
+
+        startDateInput.setAttribute('min', today);
+        endDateInput.setAttribute('min', today);
+
+
+        startDateInput.addEventListener('change', function() {
+            const startVal = this.value;
+
+            endDateInput.setAttribute('min', startVal);
+
+            if (endDateInput.value && startVal > endDateInput.value) {
+                alert("Lỗi: Ngày bắt đầu không được sau ngày kết thúc!");
+                this.value = ""; // Xóa giá trị sai
+            }
+        });
+
+        endDateInput.addEventListener('change', function() {
+            const startVal = startDateInput.value;
+            const endVal = this.value;
+
+            if (startVal && endVal < startVal) {
+                alert("Lỗi: Ngày kết thúc không được trước ngày bắt đầu!");
+                this.value = "";
+            }
+        });
+    });
 </script>
 <script src="${pageContext.request.contextPath}/assets/js/script.js"></script>
 </html>

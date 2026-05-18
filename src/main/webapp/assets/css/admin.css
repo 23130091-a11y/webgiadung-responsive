@@ -3167,7 +3167,7 @@
     flex-grow: 1;
     font-size: 14px;
     line-height: 1.8;
-    color: #444;
+    color: var(--soft-color);
 }
 
 .custom-modal .modal-info p {
@@ -3211,7 +3211,7 @@
     padding: 20px;
     border-radius: 8px;
     box-shadow: 0 2px 10px rgba(0,0,0,0.05);
-    border-top: 4px solid #d9534f;
+    border-top: 4px solid var(--primary-color);
 }
 
 .dmg-search-area label { display: block; margin-bottom: 8px; font-weight: 500; }
@@ -3240,10 +3240,10 @@
 }
 
 .dmg-btn-submit {
-    width: 100%; padding: 15px; background: #d9534f; color: white;
+    width: 100%; padding: 15px; background: var(--soft-color); color: white;
     border: none; border-radius: 6px; font-weight: bold; cursor: pointer;
 }
-.dmg-btn-submit:hover { background: #c9302c; }
+.dmg-btn-submit:hover { background:  var(--primary-color); }
 
 .dmg-data-table {
     width: 100%; border-collapse: collapse; margin-top: 10px;
@@ -3258,7 +3258,7 @@
 
 
 .dmg-badge {
-    background: #d9534f; color: white; padding: 2px 8px; border-radius: 10px; font-size: 11px;
+    background:var(--primary-color); color:var(--primary-color); padding: 2px 8px; border-radius: 10px; font-size: 11px;
 }
 .btn-recovery {
     background-color: #28a745;
