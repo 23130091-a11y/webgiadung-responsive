@@ -70,11 +70,19 @@ public class OrderDao extends BaseDao {
 
     public List<Map<String, Object>> findOrdersByUser(int userId) {
         String sql = """
-            SELECT id, total_price, status_transport, status_payment, created_at
-            FROM orders
-            WHERE user_id = :user_id
-            ORDER BY id DESC
-        """;
+        SELECT 
+            o.id, 
+            o.total_price, 
+            o.status_transport, 
+            o.status_payment, 
+            o.created_at,
+            r.status AS refund_status,
+            r.reason AS refund_reason_admin
+        FROM orders o
+        LEFT JOIN refunds r ON o.id = r.order_id
+        WHERE o.user_id = :user_id
+        ORDER BY o.id DESC
+    """;
 
         return get().withHandle(h ->
                 h.createQuery(sql)
@@ -107,8 +115,19 @@ public class OrderDao extends BaseDao {
         );
     }
 
-    public boolean cancelOrder(int orderId, int userId) {
-        String sql = """
+    public boolean cancelOrder(int orderId, int userId, String reason) {
+        return get().inTransaction(handle -> {
+            // lấy tiền và phương thức
+            Map<String, Object> order = handle.createQuery(
+                            "SELECT total_price, payment_method, status_payment FROM orders WHERE id = :id AND user_id = :uId")
+                    .bind("id", orderId)
+                    .bind("uId", userId)
+                    .mapToMap()
+                    .findOne().orElse(null);
+
+            if (order == null) return false;
+
+            String sql = """
         UPDATE orders
         SET status_transport = 4
         WHERE id = :id
@@ -116,13 +135,55 @@ public class OrderDao extends BaseDao {
           AND status_transport = 0
     """;
 
-        int updated = get().withHandle(h ->
-                h.createUpdate(sql)
-                        .bind("id", orderId)
-                        .bind("user_id", userId)
-                        .execute()
-        );
-        return updated > 0;
+            int updated = handle.createUpdate(sql)
+                            .bind("id", orderId)
+                            .bind("user_id", userId)
+                            .execute();
+
+            if (updated <= 0) return false;
+
+            String paymentMethod = (String) order.get("payment_method");
+            int statusPayment = ((Number) order.get("status_payment")).intValue();
+            double totalPrice = ((Number) order.get("total_price")).doubleValue();
+
+            if ("e-wallet".equalsIgnoreCase(paymentMethod) && statusPayment == 1) {
+                handle.createUpdate("INSERT INTO refunds (order_id, amount, reason, status) " +
+                                "VALUES (:oid, :amount, :reason, 0)")
+                        .bind("oid", orderId)
+                        .bind("amount", totalPrice)
+                        .bind("reason", "Hủy đơn hàng: " + reason)
+                        .execute();
+            }
+
+            // lấy ds sp và số lượng từ đơn này
+            List<Map<String, Object>> items = handle.createQuery(
+                                    "SELECT product_id, quantity FROM order_items WHERE order_id = :order_id")
+                            .bind("order_id", orderId)
+                            .mapToMap()
+                            .list();
+
+            // hoàn sl và tạo giao dịch kho
+            for(Map<String, Object> item : items) {
+                int productId = (int) item.get("product_id");
+                int quantity = (int) item.get("quantity");
+
+                handle.createUpdate("UPDATE products SET quantity = quantity + :qty WHERE id = :id")
+                                .bind("qty", quantity)
+                                .bind("id", productId)
+                                .execute();
+
+                //
+                handle.createUpdate("INSERT INTO warehouse_transactions (product_id, order_id, type, quantity, note, created_at) " +
+                                        "VALUES (:pid, :oid, 'RETURN', :qty, :note, NOW())")
+                                .bind("pid", productId)
+                                .bind("oid", orderId)
+                                .bind("qty", quantity)
+                                .bind("note", "Hủy đơn #" + orderId + ". Lý do: " + reason)
+                                .execute();
+            }
+            return true;
+        });
+
     }
 
     public boolean isOrderOwnedByUser(int orderId, int userId) {
@@ -143,8 +204,9 @@ public class OrderDao extends BaseDao {
             oi.product_id   AS product_id,
             oi.product_name AS name,
             COALESCE(p.image, 'assets/img/no-image.png') AS image,
-            oi.price        AS first_price,
-            (oi.price * oi.quantity) AS total_price,
+            oi.price        AS old_price,
+            p.price_first         AS current_price,
+            p.status        AS product_status,
             oi.quantity     AS quantity
         FROM order_items oi
         LEFT JOIN products p ON p.id = oi.product_id
@@ -319,6 +381,7 @@ public class OrderDao extends BaseDao {
                         .orElse(null)
         );
     }
+
     private String buildDateAndStatusFilter(String fromDate, String toDate, String status) {
         StringBuilder sql = new StringBuilder(" WHERE 1=1 ");
 

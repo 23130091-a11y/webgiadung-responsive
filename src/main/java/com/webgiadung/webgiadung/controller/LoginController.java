@@ -13,8 +13,8 @@ import java.io.IOException;
 public class LoginController extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        // setAttribute redirect để quay lại trang trước sau khi login, ví dụ: /login?redirect=checkout
-        request.setAttribute("redirect", request.getParameter("redirect"));
+        String redirect = request.getParameter("redirect");
+        request.setAttribute("redirect", redirect);
         request.getRequestDispatcher("/login.jsp").forward(request, response);
     }
 
@@ -34,6 +34,7 @@ public class LoginController extends HttpServlet {
         // kt tk
         if (user == null) {
             request.setAttribute("error", "Email hoặc mật khẩu không chính xác!");
+            request.setAttribute("redirect", request.getParameter("redirect"));
             request.getRequestDispatcher("/login.jsp").forward(request, response);
             return;
         }
@@ -41,6 +42,7 @@ public class LoginController extends HttpServlet {
         // kiểm tra trạng thái tk
         if (user.getStatus() == 0) {
             request.setAttribute("error", "Tài khoản chưa được kích hoạt hoặc đã bị khóa.");
+            request.setAttribute("redirect", request.getParameter("redirect"));
             request.getRequestDispatcher("/login.jsp").forward(request, response);
             return;
         }
@@ -65,9 +67,21 @@ public class LoginController extends HttpServlet {
         }
 
         if (redirect != null && !redirect.isBlank()) {
-            response.sendRedirect(request.getContextPath() + redirect);
+            String contextPath = request.getContextPath();
+
+            // Nếu redirect đã có chứa sẵn contextPath (ví dụ /WebGiaDung/...)
+            if (redirect.startsWith(contextPath)) {
+                response.sendRedirect(redirect);
+            } else {
+                // Nếu redirect chỉ là /list-product thì mới nối thêm contextPath
+                if (!redirect.startsWith("/")) {
+                    redirect = "/" + redirect;
+                }
+                response.sendRedirect(contextPath + redirect);
+            }
             return;
         }
+
         if (user.getRole() == 1) { // 1 là Admin
             response.sendRedirect(request.getContextPath() + "/admin/customers");
         } else { // 0 là User

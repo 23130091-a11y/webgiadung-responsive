@@ -146,8 +146,19 @@ public class AddCart extends HttpServlet {
         // kiểm tra user đăng nhập
         User user = (User) session.getAttribute("user");
         if (user == null) {
-            if (ajax) writeJson(response, HttpServletResponse.SC_UNAUTHORIZED, "{\"status\":\"unauthorized\"}");
-            else response.sendRedirect(request.getContextPath() + "/login");
+            if (ajax) {
+                writeJson(response, HttpServletResponse.SC_UNAUTHORIZED, "{\"status\":\"unauthorized\"}");
+            }
+            else {
+                String pId = request.getParameter("productId");
+                String qty = request.getParameter("quantity");
+                if (qty == null) qty = "1";
+
+                // Tạo URL quay lại chính xác hành động add-cart này
+                String returnUrl = "/add-cart?productId=" + pId + "&quantity=" + qty;
+
+                response.sendRedirect(request.getContextPath() + "/login?redirect=" + java.net.URLEncoder.encode(returnUrl, "UTF-8"));
+            }
             return;
         }
 

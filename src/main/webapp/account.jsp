@@ -317,6 +317,26 @@
                                                 <c:when test="${o.status_transport == 4}"><span class="order-item__status">Đã hủy</span></c:when>
                                                 <c:when test="${o.status_transport == 5}"><span class="order-item__status">Trả hàng</span></c:when>
                                             </c:choose>
+
+                                            <c:if test="${not empty o.refund_status}">
+                                                <c:choose>
+                                                    <c:when test="${o.refund_status == 0}">
+                                                        <span class="refund-badge refund-pending">
+                                                            <i class="fas fa-undo"></i> Chờ hoàn tiền
+                                                        </span>
+                                                    </c:when>
+                                                    <c:when test="${o.refund_status == 1}">
+                                                        <span class="refund-badge refund-success">
+                                                            <i class="fas fa-check"></i> Đã hoàn tiền
+                                                        </span>
+                                                    </c:when>
+                                                    <c:when test="${o.refund_status == 2}">
+                                                        <span class="refund-badge refund-rejected">
+                                                            <i class="fas fa-ban"></i> Từ chối hoàn tiền
+                                                        </span>
+                                                    </c:when>
+                                                </c:choose>
+                                            </c:if>
                                         </header>
 
                                         <section class="order-item__body">
@@ -342,6 +362,13 @@
                                         </section>
 
                                         <footer class="order-item__footer">
+
+                                            <c:if test="${o.refund_status == 2 and not empty o.refund_reason_admin}">
+                                                <div class="refund-reason-box" style="color: #c62828; font-style: italic; margin-bottom: 8px;">
+                                                    Lý do từ chối: ${o.refund_reason_admin}
+                                                </div>
+                                            </c:if>
+
                                             <div class="order-item__total">
                                                 <span>Thành tiền: </span>
                                                 <span class="order-item__total-price">
@@ -380,56 +407,90 @@
 
 <script src="assets/js/script.js"></script>
 
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
 <script>
-    function cancelOrderAjax(orderId, btnElement) {
-        if(!confirm("Bạn có chắc là muốn hủy đơn hàng #" + orderId + "?")) {
-            return;
-        }
-        // const originalText = btnElement.innerText;
-        btnElement.disabled = true;
-        btnElement.style.opacity = '0.8';
-
-        // gửi request
-        const params = new URLSearchParams();
-        params.append('action', 'cancelOrder');
-        params.append('orderId', orderId);
-
-        fetch('${pageContext.request.contextPath}/account-again', {
-            method : 'POST',
-            headers : {
-                'Content-Type': 'application/x-www-form-urlencoded',
+    async function cancelOrderAjax(orderId, btnElement) {
+        const {
+            value: reason, isConfirmed
+        } = await Swal.fire( {
+            title: 'Hủy đơn hàng #' + orderId,
+            input: 'select',
+            inputOptions: {
+                'Thay đổi ý định': 'Thay đổi ý định',
+                'Tìm thấy giá rẻ hơn': 'Tìm thấy giá rẻ hơn',
+                'Đặt trùng đơn': 'Đặt trùng đơn',
+                'Thời gian giao hàng quá lâu': 'Thời gian giao hàng quá lâu',
+                'Khác': 'Lý do khác'
             },
-            body : params.toString()
-        })
-            .then(response => response.json())
-            .then(data => {
-                if(data.status === 'success') {
-                    alert(data.message);
+            inputPlaceholder: 'Vui lòng chọn lý do hủy',
+            showCancelButton: true,
+            confirmButtonColor: '#fca120',
+            cancelButtonColor: '#6c757d',
+            confirmButtonText: 'Xác nhận hủy',
+            cancelButtonText: 'Đóng',
+            inputValidator: (value) => {
+                return new Promise((resolve) => {
+                    if(value) {
+                        resolve();
+                    } else {
+                        resolve('Bạn cần chọn lý do để hủy đơn!');
+                    }
+                });
+            }
+        });
 
-                    // hiệu ứng xóa đơn
-                    const orderArticle = btnElement.closest('.order-item');
-                    orderArticle.style.transition = 'all 0.5s ease';
-                    orderArticle.style.opacity = '0';
-                    orderArticle.style.transform = 'scale(0.9)';
+        if(isConfirmed && reason) {
 
-                    setTimeout(() => {
-                        orderArticle.remove();
-                        if(document.querySelectorAll('.order-item').length === 0) {
-                            window.location.href = window.location.pathname + "?tab=cancelled";
-                        }
-                    }, 500);
-                } else {
-                    alert(data.message);
+            // const originalText = btnElement.innerText;
+            btnElement.disabled = true;
+            btnElement.style.opacity = '0.8';
+
+            // gửi request
+            const params = new URLSearchParams();
+            params.append('action', 'cancelOrder');
+            params.append('orderId', orderId);
+            params.append('reason', reason);
+
+            fetch('${pageContext.request.contextPath}/account-again', {
+                method : 'POST',
+                headers : {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                body : params.toString()
+            })
+                .then(response => response.json())
+                .then(data => {
+                    if(data.status === 'success') {
+                        Swal.fire('Thành công!', data.message, 'success').then(() => {
+                            // hiệu ứng xóa đơn
+                            const orderArticle = btnElement.closest('.order-item');
+                            orderArticle.style.transition = 'all 0.5s ease';
+                            orderArticle.style.opacity = '0';
+                            orderArticle.style.transform = 'scale(0.9)';
+
+                            setTimeout(() => {
+                                orderArticle.remove();
+                                if(document.querySelectorAll('.order-item').length === 0) {
+                                    window.location.href = window.location.pathname + "?tab=cancelled";
+                                }
+                            }, 500);
+                        })
+
+                    } else {
+                        Swal.fire('Thất bại', data.message, 'error');
+                            btnElement.disabled = false;
+                        btnElement.style.opacity = '1';
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('Có lỗi xảy ra, vui lòng thử lại!');
                     btnElement.disabled = false;
                     btnElement.style.opacity = '1';
-                }
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                alert('Có lỗi xảy ra, vui lòng thử lại!');
-                btnElement.disabled = false;
-                btnElement.style.opacity = '1';
-            });
+                });
+        }
+
     }
 </script>
 
