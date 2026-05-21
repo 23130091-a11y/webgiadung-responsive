@@ -539,14 +539,26 @@ public Product getProductFullInfo(int id) {
             SET discounts_id = :discountId,
                 updated_at = NOW()
             WHERE categories_id = :categoryId
-            AND status = 1
-            AND is_visible = 1
+ 
+      
         """)
                     .bind("categoryId", categoryId)
                     .bind("discountId", newDiscountId)
                     .execute();
             return rows;
         });
+    }
+    public int applyDiscountToAll(int newDiscountId) {
+        return get().withHandle(handle ->
+                handle.createUpdate("""
+            UPDATE products 
+            SET discounts_id = :discountId, 
+                updated_at = NOW()
+           
+        """)
+                        .bind("discountId", newDiscountId)
+                        .execute()
+        );
     }
 /// ///
     public List<Product> searchWithFilters(String keyword, String[] brands, String[] priceRanges, String categoryId) {

@@ -142,5 +142,8 @@ public class ProductService {
     public boolean updateStockAndPrice(int productId, int quantityToAdd, double newPrice) {
         return pdao.updateStockAndPrice( productId, quantityToAdd, newPrice);
     }
+    public int applyDiscountToAll(int discountId) {
+        return pdao.applyDiscountToAll(discountId);
+    }
 }
 
