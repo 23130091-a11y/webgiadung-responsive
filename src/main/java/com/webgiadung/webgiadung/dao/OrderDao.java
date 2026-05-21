@@ -530,7 +530,43 @@ public class OrderDao extends BaseDao {
             return query.mapToMap().one();
         });
     }
+    public List<Map<String, Object>> getMonthlyRevenueChart(int months) {
+        String sql = """
+        WITH RECURSIVE months AS (
+            SELECT
+                CAST(DATE_FORMAT(TIMESTAMPADD(MONTH, 1 - :months, CURDATE()), '%Y-%m-01') AS DATE) AS month_start,
+                1 AS seq
+            UNION ALL
+            SELECT
+                DATE_ADD(month_start, INTERVAL 1 MONTH),
+                seq + 1
+            FROM months
+            WHERE seq < :months
+        )
+        SELECT
+            DATE_FORMAT(m.month_start, '%Y-%m') AS month_key,
+            CONCAT('T', MONTH(m.month_start)) AS month_label,
+            COALESCE(SUM(
+                CASE
+                    WHEN o.status_transport <> 4 THEN o.total_price
+                    ELSE 0
+                END
+            ), 0) AS revenue
+        FROM months m
+        LEFT JOIN orders o
+            ON o.created_at >= m.month_start
+           AND o.created_at < DATE_ADD(m.month_start, INTERVAL 1 MONTH)
+        GROUP BY m.month_start
+        ORDER BY m.month_start ASC
+    """;
 
+        return get().withHandle(handle ->
+                handle.createQuery(sql)
+                        .bind("months", months)
+                        .mapToMap()
+                        .list()
+        );
+    }
     public List<Map<String, Object>> getProductMonthComparison(String monthA, String monthB, int limit) {
         String sql = """
             SELECT

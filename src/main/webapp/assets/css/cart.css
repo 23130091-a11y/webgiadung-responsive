@@ -133,16 +133,16 @@
     align-items: center;
     justify-content: center; 
 }
-.product-col { width: 40%; gap: 10px; justify-content: flex-start}  
-.price-col { width: 25%; justify-content: center; }  
-.qty-col { width: 15%; justify-content: center; }   
-.total-col { width: 12%; justify-content: center; } 
-.action-col { width: 13%; justify-content: center; } 
+.product-col { width: 45%; gap: 10px; justify-content: flex-start; }
+.price-col { width: 15%; justify-content: center; }
+.qty-col { width: 15%; justify-content: center; }
+.total-col { width: 15%; justify-content: center; }
+.action-col { width: 10%; justify-content: center; }
 
 .cart-header .product-col,
-.cart-header .price-col
-.cart-header .qty-col
-.cart-header .total-col
+.cart-header .price-col,
+.cart-header .qty-col,
+.cart-header .total-col,
 .cart-header .action-col{
 justify-content: center
 }

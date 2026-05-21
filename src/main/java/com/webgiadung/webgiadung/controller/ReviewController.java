@@ -24,9 +24,13 @@ public class ReviewController extends HttpServlet {
         int productId = 0;
         try { productId = Integer.parseInt(request.getParameter("productId")); } catch (Exception ignored) {}
 
-        // CHẶN: chưa login -> đá về login, đăng nhập xong quay lại đúng sản phẩm
         if (user == null) {
             response.sendRedirect(request.getContextPath() + "/login?redirect=/product?id=" + productId + "#reviews");
+            return;
+        }
+
+        if (!reviewDao.hasDeliveredOrder(user.getId(), productId)) {
+            response.sendRedirect(request.getContextPath() + "/product?id=" + productId + "&cmt_err=not_bought#reviews");
             return;
         }
 

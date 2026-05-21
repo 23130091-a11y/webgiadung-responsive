@@ -234,28 +234,35 @@
                             <h2 class="section-title product-comment__heading">Chia sẻ đánh giá của bạn</h2>
 
                             <c:choose>
-                                <%-- CHƯA ĐĂNG NHẬP: chỉ hiện nút login --%>
+                                <%-- Chưa đăng nhập --%>
                                 <c:when test="${empty sessionScope.user}">
-                                    <p style="margin:12px 0;">
-                                        Bạn cần <b>đăng nhập</b> để gửi đánh giá.
-                                    </p>
-
-                                    <c:url var="loginUrl" value="/login">
-                                        <c:param name="redirect" value="/product?id=${product.id}#reviews"/>
-                                    </c:url>
-
+                                    <p style="margin:12px 0;">Bạn cần <b>đăng nhập</b> để gửi đánh giá.</p>
                                     <a class="btn btn--default-color btn-comt"
                                        href="${pageContext.request.contextPath}/login?redirect=/product?id=${product.id}%23reviews">
-                                       Đăng nhập để đánh giá
+                                        Đăng nhập để đánh giá
                                     </a>
                                 </c:when>
 
-                                <%-- ĐÃ ĐĂNG NHẬP: hiện form gửi review --%>
+
+                                <c:when test="${not canReview}">
+                                    <p style="margin:12px 0; color:#888; font-size:1.4rem;">
+                                        <i class="fa-solid fa-circle-info" style="color:#FF8C00; margin-right:6px;"></i>
+                                        Chỉ khách hàng đã <b>mua và nhận hàng thành công</b> mới có thể đánh giá sản phẩm này.
+                                    </p>
+                                </c:when>
+
+
                                 <c:otherwise>
+                                    <c:if test="${param.cmt_err == 'not_bought'}">
+                                        <p style="color:red; margin-bottom:8px; font-size:1.4rem;">Bạn chưa mua hoặc chưa nhận sản phẩm này.</p>
+                                    </c:if>
+                                    <c:if test="${param.cmt_err == 'empty'}">
+                                        <p style="color:red; margin-bottom:8px; font-size:1.4rem;">Vui lòng nhập nội dung đánh giá.</p>
+                                    </c:if>
+
                                     <form action="${pageContext.request.contextPath}/review" method="post">
                                         <input type="hidden" name="productId" value="${product.id}" />
                                         <input type="hidden" name="rating" id="ratingValue" value="5" />
-
                                         <div class="product-comment__vote">
                                             <span class="product-comment__title">Đánh giá của bạn: </span>
                                             <div class="rating" id="ratingStars" style="cursor:pointer;">
@@ -266,31 +273,14 @@
                                                 <i class="fa-solid fa-star rating__star rating__star--gold" data-val="5"></i>
                                             </div>
                                         </div>
-
-                                        <%-- đổi name từ new_comment -> comment để controller nhận --%>
                                         <textarea class="product-comment__input" name="comment" id="new_comment" rows="4"
                                                   placeholder="Nhập câu hỏi / Bình luận / Nhận xét tại đây" required></textarea>
-
-                                        <%-- Upload ảnh: tạm thời giữ UI, chưa lưu DB (để sau) --%>
                                         <div class="product-comment__upload">
-                                            <label for="reviewImage" class="product-comment__upload-label">
-                                                Upload ảnh đánh giá:
-                                            </label>
-
-                                            <input
-                                                    type="file"
-                                                    id="reviewImage"
-                                                    name="reviewImage"
-                                                    class="product-comment__upload-input"
-                                                    accept="image/*"
-                                                    multiple
-                                                    disabled
-                                            >
-                                            <small style="display:block;margin-top:6px;opacity:.7">
-                                                (Tạm thời chưa lưu ảnh, chỉ lưu nội dung + sao)
-                                            </small>
+                                            <label for="reviewImage" class="product-comment__upload-label">Upload ảnh đánh giá:</label>
+                                            <input type="file" id="reviewImage" name="reviewImage"
+                                                   class="product-comment__upload-input" accept="image/*" multiple disabled>
+                                            <small style="display:block; margin-top:6px; opacity:.7">(Tạm thời chưa lưu ảnh, chỉ lưu nội dung + sao)</small>
                                         </div>
-
                                         <button type="submit" class="product-comment__btn btn btn--default-color">Gửi đánh giá</button>
                                     </form>
                                 </c:otherwise>
@@ -311,7 +301,7 @@
                                     </figure>
 
                                     <article class="product-review__content-wrapper">
-                                        <h3 class="product-review__author">${rv.userId }</h3>
+                                        <h3 class="product-review__author">${rv.authorName}</h3>
 
                                         <div class="rating">
                                             <c:forEach var="i" begin="1" end="5">

@@ -11,11 +11,12 @@ import java.io.IOException;
 
 @WebServlet(name = "LogoutController", value = "/logout")
 public class LogoutController extends HttpServlet {
+
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         HttpSession session = request.getSession(false);
         if (session != null) {
-            session.invalidate(); // xoá sạch session
+            session.invalidate();
         }
 
         // chặn cache
@@ -23,7 +24,6 @@ public class LogoutController extends HttpServlet {
         response.setHeader("Pragma", "no-cache");
         response.setDateHeader("Expires", 0);
 
-        // về trang công khai
         response.sendRedirect(request.getContextPath() + "/list-product");
     }
 
