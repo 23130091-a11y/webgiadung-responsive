@@ -151,7 +151,6 @@
                     <img class="logo__img" src="assets/img/logo.png" alt="WebGiaDung">
                 </a>
 
-                <!-- Thay toàn bộ header search bằng -->
                 <form action="search-product" method="get" class="header-search">
                     <div class="header-search__wrap">
                         <input
@@ -160,10 +159,8 @@
                                 class="header-search__input"
                                 placeholder="Bạn cần tìm kiếm sản phẩm gì?"
                                 value="${param.keyword}"
-                                required
-                        >
+                                required>
 
-                        <!-- Search history giữ nguyên (HTML) -->
                         <div class="search-history">
                             <h3 class="search-history__heading">Lịch sử tìm kiếm</h3>
                             <ul class="search-history__list">

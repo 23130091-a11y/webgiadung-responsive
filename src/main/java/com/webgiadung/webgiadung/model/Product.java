@@ -32,10 +32,7 @@ public class Product implements Serializable {
 
     private LocalDateTime updatedAt; // ngày update
 
-
-
-// Liên kết các bảng phụ
-
+    // Liên kết các bảng phụ
     private List<ProductDescriptions> descriptions = new ArrayList<>(); // mô tả sp
 
     private List<ProductDetails> details = new ArrayList<>(); // chi tiết sp
@@ -46,35 +43,22 @@ public class Product implements Serializable {
 
     private List<Keywords> keywords = new ArrayList<>();
 
-
-
-// rating tính sẵn từ SQL (dùng cho trang list)
+    // rating tính sẵn từ SQL (dùng cho trang list)
 
     private Double ratingAvg;
 
-
-
     public Double getRatingAvg() {
-
         return (ratingAvg != null) ? ratingAvg : 0.0;
 
     }
 
-
-
     public void setRatingAvg(Double ratingAvg) {
-
         this.ratingAvg = ratingAvg;
 
     }
 
-
-
-// Tính toán lại dùng đến sau
-
+    // Tính toán lại dùng đến sau
     private Double discountPercent;
-
-
 
     private String discountType;
 
@@ -83,31 +67,21 @@ public class Product implements Serializable {
     }
 
     public Double getDiscountPercent() {
-
         return discountPercent != null ? discountPercent : 0.0;
 
     }
 
-
-
     public void setDiscountPercent(Double discountPercent) {
-
         this.discountPercent = discountPercent;
 
     }
 
-
-
     public String getDiscountType() {
-
         return discountType;
 
     }
 
-
-
     public void setDiscountType(String discountType) {
-
         this.discountType = discountType;
 
     }
@@ -116,78 +90,45 @@ public class Product implements Serializable {
         return status;
     }
 
-// tính rating lấy từ review trong trang product details
-
+    // tính rating lấy từ review trong trang product details
     public double getRating() {
 
         if (reviews == null || reviews.isEmpty()) return 0.0;
 
-
-
         double avg = reviews.stream()
-
                 .mapToDouble(ProductReview::getRating)
-
                 .average()
-
                 .orElse(0.0);
 
-
-
         return Math.round(avg * 10.0) / 10.0; // làm tròn 1 chữ số
-
     }
 
-
-
-// làm tròn để hiển thị sao
-
+    // làm tròn để hiển thị sao
     public int getRatingInt() {
-
         return (int) Math.round(getRating());
 
     }
 
-
-
     public boolean getIsDiscounted() {
-
         return discountPercent != null && discountPercent > 0;
 
     }
 
-
-
     public Product() {}
 
-
-
     public Product(int id, String name, String image, double firstPrice, int discountsId, int categoriesId, int brandsId, int isVisible, int status, int quantity, int soldQuantity, LocalDateTime createdAt, LocalDateTime updatedAt) {
-
         this.id = id;
-
         this.name = name;
-
         this.image = image;
-
         this.firstPrice = firstPrice;
-
         this.discountsId = discountsId;
-
         this.categoriesId = categoriesId;
-
         this.brandsId = brandsId;
-
         this.isVisible = isVisible;
-
         this.status = status;
-
         this.quantity = quantity;
-
         this.soldQuantity = soldQuantity;
-
         this.createdAt = createdAt;
-
         this.updatedAt = updatedAt;
 
     }

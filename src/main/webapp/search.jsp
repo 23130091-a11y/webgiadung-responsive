@@ -2,6 +2,7 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <%@ taglib prefix="c" uri="jakarta.tags.core" %>
 <%@ taglib prefix="fmt" uri="jakarta.tags.fmt" %>
+<%@ taglib prefix="a" uri="http://java.sun.com/jsp/jstl/core" %>
 <html lang="en">
 
 <head>
@@ -40,259 +41,302 @@
                 <div class="row small-gutter">
                     <div class="col l-2 m-0 c-0">
                         <section class="search-filter__inner">
-                            <nav class="category">
-                                <h2 class="category__heading">Danh mục</h2>
-                                <ul class="category__list">
-                                    <li class="category__item category__item--active">
-                                        <a href="#!" class="category__link">Gia dụng - Nhà cửa</a>
-                                        <ul class="category-menu">
-                                            <li class="category-menu__item">
-                                                <a href="#!" class="category-menu__link">Đồ dùng nhà bếp</a>
+                            <form id="filter-form">
+                                <nav class="category">
+                                    <h2 class="category__heading">Danh mục</h2>
+                                    <ul class="category__list">
+                                        <c:forEach items="${parentCategories}" var="parent">
+                                            <li class="category__item category__item--active">
+                                                <a href="#!" class="category__link">
+                                                        ${parent.name}
+                                                </a>
+                                                <c:if test="${not empty parent.children}">
+                                                    <ul class="category-menu">
+                                                        <c:forEach items="${parent.children}" var="child">
+                                                            <li class="category-menu__item">
+                                                                <a class="category-menu__link category-filter ${child.id == selectedCategoryId ? 'active' : ''}"
+                                                                   data-id="${child.id}" href="#!">
+                                                                        ${child.name}
+                                                                </a>
+                                                            </li>
+                                                        </c:forEach>
+                                                    </ul>
+                                                </c:if>
                                             </li>
-                                            <li class="category-menu__item">
-                                                <a href="#!" class="category-menu__link">Dụng cụ làm vườn</a>
-                                            </li>
-                                            <li class="category-menu__item">
-                                                <a href="#!" class="category-menu__link">Đồ dùng sinh hoạt</a>
-                                            </li>
-                                            <li class="category-menu__item">
-                                                <a href="#!" class="category-menu__link">Vệ sinh nhà cửa</a>
-                                            </li>
-                                            <li class="category-menu__item">
-                                                <a href="#!" class="category-menu__link">Dụng cụ sửa chữa</a>
-                                            </li>
-                                        </ul>
-                                    </li>
-                                    <li class="category__item">
-                                        <a href="#!" class="category__link">Phụ kiện ô tô</a>
-                                    </li>
-                                    <li class="category__item">
-                                        <a href="#!" class="category__link">Thời trang</a>
-                                    </li>
-                                    <li class="category__item">
-                                        <a href="#!" class="category__link">Âm thanh - Camera</a>
-                                    </li>
-                                </ul>
-                            </nav>
+                                        </c:forEach>
+                                    </ul>
+                                </nav>
 
-                            <div class="search-filter__header">
-                                <i class="search-filter__icon fa-solid fa-filter"></i>
-                                <h2 class="search-filter__heading">Bộ lọc tìm kiếm</h2>
-                            </div>
-
-                            <article class="search-filter__category">
-                                <h3 class="search-filter__title">Theo thương hiệu</h3>
-                                <div class="search-filter__options">
-
-                                    <div class="search-filter__item">
-                                        <input hidden type="checkbox" name="brands" class="filter-checkbox" id="brand-spark-l" value="SPARK-L" />
-                                        <label class="search-filter__checkbox" for="brand-spark-l">SPARK-L</label>
-                                    </div>
-
-                                    <div class="search-filter__item">
-                                        <input hidden type="checkbox" name="brands" class="filter-checkbox" id="brand-oboking" value="Obo king" />
-                                        <label class="search-filter__checkbox" for="brand-oboking">Obo king</label>
-                                    </div>
-
-                                    <div class="search-filter__item">
-                                        <input hidden type="checkbox" name="brands" class="filter-checkbox" id="brand-gardena" value="Gardena" />
-                                        <label class="search-filter__checkbox" for="brand-gardena">Gardena</label>
-                                    </div>
-
-                                    <div class="search-filter__item">
-                                        <input hidden type="checkbox" name="brands" class="filter-checkbox" id="brand-worx" value="WORX" />
-                                        <label class="search-filter__checkbox" for="brand-worx">WORX</label>
-                                    </div>
-
-                                    <div class="search-filter__item">
-                                        <input hidden type="checkbox" name="brands" class="filter-checkbox" id="brand-black-decker" value="Black+Decker" />
-                                        <label class="search-filter__checkbox" for="brand-black-decker">Black+Decker</label>
-                                    </div>
-
-                                    <div class="search-filter__item">
-                                        <input hidden type="checkbox" name="brands" class="filter-checkbox" id="brand-okabe" value="Okabe" />
-                                        <label class="search-filter__checkbox" for="brand-okabe">Okabe</label>
-                                    </div>
-
-                                    <div class="search-filter__item">
-                                        <input hidden type="checkbox" name="brands" class="filter-checkbox" id="brand-anhvica" value="Anh Vi Cá" />
-                                        <label class="search-filter__checkbox" for="brand-anhvica">Anh Vi Cá</label>
-                                    </div>
-
-                                    <div class="search-filter__item">
-                                        <input hidden type="checkbox" name="brands" class="filter-checkbox" id="brand-mayo" value="Mayo" />
-                                        <label class="search-filter__checkbox" for="brand-mayo">Mayo</label>
-                                    </div>
-
-                                    <div class="search-filter__item">
-                                        <input hidden type="checkbox" name="brands" class="filter-checkbox" id="brand-kobayashi" value="Kobayashi" />
-                                        <label class="search-filter__checkbox" for="brand-kobayashi">Kobayashi</label>
-                                    </div>
-
+                                <div class="search-filter__header">
+                                    <i class="search-filter__icon fa-solid fa-filter"></i>
+                                    <h2 class="search-filter__heading">Bộ lọc tìm kiếm</h2>
                                 </div>
-                            </article>
 
-                            <article class="search-filter__category">
-                                <h3 class="search-filter__title">Khoảng giá</h3>
-                                <div class="search-filter__options">
-                                    <div class="search-filter__item">
-                                        <input hidden type="checkbox" id="price-all" value="all" />
-                                        <label class="search-filter__checkbox" for="price-all">Tất cả</label>
+                                <article class="search-filter__category">
+                                    <h3 class="search-filter__title">Theo thương hiệu</h3>
+                                    <div class="search-filter__options">
+                                        <c:forEach items="${allBrands}" var="brand">
+                                            <div class="search-filter__item">
+                                                <input hidden type="checkbox" name="brands" class="filter-checkbox" id="brand-${brand.id}" value="${brand.name}" />
+                                                <label class="search-filter__checkbox" for="brand-${brand.id}">${brand.name}</label>
+                                            </div>
+                                        </c:forEach>
                                     </div>
+                                </article>
 
-                                    <div class="search-filter__item">
-                                        <input hidden type="checkbox" name="priceRanges" class="filter-checkbox" id="price-under100" value="0-100000" />
-                                        <label class="search-filter__checkbox" for="price-under100">Dưới 100k</label>
-                                    </div>
+                                <article class="search-filter__category">
+                                    <h3 class="search-filter__title">Khoảng giá</h3>
+                                    <div class="search-filter__options">
+                                        <div class="search-filter__item">
+                                            <input hidden type="checkbox" id="price-all" value="all" />
+                                            <label class="search-filter__checkbox" for="price-all">Tất cả</label>
+                                        </div>
 
-                                    <div class="search-filter__item">
-                                        <input hidden type="checkbox" name="priceRanges" class="filter-checkbox" id="price-100-200" value="100000-200000" />
-                                        <label class="search-filter__checkbox" for="price-100-200">100k - 200k</label>
-                                    </div>
+                                        <div class="search-filter__item">
+                                            <input hidden type="checkbox" name="priceRanges" class="filter-checkbox" id="price-under100" value="0-100000" />
+                                            <label class="search-filter__checkbox" for="price-under100">Dưới 100k</label>
+                                        </div>
 
-                                    <div class="search-filter__item">
-                                        <input hidden type="checkbox" name="priceRanges" class="filter-checkbox" id="price-200-500" value="200000-500000" />
-                                        <label class="search-filter__checkbox" for="price-200-500">200k - 500k</label>
-                                    </div>
+                                        <div class="search-filter__item">
+                                            <input hidden type="checkbox" name="priceRanges" class="filter-checkbox" id="price-100-200" value="100000-200000" />
+                                            <label class="search-filter__checkbox" for="price-100-200">100k - 200k</label>
+                                        </div>
 
-                                    <div class="search-filter__item">
-                                        <input hidden type="checkbox" name="priceRanges" class="filter-checkbox" id="price-500-1000" value="500000-1000000" />
-                                        <label class="search-filter__checkbox" for="price-500-1000">500k - 1 triệu</label>
-                                    </div>
+                                        <div class="search-filter__item">
+                                            <input hidden type="checkbox" name="priceRanges" class="filter-checkbox" id="price-200-500" value="200000-500000" />
+                                            <label class="search-filter__checkbox" for="price-200-500">200k - 500k</label>
+                                        </div>
 
-                                    <div class="search-filter__item">
-                                        <input hidden type="checkbox" name="priceRanges" class="filter-checkbox" id="price-over1000" value="1000000-999999999" />
-                                        <label class="search-filter__checkbox" for="price-over1000">Trên 1 triệu</label>
-                                    </div>
-                                </div>
-                            </article>
-                            <article class="search-filter__category">
-                                <h3 class="search-filter__title">Đánh giá</h3>
+                                        <div class="search-filter__item">
+                                            <input hidden type="checkbox" name="priceRanges" class="filter-checkbox" id="price-500-1000" value="500000-1000000" />
+                                            <label class="search-filter__checkbox" for="price-500-1000">500k - 1 triệu</label>
+                                        </div>
 
-                                <div class="search-filter-reviews">
-                                    <input type="radio" name="rating" class="search-filter-reviews__input" checked />
-                                    <div class="search-filter-reviews__content">
-                                        <div class="rating">
-                                            <i class="fa-solid fa-star rating__star rating__star--gold"></i>
-                                            <i class="fa-solid fa-star rating__star rating__star--gold"></i>
-                                            <i class="fa-solid fa-star rating__star rating__star--gold"></i>
-                                            <i class="fa-solid fa-star rating__star rating__star--gold"></i>
-                                            <i class="fa-solid fa-star rating__star rating__star--gold"></i>
+                                        <div class="search-filter__item">
+                                            <input hidden type="checkbox" name="priceRanges" class="filter-checkbox" id="price-over1000" value="1000000-999999999" />
+                                            <label class="search-filter__checkbox" for="price-over1000">Trên 1 triệu</label>
                                         </div>
                                     </div>
-                                </div>
+                                </article>
 
-                                <div class="search-filter-reviews">
-                                    <input type="radio" name="rating" class="search-filter-reviews__input" />
-                                    <div class="search-filter-reviews__content">
-                                        <div class="rating">
-                                            <i class="fa-solid fa-star rating__star rating__star--gold"></i>
-                                            <i class="fa-solid fa-star rating__star rating__star--gold"></i>
-                                            <i class="fa-solid fa-star rating__star rating__star--gold"></i>
-                                            <i class="fa-solid fa-star rating__star rating__star--gold"></i>
-                                            <i class="fa-solid fa-star rating__star"></i>
-                                            <span class="rating__label">Trở lên</span>
-                                        </div>
-                                    </div>
-                                </div>
+                                <article class="search-filter__category">
+                                    <h3 class="search-filter__title">Đánh giá</h3>
 
-                                <div class="search-filter-reviews">
-                                    <input type="radio" name="rating" class="search-filter-reviews__input" />
-                                    <div class="search-filter-reviews__content">
-                                        <div class="rating">
-                                            <i class="fa-solid fa-star rating__star rating__star--gold"></i>
-                                            <i class="fa-solid fa-star rating__star rating__star--gold"></i>
-                                            <i class="fa-solid fa-star rating__star rating__star--gold"></i>
-                                            <i class="fa-solid fa-star rating__star"></i>
-                                            <i class="fa-solid fa-star rating__star"></i>
-                                            <span class="rating__label">Trở lên</span>
-                                        </div>
+                                    <div class="search-filter-reviews">
+                                        <input type="radio" name="rating" value="5" id="star5" class="search-filter-reviews__input filter-rating-radio"
+                                        ${selectedRating == '5' ? 'checked' : ''} />
+                                        <label for="star5" class="search-filter-reviews__content">
+                                            <div class="rating">
+                                                <i class="fa-solid fa-star rating__star rating__star--gold"></i>
+                                                <i class="fa-solid fa-star rating__star rating__star--gold"></i>
+                                                <i class="fa-solid fa-star rating__star rating__star--gold"></i>
+                                                <i class="fa-solid fa-star rating__star rating__star--gold"></i>
+                                                <i class="fa-solid fa-star rating__star rating__star--gold"></i>
+                                                <span class="rating__label" style="visibility: hidden;">Trở lên</span>
+                                            </div>
+                                        </label>
                                     </div>
-                                </div>
 
-                                <div class="search-filter-reviews">
-                                    <input type="radio" name="rating" class="search-filter-reviews__input" />
-                                    <div class="search-filter-reviews__content">
-                                        <div class="rating">
-                                            <i class="fa-solid fa-star rating__star rating__star--gold"></i>
-                                            <i class="fa-solid fa-star rating__star rating__star--gold"></i>
-                                            <i class="fa-solid fa-star rating__star"></i>
-                                            <i class="fa-solid fa-star rating__star"></i>
-                                            <i class="fa-solid fa-star rating__star"></i>
-                                            <span class="rating__label">Trở lên</span>
-                                        </div>
+                                    <div class="search-filter-reviews">
+                                        <input type="radio" name="rating" value="4" id="star4" class="search-filter-reviews__input filter-rating-radio"
+                                        ${selectedRating == '4' ? 'checked' : ''} />
+                                        <label for="star4" class="search-filter-reviews__content">
+                                            <div class="rating">
+                                                <i class="fa-solid fa-star rating__star rating__star--gold"></i>
+                                                <i class="fa-solid fa-star rating__star rating__star--gold"></i>
+                                                <i class="fa-solid fa-star rating__star rating__star--gold"></i>
+                                                <i class="fa-solid fa-star rating__star rating__star--gold"></i>
+                                                <i class="fa-solid fa-star rating__star"></i>
+                                                <span class="rating__label">Trở lên</span>
+                                            </div>
+                                        </label>
                                     </div>
-                                </div>
 
-                                <div class="search-filter-reviews">
-                                    <input type="radio" name="rating" class="search-filter-reviews__input" />
-                                    <div class="search-filter-reviews__content">
-                                        <div class="rating">
-                                            <i class="fa-solid fa-star rating__star rating__star--gold"></i>
-                                            <i class="fa-solid fa-star rating__star"></i>
-                                            <i class="fa-solid fa-star rating__star"></i>
-                                            <i class="fa-solid fa-star rating__star"></i>
-                                            <i class="fa-solid fa-star rating__star"></i>
-                                            <span class="rating__label">Trở lên</span>
-                                        </div>
+                                    <div class="search-filter-reviews">
+                                        <input type="radio" name="rating" value="3" id="star3" class="search-filter-reviews__input filter-rating-radio"
+                                        ${selectedRating == '3' ? 'checked' : ''} />
+                                        <label for="star3" class="search-filter-reviews__content">
+                                            <div class="rating">
+                                                <i class="fa-solid fa-star rating__star rating__star--gold"></i>
+                                                <i class="fa-solid fa-star rating__star rating__star--gold"></i>
+                                                <i class="fa-solid fa-star rating__star rating__star--gold"></i>
+                                                <i class="fa-solid fa-star rating__star"></i>
+                                                <i class="fa-solid fa-star rating__star"></i>
+                                                <span class="rating__label">Trở lên</span>
+                                            </div>
+                                        </label>
                                     </div>
-                                </div>
-                            </article>
+
+                                    <div class="search-filter-reviews">
+                                        <input type="radio" name="rating" value="2" id="star2" class="search-filter-reviews__input filter-rating-radio"
+                                        ${selectedRating == '2' ? 'checked' : ''} />
+                                        <label for="star2" class="search-filter-reviews__content">
+                                            <div class="rating">
+                                                <i class="fa-solid fa-star rating__star rating__star--gold"></i>
+                                                <i class="fa-solid fa-star rating__star rating__star--gold"></i>
+                                                <i class="fa-solid fa-star rating__star"></i>
+                                                <i class="fa-solid fa-star rating__star"></i>
+                                                <i class="fa-solid fa-star rating__star"></i>
+                                                <span class="rating__label">Trở lên</span>
+                                            </div>
+                                        </label>
+                                    </div>
+
+                                    <div class="search-filter-reviews">
+                                        <input type="radio" name="rating" value="1" id="star1" class="search-filter-reviews__input filter-rating-radio"
+                                        ${selectedRating == '1' ? 'checked' : ''} />
+                                        <label for="star1" class="search-filter-reviews__content">
+                                            <div class="rating">
+                                                <i class="fa-solid fa-star rating__star rating__star--gold"></i>
+                                                <i class="fa-solid fa-star rating__star"></i>
+                                                <i class="fa-solid fa-star rating__star"></i>
+                                                <i class="fa-solid fa-star rating__star"></i>
+                                                <i class="fa-solid fa-star rating__star"></i>
+                                                <span class="rating__label">Trở lên</span>
+                                            </div>
+                                        </label>
+                                    </div>
+                                </article>
+                            </form>
                         </section>
                     </div>
 
                     <div class="col l-10 m-12 c-12">
                         <section class="product-search-list">
                             <div class="search-header">
-                                <c:choose>
-                                    <%-- Ưu tiên hiện Keyword nếu đang search --%>
-                                    <c:when test="${not empty keyword}">
-                                        <p>Kết quả tìm kiếm cho: <span class="word-search">${keyword}</span></p>
-                                    </c:when>
+                                <p>
+                                    <i class="fa-solid fa-magnifying-glass"></i>
+                                    <c:choose>
+                                        <c:when test="${isNoResult}">
+                                            Rất tiếc, không tìm thấy sản phẩm nào phù hợp
+                                        </c:when>
 
-                                    <%-- Hiện Tên Danh Mục thật từ Database --%>
-                                    <c:when test="${not empty category}">
-                                        <p>Danh mục: <span class="word-search">${category.name}</span></p>
-                                    </c:when>
-                                </c:choose>
-                            </div>
-                            <div class="row-list row small-gutter" id="content-products">
-
-                                <c:if test="${empty products}">
-                                    <p style="padding:20px">Không tìm thấy sản phẩm phù hợp</p>
-                                </c:if>
-
-                                <c:forEach items="${products}" var="p">
-                                <div class="col l-2-4 m-4 c-6">
-                                    <div class="product-card">
-                                        <a href="product?id=${p.id}">
-                                            <img src="${pageContext.request.contextPath}/assets/img/products/${p.image}" alt="${p.name}">
-                                        </a>
-                                        <a href="product?id=${p.id}">
-                                            <p>${p.name}</p>
-                                        </a>
-
-                                        <div class="price-discount">
-                                            <c:if test="${p.discountPercent > 0}">
-                                                <div class="price-top">
-                                                    <span class="old-price"><fmt:formatNumber value="${p.firstPrice}" type="number"/>đ</span>
-                                                    <div class="discount-badge">Giảm ${p.discountPercent}%</div>
-                                                </div>
+                                        <c:otherwise>
+                                            <c:if test="${not empty keyword}">
+                                                Kết quả cho: <span class="word-search">"${keyword}"</span>
                                             </c:if>
 
-                                            <div class="price-bottom">
-                                                <span class="new-price"><fmt:formatNumber value="${p.totalPrice}" type="number"/>đ</span>
+                                            <c:if test="${not empty keyword && not empty category}">
+                                                <span> thuộc </span>
+                                            </c:if>
+
+                                            <c:if test="${not empty category}">
+                                                Danh mục: <span class="word-search">${category.name}</span>
+                                            </c:if>
+                                        </c:otherwise>
+                                    </c:choose>
+                                </p>
+                            </div>
+
+                            <div class="row-list row small-gutter" id="content-products">
+                                <c:choose>
+                                    <c:when test="${empty products}">
+                                        <div class="no-result-container" style="text-align: center; padding: 40px 20px;">
+                                            <div class="recommendation-section">
+                                                <h2 class="recommendation__title" style="text-align: left; margin-bottom: 20px; color: var(--primary-color); border-bottom: 2px solid;">
+                                                    CÓ THỂ BẠN SẼ THÍCH
+                                                </h2>
+
+                                                <div class="row-list row small-gutter">
+                                                    <c:forEach items="${recommendations}" var="p">
+                                                        <div class="col l-2-4 m-4 c-6">
+                                                            <div class="product-card">
+                                                                <a href="product?id=${p.id}">
+                                                                    <img src="${pageContext.request.contextPath}/assets/img/products/${p.image}" alt="${p.name}">
+                                                                </a>
+                                                                <a href="product?id=${p.id}">
+                                                                    <p>${p.name}</p>
+                                                                </a>
+
+                                                                <div class="price-discount">
+                                                                    <c:if test="${p.isDiscounted}">
+                                                                        <div class="price-top">
+                                                                        <span class="old-price">
+                                                                            <fmt:formatNumber value="${p.firstPrice}" pattern="#,###"/>đ
+                                                                        </span>
+
+                                                                            <div class="discount-badge">
+                                                                                <c:choose>
+                                                                                    <c:when test="${p.discountType eq 'percentage'}">
+                                                                                        Giảm ${p.discountPercent}%
+                                                                                    </c:when>
+                                                                                    <c:otherwise>
+                                                                                        Giảm <fmt:formatNumber value="${p.discountPercent}" pattern="#,###"/>đ
+                                                                                    </c:otherwise>
+                                                                                </c:choose>
+                                                                            </div>
+                                                                        </div>
+                                                                    </c:if>
+
+                                                                    <div class="price-bottom">
+                                                                    <span class="new-price">
+                                                                        <fmt:formatNumber value="${p.totalPrice}" pattern="#,###"/>đ
+                                                                    </span>
+                                                                    </div>
+                                                                </div>
+                                                                <div class="bottom">
+                                                                    <div class="star"><i class="fa-solid fa-star"></i> ${p.ratingAvg}</div>
+                                                                    <button class="fav-btn">
+                                                                        <i class="fa-regular fa-heart"></i> Yêu thích
+                                                                    </button>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </c:forEach>
+                                                </div>
                                             </div>
                                         </div>
-                                        <div class="bottom">
-                                            <div class="star"><i class="fa-solid fa-star"></i> ${p.rating}</div>
-                                            <button class="fav-btn">
-                                                <i class="fa-regular fa-heart"></i> Yêu thích
-                                            </button>
-                                        </div>
-                                    </div>
-                                </div>
-                                </c:forEach>
+                                    </c:when>
+
+                                    <c:otherwise>
+                                        <c:forEach items="${products}" var="p">
+                                            <div class="col l-2-4 m-4 c-6">
+                                                <div class="product-card">
+                                                    <a href="product?id=${p.id}">
+                                                        <img src="${pageContext.request.contextPath}/assets/img/products/${p.image}" alt="${p.name}">
+                                                    </a>
+                                                    <a href="product?id=${p.id}">
+                                                        <p>${p.name}</p>
+                                                    </a>
+
+                                                    <div class="price-discount">
+                                                        <c:if test="${p.isDiscounted}">
+                                                            <div class="price-top">
+                                                        <span class="old-price">
+                                                            <fmt:formatNumber value="${p.firstPrice}" pattern="#,###"/>đ
+                                                        </span>
+
+                                                                <div class="discount-badge">
+                                                                    <c:choose>
+                                                                        <c:when test="${p.discountType eq 'percentage'}">
+                                                                            Giảm ${p.discountPercent}%
+                                                                        </c:when>
+                                                                        <c:otherwise>
+                                                                            Giảm <fmt:formatNumber value="${p.discountPercent}" pattern="#,###"/>đ
+                                                                        </c:otherwise>
+                                                                    </c:choose>
+                                                                </div>
+                                                            </div>
+                                                        </c:if>
+
+                                                        <div class="price-bottom">
+                                                    <span class="new-price">
+                                                        <fmt:formatNumber value="${p.totalPrice}" pattern="#,###"/>đ
+                                                    </span>
+                                                        </div>
+                                                    </div>
+                                                    <div class="bottom">
+                                                        <div class="star"><i class="fa-solid fa-star"></i> ${p.ratingAvg}</div>
+                                                        <button class="fav-btn">
+                                                            <i class="fa-regular fa-heart"></i> Yêu thích
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </c:forEach>
+                                    </c:otherwise>
+                                </c:choose>
+
                             </div>
                         </section>
                     </div>
@@ -301,29 +345,36 @@
         </div>
     </main>
 </body>
+
 <!-- Link JS -->
 <script src="assets/js/script.js"></script>
+
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
 <script>
     $(document).ready(function() {
-        // 1. Xử lý logic Checkbox
-        $(document).on('change', '.filter-checkbox', function() {
-            if ($(this).attr('name') === 'priceRanges' && $(this).is(':checked')) {
-                $('#price-all').prop('checked', false);
-            }
+        let currentCategoryId = new URLSearchParams(window.location.search).get('categoryId') || "";
+
+        $(document).on('click', '.category-filter', function (e){
+            e.preventDefault();
+            currentCategoryId = $(this).data('id');
+
+            $('.category-filter').removeClass('active');
+            $(this).addClass('active');
+
             searchFilter();
         });
 
-        $('#price-all').on('change', function() {
-            if ($(this).is(':checked')) {
-                $('input[name="priceRanges"]').prop('checked', false);
-                searchFilter();
-            }
+        $(document).on('change', '.filter-checkbox', function() {
+            searchFilter();
         });
 
-        // 2. Hàm lọc chính
+        $(document).on('change', '.filter-rating-radio', function() {
+            searchFilter();
+        });
+
+        // hàm lọc
         function searchFilter() {
-            // Lấy danh sách Thương hiệu
             let brands = [];
             $('input[name="brands"]:checked').each(function() {
                 brands.push($(this).val());
@@ -334,11 +385,9 @@
                 priceRanges.push($(this).val());
             });
 
+            let rating = $('input[name="rating"]:checked').val() || "";
+
             const urlParams = new URLSearchParams(window.location.search);
-
-            let categoryId = urlParams.get('categoryId') || "";
-
-
             let keyword = urlParams.get('keyword') || "";
 
             $.ajax({
@@ -346,17 +395,19 @@
                 type: "GET",
                 data: {
                     keyword: keyword,
-                    categoryId: categoryId,
+                    categoryId: currentCategoryId,
                     'brands[]': brands,
-                    'priceRanges[]': priceRanges
+                    'priceRanges[]': priceRanges,
+                    'rating': rating
                 },
                 beforeSend: function() {
-                    // Hiệu ứng loading
                     $("#content-products").stop(true, true).css("opacity", "0.5");
                 },
                 success: function(data) {
                     let $htmlResponse = $(data);
+
                     let newList = $htmlResponse.find("#content-products").html();
+
                     let newHeader = $htmlResponse.find(".search-header").html();
 
                     $("#content-products").fadeOut(100, function() {
@@ -366,6 +417,20 @@
                     if (newHeader) {
                         $(".search-header").html(newHeader);
                     }
+
+                    let params = {
+                        keyword: keyword,
+                        categoryId: currentCategoryId,
+                        brands: brands,
+                        priceRanges: priceRanges
+                    };
+
+                    if(rating) {
+                        params.rating = rating;
+                    }
+
+                    let newUrl = "search-product?" + $.param(params);
+                    window.history.pushState({}, "", newUrl);
                 },
                 error: function(xhr) {
                     $("#content-products").css("opacity", "1");
@@ -375,4 +440,5 @@
         }
     });
 </script>
+
 </html>

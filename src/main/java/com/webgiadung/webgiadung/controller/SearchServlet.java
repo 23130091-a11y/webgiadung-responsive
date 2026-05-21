@@ -1,8 +1,9 @@
 package com.webgiadung.webgiadung.controller;
 
-import com.webgiadung.webgiadung.dao.ProductDao;
+import com.webgiadung.webgiadung.model.Brands;
 import com.webgiadung.webgiadung.model.Categories;
 import com.webgiadung.webgiadung.model.Product;
+import com.webgiadung.webgiadung.services.BrandService;
 import com.webgiadung.webgiadung.services.CategoriesService;
 import com.webgiadung.webgiadung.services.ProductService;
 import jakarta.servlet.*;
@@ -19,20 +20,25 @@ public class SearchServlet extends HttpServlet {
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         request.setCharacterEncoding("UTF-8");
         String keyword = request.getParameter("keyword");
-        String categoryId = request.getParameter("categoryId");
-
-        String[] brands = request.getParameterValues("brands");
-        String[] priceRanges = request.getParameterValues("priceRanges");
-        if (brands == null) brands = request.getParameterValues("brands[]");
-        if (priceRanges == null) priceRanges = request.getParameterValues("priceRanges[]");
 
         if (keyword != null) {
             keyword = keyword.trim();
         }
 
+        String categoryId = request.getParameter("categoryId");
+        String[] brands = request.getParameterValues("brands");
+        if (brands == null) brands = request.getParameterValues("brands[]");
+
+        String[] priceRanges = request.getParameterValues("priceRanges");
+        if (priceRanges == null) priceRanges = request.getParameterValues("priceRanges[]");
+
+        String rating = request.getParameter("rating");
+
         boolean hasKeyword = (keyword != null && !keyword.isEmpty());
         boolean hasCategory = (categoryId != null && !categoryId.isEmpty());
-        boolean hasFilter = (brands != null && brands.length > 0) || (priceRanges != null && priceRanges.length > 0);
+        boolean hasFilter = (brands != null && brands.length > 0)
+                || (priceRanges != null && priceRanges.length > 0)
+                || (rating != null && !rating.trim().isEmpty());
 
         if (!hasKeyword && !hasFilter && !hasCategory) {
             request.setAttribute("message", "Vui lòng nhập từ khóa tìm kiếm hoặc chọn bộ lọc");
@@ -45,6 +51,7 @@ public class SearchServlet extends HttpServlet {
             request.getRequestDispatcher("/search.jsp").forward(request, response);
             return;
         }
+
         if (hasCategory) {
             try {
                 int id = Integer.parseInt(categoryId);
@@ -70,14 +77,29 @@ public class SearchServlet extends HttpServlet {
             session.setAttribute("searchHistory", searchHistory);
         }
 
-        ProductService productsSer = new ProductService();
-        List<Product> products = productsSer.searchWithFilters(keyword, brands, priceRanges, categoryId);
+        ProductService productsService = new ProductService();
+        CategoriesService categoriesService = new CategoriesService();
+        BrandService brandService = new BrandService();
+
+        List<Product> products = productsService.searchWithFilters(keyword, brands, priceRanges, categoryId, rating);
+        if(products == null || products.isEmpty()) {
+            List<Product> recommendations = productsService.getTopSellingProducts(10);
+            request.setAttribute("recommendations", recommendations);
+            request.setAttribute("isNoResult", true);
+        }
+
+        List<Categories> pCategories = categoriesService.getCategoriesWithChildren();
+        List<Brands> allBrands = brandService.getAllBrands();
 
         request.setAttribute("keyword", keyword);
         request.setAttribute("selectedCategoryId", categoryId);
+        request.setAttribute("parentCategories", pCategories);
+        request.setAttribute("allBrands", allBrands);
         request.setAttribute("products", products);
         request.setAttribute("selectedBrands", brands);
         request.setAttribute("selectedPrices", priceRanges);
+
+        request.setAttribute("selectedRating", rating);
 
         request.getRequestDispatcher("/search.jsp").forward(request, response);
     }
