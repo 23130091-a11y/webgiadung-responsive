@@ -2087,15 +2087,22 @@
 
                             function doAjaxSearch() {
                                 if (!form || !mainContent) return;
-                                var params = new URLSearchParams(new FormData(form));
-                                var url = form.action + '?' + params.toString();
+                                var keyword = form.querySelector('[name=keyword]').value || '';
+                                var status  = hiddenSt.value  || '';
+                                var payment = hiddenPay.value || '';
+                                var params = 'keyword=' + encodeURIComponent(keyword)
+                                           + '&statusFilter='  + encodeURIComponent(status)
+                                           + '&paymentFilter=' + encodeURIComponent(payment);
+                                var url = form.action + '?' + params;
+                                mainContent.innerHTML = '<div style="text-align:center;padding:30px;color:#aaa;"><i class=\"fa-solid fa-spinner fa-spin\"></i> Đang tải...</div>';
                                 fetch(url, { headers: { 'X-Requested-With': 'XMLHttpRequest' } })
                                     .then(function(r){ return r.text(); })
                                     .then(function(html){
                                         mainContent.innerHTML = html;
                                         updateCount();
                                         rebindCheckAll();
-                                    });
+                                    })
+                                    .catch(function(){ mainContent.innerHTML = '<div style="padding:20px;color:red;">Lỗi tải dữ liệu!</div>'; });
                             }
 
                             function initChipGroup(groupId, hiddenInput) {
