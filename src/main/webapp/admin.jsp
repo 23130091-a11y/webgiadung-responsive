@@ -2669,7 +2669,7 @@
           }
 
           // role text
-          const r = btn.dataset.role; // "1" hoặc "0"
+          const r = btn.dataset.role;
           const roleEl = document.getElementById("customerDetailRole");
           if (roleEl) roleEl.textContent = (r === "1") ? "Admin" : "User";
 
@@ -2686,13 +2686,13 @@
         sectionCustomer.style.display = "block";
         window.scrollTo({ top: 0, behavior: "smooth" });
     }
-    // Ẩn tất cả section News
+
     function hideAllNewsSections() {
         Object.values(newsSections).forEach(sec => sec.style.display = "none");
         newsMenuButtons.forEach(btn => btn.classList.remove("active"));
     }
 
-    // Mặc định show Slide khi vào News
+
     function showNewsDefault() {
         sectionNews.style.display = "block";
         hideAllNewsSections();
@@ -2715,7 +2715,7 @@
         sectionSlideEdit.style.display = "none";
         sectionBlogEdit.style.display = "none";
     }
-    // === Xem chi tiết Slide ===
+
     document.querySelectorAll("#news-slide .news-table__view").forEach(btn => {
         btn.addEventListener("click", () => {
             hideAllSections();
@@ -2725,7 +2725,6 @@
         });
     });
 
-    // === Xem chi tiết Blog ===
     document.querySelectorAll("#news-blog .news-table__view").forEach(btn => {
         btn.addEventListener("click", () => {
             hideAllSections();
@@ -2735,7 +2734,6 @@
         });
     });
 
-    // === Sửa Slide/Blog ===
     document.querySelectorAll(".news-table__edit").forEach(btn => {
         btn.addEventListener("click", () => {
             const parentTable = btn.closest(".news-table");
@@ -2762,7 +2760,6 @@
         window.scrollTo({ top: 0, behavior: "smooth" });
     }
 
-    // === Nút đóng chi tiết Slide/Blog ===
     function hideSlideDetail() {
         sectionSlideDetail.style.display = "none";
         showNewsWithTab("news-slide");
@@ -3202,7 +3199,32 @@
 
             if (result.status === "success") {
                 alert("Lưu sản phẩm, mô tả và chi tiết thành công!");
-                window.location.reload();
+
+                form.reset();
+
+                if (quill) {
+                    quill.setContents([]);
+                }
+
+                const mainImgList = document.getElementById('mainImageStatusList');
+                if (mainImgList) mainImgList.innerHTML = '';
+
+                const descList = document.getElementById('descriptionList');
+                if (descList) descList.innerHTML = '';
+
+                const detList = document.getElementById('detailList');
+                if (detList) detList.innerHTML = '';
+
+
+                uploadedProductImages = [];
+                uploadedDetailImages = [];
+
+                window.scrollTo({ top: 0, behavior: "smooth" });
+
+                if (typeof loadAllProducts === "function") {
+                    loadAllProducts();
+                }
+
             } else {
                 alert("Lỗi từ server: " + result.message);
             }
@@ -3664,7 +3686,7 @@
         if (isUpdating) return;
 
         var btnSave = document.querySelector("#editProductPage .btn-save");
-        if (btnSave) { btnSave.innerText = "Đang lưu..."; btnSave.disabled = true; }
+        if (btnSave) {btnSave.disabled = true; }
         isUpdating = true;
 
         var formData = new FormData();
@@ -3836,9 +3858,35 @@
     }
 
     function closeEditModal() {
-        document.getElementById('editProductPage').style.display = 'none';
-        var listSection = document.getElementById('product-manage-section');
-        if(listSection) listSection.style.display = 'block';
+        const editPage = document.getElementById('editProductPage');
+        if (editPage) editPage.style.display = 'none';
+
+
+        if (sectionProduct) {
+            sectionProduct.style.display = "block";
+        }
+
+        if (sectionProductList) {
+            sectionProductList.style.display = "block";
+        }
+        if (sectionProductEvent) {
+            sectionProductEvent.style.display = "none";
+        }
+
+        const sidebar = document.querySelector(".product-sidebar");
+        if (sidebar) {
+            sidebar.style.display = "block";
+        }
+
+        productMenuButtons.forEach(btn => {
+            if (btn.getAttribute("data-target") === "product-list") {
+                btn.classList.add("active");
+            } else {
+                btn.classList.remove("active");
+            }
+        });
+
+        window.scrollTo({ top: 0, behavior: "smooth" });
     }
 
     function loadBrandOptions() {
