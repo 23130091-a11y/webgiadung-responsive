@@ -2,6 +2,8 @@ package com.webgiadung.webgiadung.controller.admin;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonArray;
 import com.google.gson.JsonPrimitive;
 import com.google.gson.JsonSerializer;
 import com.webgiadung.webgiadung.model.Discounts;
@@ -31,16 +33,38 @@ public class DiscountController extends HttpServlet {
         try {
             List<Discounts> list = discountService.getAllDiscounts();
 
-            // Định dạng ngày tháng: dd/MM/yyyy
-            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
 
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
             Gson gson = new GsonBuilder()
                     .registerTypeAdapter(LocalDateTime.class, (JsonSerializer<LocalDateTime>) (src, typeOfSrc, context) ->
-                            new JsonPrimitive(src.format(formatter)))
+                            src != null ? new JsonPrimitive(src.format(formatter)) : null)
                     .create();
 
-            String json = gson.toJson(list);
-            response.getWriter().write(json);
+
+            JsonArray jsonArray = new JsonArray();
+            for (Discounts discount : list) {
+
+                JsonObject jsonObject = gson.toJsonTree(discount).getAsJsonObject();
+
+
+                String displayValue = "0đ";
+
+                String type = discount.getDiscountType();
+                double value = discount.getDiscountValue();
+
+                if ("percentage".equalsIgnoreCase(type) || "%".equals(type)) {
+
+                    displayValue = (int) value + "%";
+                } else {
+
+                    displayValue = String.format("%,.0f", value) + "đ";
+                }
+
+                jsonObject.addProperty("displayValue", displayValue);
+                jsonArray.add(jsonObject);
+            }
+
+            response.getWriter().write(gson.toJson(jsonArray));
 
         } catch (Exception e) {
             e.printStackTrace();

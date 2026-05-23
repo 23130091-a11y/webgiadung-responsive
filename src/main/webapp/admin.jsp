@@ -4062,21 +4062,21 @@
 
         if (discounts && discounts.length > 0) {
             discounts.forEach(function (d) {
-                var discountDisplay = d.discount + "%";
+                var discountDisplay = d.displayValue || d.discountValue || d.discount || "0";
 
                 html += '<article class="event-table__row">';
                 html += '    <div class="event-table__cell event-col-name">';
-                html += '        <span class="event-table__text event-table__text--bold">' + d.name + '</span>';
+                html += '        <span class="event-table__text event-table__text--bold">' + (d.name || d.discountName || "") + '</span>';
                 html += '    </div>';
                 html += '    <div class="event-table__cell event-col-discount">';
                 html += '        <span class="event-table__text event-table__text--red">' + discountDisplay + '</span>';
                 html += '    </div>';
                 html += '    <div class="event-table__cell event-col-post"><input type="checkbox" ' + (d.status == 1 ? "checked" : "") + '></div>';
                 html += '    <div class="event-table__cell event-col-date">';
-                html += '        <span class="event-table__text">' + d.startDate + '</span>';
+                html += '        <span class="event-table__text">' + (d.startDate || "") + '</span>';
                 html += '    </div>';
                 html += '    <div class="event-table__cell event-col-date">';
-                html += '        <span class="event-table__text">' + d.endDate + '</span>';
+                html += '        <span class="event-table__text">' + (d.endDate || "") + '</span>';
                 html += '    </div>';
 
                 html += '    <div class="event-table__cell event-col-action">';
