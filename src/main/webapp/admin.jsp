@@ -32,7 +32,7 @@
     <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/grid.css">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/base.css">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/style.css">
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/admin.css?v=200">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/admin.css?v=99">
     <!-- Include stylesheet -->
     <link href="https://cdn.jsdelivr.net/npm/quill@2.0.3/dist/quill.snow.css" rel="stylesheet" />
 </head>
@@ -1985,38 +1985,203 @@
                     </section>
 
                     <section id="order" class="manage-detail">
-                        <h2 class="manage__heading">Đơn hàng</h2>
+                        <h2 class="manage__heading">
+                            <i class="fa-solid fa-box-open" style="margin-right:8px;"></i>Quản lý đơn hàng
+                        </h2>
 
-                        <div class="order-table">
+                        <div class="order-page-body">
 
-                            <!-- Form tìm kiếm -->
                             <form id="searchOrderForm" action="${pageContext.request.contextPath}/order-search" method="get">
-                                <div class="order-table__filter">
-                                    <div class="order-table__filter-label">
-                                        Điều kiện lọc
-                                        <i class="order-table__filter-icon fa-solid fa-caret-down"></i>
+                                <input type="hidden" name="statusFilter" id="hiddenStatusFilter" value="">
+                                <input type="hidden" name="paymentFilter" id="hiddenPaymentFilter" value="">
+
+                                <div class="order-filter-bar">
+                                    <div class="order-filter-bar__row">
+                                        <div class="ofb-label">
+                                            <i class="fa-solid fa-filter"></i> Tìm kiếm
+                                        </div>
+                                        <div class="ofb-search-wrap">
+                                            <i class="fa-solid fa-magnifying-glass"></i>
+                                            <input type="text"
+                                                   name="keyword"
+                                                   class="ofb-search-input"
+                                                   placeholder="Nhập mã đơn hoặc tên khách hàng..."
+                                                   value="${keyword}">
+                                        </div>
+                                        <button type="submit" class="ofb-btn-search">
+                                            <i class="fa-solid fa-search"></i> Tìm kiếm
+                                        </button>
+                                        <button type="button" id="btnReloadAll" class="ofb-btn-reload">
+                                            <i class="fa-solid fa-rotate-right"></i> Tất cả đơn
+                                        </button>
                                     </div>
 
-                                    <input type="text"
-                                           name="keyword"
-                                           class="order-table__search"
-                                           placeholder="Nhập mã đơn hoặc tên khách"
-                                           value="${keyword}">
 
-                                    <button type="submit"
-                                            class="btn btn--default-color order-table__search-btn">
-                                        Tìm kiếm
-                                    </button>
-                                    <button type="button" id="btnReloadAll" class="btn btn--default-color" style="margin-left: 10px; min-width: 130px; --height: 30px;">
-                                        Tất cả đơn hàng
-                                    </button>
+                                    <div class="order-filter-bar__chips">
+                                        <span class="ofb-chips-label">Trạng thái:</span>
+                                        <div class="ofb-chip-group" id="statusChipGroup">
+                                            <span class="ofb-chip active"          data-val="">Tất cả</span>
+                                            <span class="ofb-chip chip-new"        data-val="0">Đơn mới</span>
+                                            <span class="ofb-chip chip-ship"       data-val="2">Đang giao</span>
+                                            <span class="ofb-chip chip-done"       data-val="3">Đã giao</span>
+                                            <span class="ofb-chip chip-cancel"     data-val="4">Đã hủy</span>
+                                        </div>
+
+                                        <div class="ofb-divider"></div>
+
+                                        <span class="ofb-chips-label">Thanh toán:</span>
+                                        <div class="ofb-chip-group" id="paymentChipGroup">
+                                            <span class="ofb-chip active"      data-val="">Tất cả</span>
+                                            <span class="ofb-chip chip-unpaid" data-val="0">Chưa TT</span>
+                                            <span class="ofb-chip chip-paid"   data-val="1">Đã TT</span>
+                                        </div>
+                                    </div>
                                 </div>
                             </form>
 
-                            <div class="order-table" id="order-main-content">
-                                <jsp:include page="_order_list.jsp" />
+
+                            <div class="order-toolbar">
+                                <div class="order-toolbar__title">
+                                    Danh sách đơn hàng
+                                    <span class="order-toolbar__count" id="orderCountBadge">0</span>
+                                </div>
+                                <div class="order-toolbar__actions">
+                                    <button class="btn-delete-selected" id="btnDeleteSelected">
+                                        <i class="fa-solid fa-trash-can"></i> Xóa đã chọn
+                                    </button>
+                                </div>
                             </div>
+
+                            <div class="order-card">
+                                <!-- Header -->
+                                <div class="order-card__head">
+                                    <div class="order-card__head-cell">
+                                        <input type="checkbox" id="checkAllOrders" style="width:18px;height:18px;accent-color:#fff;cursor:pointer;">
+                                    </div>
+                                    <div class="order-card__head-cell">Mã</div>
+                                    <div class="order-card__head-cell" style="justify-content:flex-start;padding-left:16px;">Khách hàng</div>
+                                    <div class="order-card__head-cell">Trạng thái</div>
+                                    <div class="order-card__head-cell">Thanh toán</div>
+                                    <div class="order-card__head-cell">Ngày tạo</div>
+                                    <div class="order-card__head-cell">Tổng tiền</div>
+                                </div>
+                                <div id="order-main-content">
+                                    <jsp:include page="_order_list.jsp" />
+                                </div>
+                            </div>
+
                         </div>
+
+                        <script>
+                        (function() {
+                            var form       = document.getElementById('searchOrderForm');
+                            var hiddenSt   = document.getElementById('hiddenStatusFilter');
+                            var hiddenPay  = document.getElementById('hiddenPaymentFilter');
+                            var mainContent = document.getElementById('order-main-content');
+                            var countBadge  = document.getElementById('orderCountBadge');
+
+                            function updateCount() {
+                                if (!countBadge || !mainContent) return;
+                                countBadge.textContent = mainContent.querySelectorAll('.order-item').length;
+                            }
+
+                            function doAjaxSearch() {
+                                if (!form || !mainContent) return;
+                                var keyword = form.querySelector('[name=keyword]').value || '';
+                                var status  = hiddenSt.value  || '';
+                                var payment = hiddenPay.value || '';
+                                var params = 'keyword=' + encodeURIComponent(keyword)
+                                           + '&statusFilter='  + encodeURIComponent(status)
+                                           + '&paymentFilter=' + encodeURIComponent(payment);
+                                var url = form.action + '?' + params;
+                                mainContent.innerHTML = '<div style="text-align:center;padding:30px;color:#aaa;"><i class=\"fa-solid fa-spinner fa-spin\"></i> Đang tải...</div>';
+                                fetch(url, { headers: { 'X-Requested-With': 'XMLHttpRequest' } })
+                                    .then(function(r){ return r.text(); })
+                                    .then(function(html){
+                                        mainContent.innerHTML = html;
+                                        updateCount();
+                                        rebindCheckAll();
+                                    })
+                                    .catch(function(){ mainContent.innerHTML = '<div style="padding:20px;color:red;">Lỗi tải dữ liệu!</div>'; });
+                            }
+
+                            function initChipGroup(groupId, hiddenInput) {
+                                var group = document.getElementById(groupId);
+                                if (!group) return;
+                                group.querySelectorAll('.ofb-chip').forEach(function(chip) {
+                                    chip.addEventListener('click', function() {
+                                        group.querySelectorAll('.ofb-chip').forEach(function(c){ c.classList.remove('active'); });
+                                        chip.classList.add('active');
+                                        hiddenInput.value = chip.dataset.val;
+                                        doAjaxSearch();
+                                    });
+                                });
+                            }
+
+                            initChipGroup('statusChipGroup',  hiddenSt);
+                            initChipGroup('paymentChipGroup', hiddenPay);
+
+                            if (form) {
+                                form.addEventListener('submit', function(e) {
+                                    e.preventDefault();
+                                    doAjaxSearch();
+                                });
+                            }
+
+                            var btnReload = document.getElementById('btnReloadAll');
+                            if (btnReload) {
+                                btnReload.addEventListener('click', function() {
+                                    document.getElementById('searchOrderForm').querySelector('[name=keyword]').value = '';
+                                    hiddenSt.value = '';
+                                    hiddenPay.value = '';
+                                    document.querySelectorAll('#statusChipGroup .ofb-chip').forEach(function(c, i){ c.classList.toggle('active', i===0); });
+                                    document.querySelectorAll('#paymentChipGroup .ofb-chip').forEach(function(c, i){ c.classList.toggle('active', i===0); });
+                                    doAjaxSearch();
+                                });
+                            }
+
+                            var btnDelSel = document.getElementById('btnDeleteSelected');
+                            if (btnDelSel) {
+                                btnDelSel.addEventListener('click', function() {
+                                    var checked = mainContent.querySelectorAll('.order-item__checkbox:checked');
+                                    if (checked.length === 0) { alert('Vui lòng chọn ít nhất 1 đơn hàng!'); return; }
+                                    if (!confirm('Xóa ' + checked.length + ' đơn hàng đã chọn?')) return;
+                                    var fd = new FormData();
+                                    checked.forEach(function(cb){ fd.append('orderIds', cb.value); });
+                                    fetch('${pageContext.request.contextPath}/order-delete', {
+                                        method: 'POST',
+                                        headers: { 'X-Requested-With': 'XMLHttpRequest' },
+                                        body: fd
+                                    }).then(function(r){ return r.text(); })
+                                      .then(function(html){ mainContent.innerHTML = html; updateCount(); rebindCheckAll(); });
+                                });
+                            }
+
+                            function rebindCheckAll() {
+                                var ca = document.getElementById('checkAllOrders');
+                                if (!ca) return;
+                                ca.checked = false;
+                                ca.addEventListener('change', function() {
+                                    mainContent.querySelectorAll('.order-item__checkbox').forEach(function(cb){ cb.checked = ca.checked; });
+                                });
+                            }
+
+                            rebindCheckAll();
+                            updateCount();
+
+                            mainContent && mainContent.addEventListener('submit', function(e) {
+                                var f = e.target;
+                                if (!f.classList.contains('form-update-status')) return;
+                                e.preventDefault();
+                                fetch(f.action, {
+                                    method: 'POST',
+                                    body: new FormData(f),
+                                    headers: { 'X-Requested-With': 'XMLHttpRequest' }
+                                }).then(function(r){ return r.text(); })
+                                  .then(function(html){ mainContent.innerHTML = html; updateCount(); rebindCheckAll(); });
+                            });
+                        })();
+                        </script>
                     </section>
                 </div>
             </div>
