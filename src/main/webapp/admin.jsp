@@ -165,13 +165,13 @@
                                                         <input type="number" id="import-qty" placeholder="0" oninput="calculateTotalPrice()">
                                                     </div>
                                                     <div class="form-group">
-                                                        <label>Giá nhập đợt này (VNĐ)</label>
+                                                        <label>Giá nhập đợt này (đ)</label>
                                                         <input type="number" id="unit-cost" placeholder="0" oninput="calculateTotalPrice()">
                                                     </div>
                                                 </div>
 
                                                 <div class="form-group" style="margin-top: 15px; margin-bottom: 10px;">
-                                                    <label>Thành tiền dự kiến (VNĐ)</label>
+                                                    <label>Thành tiền dự kiến (đ)</label>
                                                     <input type="text" id="total-price-display" readonly class="readonly-bg"
                                                            style="font-weight: bold; color: #f39c12; font-size: 1.1rem;" value="0">
                                                 </div>
@@ -360,21 +360,21 @@
                                     <div class="revenue-box">
                                         <span class="revenue-box__label">Doanh thu hôm nay</span>
                                         <strong class="revenue-box__value">
-                                            <fmt:formatNumber value="${revenueSummary['today_revenue']}" type="number" groupingUsed="true"/> VND
+                                            <fmt:formatNumber value="${revenueSummary['today_revenue']}" type="number" groupingUsed="true"/> đ
                                         </strong>
                                     </div>
 
                                     <div class="revenue-box">
                                         <span class="revenue-box__label">Doanh thu tháng ${monthALabel}</span>
                                         <strong class="revenue-box__value">
-                                            <fmt:formatNumber value="${revenueSummary['month_a_revenue']}" type="number" groupingUsed="true"/> VND
+                                            <fmt:formatNumber value="${revenueSummary['month_a_revenue']}" type="number" groupingUsed="true"/> đ
                                         </strong>
                                     </div>
 
                                     <div class="revenue-box">
                                         <span class="revenue-box__label">Doanh thu tháng ${monthBLabel}</span>
                                         <strong class="revenue-box__value">
-                                            <fmt:formatNumber value="${revenueSummary['month_b_revenue']}" type="number" groupingUsed="true"/> VND
+                                            <fmt:formatNumber value="${revenueSummary['month_b_revenue']}" type="number" groupingUsed="true"/> đ
                                         </strong>
                                     </div>
 
@@ -414,7 +414,7 @@
                                            <c:forEach var="item" items="${monthlyRevenueChart}" varStatus="loop">
                                                <div class="revenue-month-chart__item">
                                                    <div class="revenue-month-chart__tooltip">
-                                                       <fmt:formatNumber value="${item['revenue']}" type="number" groupingUsed="true"/> VND
+                                                       <fmt:formatNumber value="${item['revenue']}" type="number" groupingUsed="true"/> đ
                                                    </div>
                                                    <div class="revenue-month-chart__bar-wrap">
                                                        <div class="revenue-month-chart__bar ${loop.last ? 'revenue-month-chart__bar--active' : ''}"
@@ -452,10 +452,10 @@
                                                     <tr>
                                                         <td>${row['order_date']}</td>
                                                         <td><fmt:formatNumber value="${row['total_orders']}" type="number" groupingUsed="true"/></td>
-                                                        <td><fmt:formatNumber value="${row['gross_revenue']}" type="number" groupingUsed="true"/> VND</td>
+                                                        <td><fmt:formatNumber value="${row['gross_revenue']}" type="number" groupingUsed="true"/> đ</td>
                                                         <td><fmt:formatNumber value="${row['cancelled_orders']}" type="number" groupingUsed="true"/></td>
-                                                        <td><fmt:formatNumber value="${row['cancelled_value']}" type="number" groupingUsed="true"/> VND</td>
-                                                        <td><fmt:formatNumber value="${row['net_revenue']}" type="number" groupingUsed="true"/> VND</td>
+                                                        <td><fmt:formatNumber value="${row['cancelled_value']}" type="number" groupingUsed="true"/> đ</td>
+                                                        <td><fmt:formatNumber value="${row['net_revenue']}" type="number" groupingUsed="true"/> đ</td>
                                                         <td>
                                                             <c:choose>
                                                                 <c:when test="${row['cancelled_orders'] == 0}">
@@ -489,7 +489,7 @@
                                                     <c:forEach var="item" items="${topSellingProducts}">
                                                         <li>
                                                             <span>${item['product_name']} (<fmt:formatNumber value="${item['sold_qty']}" type="number" groupingUsed="true"/> SP)</span>
-                                                            <strong><fmt:formatNumber value="${item['revenue']}" type="number" groupingUsed="true"/> VND</strong>
+                                                            <strong><fmt:formatNumber value="${item['revenue']}" type="number" groupingUsed="true"/> đ</strong>
                                                         </li>
                                                     </c:forEach>
                                                 </c:otherwise>
@@ -563,8 +563,8 @@
                                                                 </c:otherwise>
                                                             </c:choose>
                                                         </td>
-                                                        <td><fmt:formatNumber value="${item['month_a_revenue']}" type="number" groupingUsed="true"/> VND</td>
-                                                        <td><fmt:formatNumber value="${item['month_b_revenue']}" type="number" groupingUsed="true"/> VND</td>
+                                                        <td><fmt:formatNumber value="${item['month_a_revenue']}" type="number" groupingUsed="true"/> đ</td>
+                                                        <td><fmt:formatNumber value="${item['month_b_revenue']}" type="number" groupingUsed="true"/> đ</td>
                                                     </tr>
                                                 </c:forEach>
                                             </c:otherwise>
@@ -605,7 +605,7 @@
                                                         <td><fmt:formatNumber value="${item['sold_qty_since_import']}" type="number" groupingUsed="true"/></td>
                                                         <td><fmt:formatNumber value="${item['sold_order_count']}" type="number" groupingUsed="true"/></td>
                                                         <td><fmt:formatNumber value="${item['estimated_remaining_qty']}" type="number" groupingUsed="true"/></td>
-                                                        <td><fmt:formatNumber value="${item['total_price']}" type="number" groupingUsed="true"/> VND</td>
+                                                        <td><fmt:formatNumber value="${item['total_price']}" type="number" groupingUsed="true"/> đ</td>
                                                     </tr>
                                                 </c:forEach>
                                             </c:otherwise>
@@ -3443,7 +3443,7 @@
         var html = '';
 
         products.forEach(function(p) {
-            var formattedPrice = new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(p.price);
+            var formattedPrice = new Intl.NumberFormat('vi-VN').format(p.price) + ' đ';
             var imgUrl = contextPath + '/assets/img/products/' + p.image;
 
             var checkStatus = (p.post == 1) ? 'checked' : '';
@@ -3625,7 +3625,7 @@
             document.getElementById('v-isPost').checked = (p.post == 1 || p.post === true || p.post === "true");
         }
 
-        var priceFmt = new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' });
+        var priceFmt = { format: v => new Intl.NumberFormat('vi-VN').format(v) + ' đ' };
         if(document.getElementById('v-newPrice')) document.getElementById('v-newPrice').innerText = priceFmt.format(p.price);
 
         var boxOldPrice = document.getElementById('box-oldPrice');
@@ -4392,8 +4392,8 @@
                 document.getElementById('view-categoryName').textContent = d.categoryName;
 
                 const isPercent = (d.typeDiscount === "percentage" || d.typeDiscount == 1);
-                document.getElementById('view-discountType').textContent = isPercent ? "Phần trăm (%)" : "Tiền mặt (VNĐ)";
-                document.getElementById('view-discountValue').textContent = d.discount + (isPercent ? "%" : " VNĐ");
+                document.getElementById('view-discountType').textContent = isPercent ? "Phần trăm (%)" : "Tiền mặt (đ)";
+                document.getElementById('view-discountValue').textContent = d.discount + (isPercent ? "%" : " đ");
 
                 if (typeof hideAllSections === "function") hideAllSections();
                 const viewPage = document.getElementById('view-event-page');
@@ -4747,7 +4747,7 @@
 
     // Hàm định dạng tiền tệ
     function formatVND(amount) {
-        return new Intl.NumberFormat('vi-VN').format(amount || 0) + ' ₫';
+        return new Intl.NumberFormat('vi-VN').format(amount || 0) + ' đ';
     }
 
     // Hàm định dạng ngày tháng: 2026-04-20T19:49:04 -> 20/04/2026 19:49
