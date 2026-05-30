@@ -26,6 +26,13 @@ public class SlideDao extends BaseDao{
                     .orElse(null);
         });
     }
+    public static List<Slide> getAllSlides() {
+        return get().withHandle(handle ->
+                handle.createQuery("SELECT * FROM slides ORDER BY id DESC")
+                        .mapToBean(Slide.class)
+                        .list()
+        );
+    }
 
     public static int insert(Slide slide) {
         return get().withHandle(handle -> {
