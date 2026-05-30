@@ -27,12 +27,21 @@ public class CategoriesService {
     public int insertCategory(String name, String description, Integer parentId) {
         Categories exist = categoriesDao.findByName(name);
         if (exist != null) {
-            return -2; // nếu trùng tên trả về -2
+            return -2;
         }
+
         // nếu mà không truyền parentId vào thì mặc định nó là cha
         int finalParentId = (parentId == null) ? 0 : parentId;
 
-        // gọi dao
         return categoriesDao.insertCategory(name, description, finalParentId);
+    }
+
+    public List<Categories> getCategoriesWithChildren() {
+        List<Categories> parents = categoriesDao.getCategoriesParent();
+        for(Categories parent : parents) {
+            List<Categories> children = categoriesDao.getCategoriesByParentId(parent.getId());
+            parent.setChildren(children);
+        }
+        return parents;
     }
 }

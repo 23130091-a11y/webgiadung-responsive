@@ -561,75 +561,175 @@ public Product getProductFullInfo(int id) {
         );
     }
 /// ///
-    public List<Product> searchWithFilters(String keyword, String[] brands, String[] priceRanges, String categoryId) {
-        return get().withHandle(h -> {
-            StringBuilder sql = new StringBuilder("""
-        SELECT 
-            p.id, p.name, p.image, p.post, p.quantity,
-            p.price_first AS firstPrice, 
-            p.discounts_id AS discountsId, 
-           (COALESCE(d.discount, 0) * 1.0) AS discountPercent,
-            p.categories_id AS categoriesId, 
-            p.brands_id AS brandsId, 
-            p.sold_quantity AS quantitySaled, 
-            p.created_at AS createdAt, 
-            p.updated_at AS updatedAt
-        FROM products p
-        LEFT JOIN discounts d ON p.discounts_id = d.id
-        WHERE 1=1 
-    """);
+//    public List<Product> searchWithFilters(String keyword, String[] brands, String[] priceRanges, String categoryId) {
+//        return get().withHandle(h -> {
+//            StringBuilder sql = new StringBuilder("""
+//        SELECT
+//            p.id, p.name, p.image, p.post, p.quantity,
+//            p.price_first AS firstPrice,
+//            p.discounts_id AS discountsId,
+//           (COALESCE(d.discount, 0) * 1.0) AS discountPercent,
+//            p.categories_id AS categoriesId,
+//            p.brands_id AS brandsId,
+//            p.sold_quantity AS quantitySaled,
+//            p.created_at AS createdAt,
+//            p.updated_at AS updatedAt
+//        FROM products p
+//        LEFT JOIN discounts d ON p.discounts_id = d.id
+//        WHERE 1=1
+//    """);
+//
+//            if (categoryId != null && !categoryId.trim().isEmpty()) {
+//                sql.append(" AND p.categories_id = :categoryId ");
+//            }
+//
+//            if (keyword != null && !keyword.trim().isEmpty()) {
+//                sql.append(" AND LOWER(p.name) LIKE LOWER(:keyword) ");
+//            }
+//
+//            if (brands != null && brands.length > 0) {
+//                sql.append(" AND p.brands_id IN (SELECT id FROM brands WHERE name IN (<brandNames>)) ");
+//            }
+//
+//            if (priceRanges != null && priceRanges.length > 0) {
+//                sql.append(" AND ( ");
+//                for (int i = 0; i < priceRanges.length; i++) {
+//                    sql.append(" (p.price_total BETWEEN :min").append(i).append(" AND :max").append(i).append(") ");
+//                    if (i < priceRanges.length - 1) {
+//                        sql.append(" OR ");
+//                    }
+//                }
+//                sql.append(" ) ");
+//            }
+//
+//            var query = h.createQuery(sql.toString());
+//
+//            if (categoryId != null && !categoryId.trim().isEmpty()) {
+//                query.bind("categoryId", categoryId);
+//            }
+//            if (keyword != null && !keyword.trim().isEmpty()) {
+//                query.bind("keyword", "%" + keyword.trim() + "%");
+//            }
+//            if (brands != null && brands.length > 0) {
+//                query.bindList("brandNames", java.util.Arrays.asList(brands));
+//            }
+//            if (priceRanges != null && priceRanges.length > 0) {
+//                for (int i = 0; i < priceRanges.length; i++) {
+//                    String[] parts = priceRanges[i].split("-");
+//                    if (parts.length == 2) {
+//                        try {
+//                            query.bind("min" + i, Double.parseDouble(parts[0]));
+//                            query.bind("max" + i, Double.parseDouble(parts[1]));
+//                        } catch (NumberFormatException e) {
+//                            query.bind("min" + i, -1.0);
+//                            query.bind("max" + i, -1.0);
+//                        }
+//                    }
+//                }
+//            }
+//            return query.mapToBean(Product.class).list();
+//        });
+//    }
 
-            if (categoryId != null && !categoryId.trim().isEmpty()) {
-                sql.append(" AND p.categories_id = :categoryId ");
-            }
+public List<Product> searchWithFilters(String keyword, String[] brands, String[] priceRanges, String categoryId, String rating) {
+    return get().withHandle(h -> {
 
-            if (keyword != null && !keyword.trim().isEmpty()) {
-                sql.append(" AND LOWER(p.name) LIKE LOWER(:keyword) ");
-            }
+        StringBuilder sql = new StringBuilder("""
+            SELECT
+                p.id, p.name, p.image,
+                p.price_first AS firstPrice,
+                p.discounts_id AS discountsId,
+                p.categories_id AS categoriesId,
+                p.brands_id AS brandsId,
+                p.is_visible AS isVisible,
+                p.status,
+                p.quantity,
+                p.sold_quantity AS soldQuantity,
+                p.created_at AS createdAt,
+                p.updated_at AS updatedAt,
+                IFNULL(d.discount_value, 0) AS discountPercent,
+                d.discount_type AS discountType,
+                IFNULL(pr.ratingAvg, 0.0) AS ratingAvg
+            FROM products p
+            LEFT JOIN discounts d ON p.discounts_id = d.id
+            LEFT JOIN (
+                SELECT product_id, ROUND(AVG(rating), 1) AS ratingAvg 
+                FROM product_reviews
+                WHERE status = 1 
+                GROUP BY product_id
+            ) pr ON p.id = pr.product_id
+            WHERE p.is_visible = 1 
+        """);
 
-            if (brands != null && brands.length > 0) {
-                sql.append(" AND p.brands_id IN (SELECT id FROM brands WHERE name IN (<brandNames>)) ");
-            }
+        if (categoryId != null && !categoryId.trim().isEmpty()) {
+            sql.append(" AND p.categories_id = :categoryId ");
+        }
 
-            if (priceRanges != null && priceRanges.length > 0) {
-                sql.append(" AND ( ");
-                for (int i = 0; i < priceRanges.length; i++) {
-                    sql.append(" (p.price_total BETWEEN :min").append(i).append(" AND :max").append(i).append(") ");
-                    if (i < priceRanges.length - 1) {
-                        sql.append(" OR ");
-                    }
+        if (keyword != null && !keyword.trim().isEmpty()) {
+            sql.append(" AND LOWER(p.name) LIKE LOWER(:keyword) ");
+        }
+
+        if (brands != null && brands.length > 0) {
+            sql.append(" AND p.brands_id IN (SELECT id FROM brands WHERE name IN (<brandNames>)) ");
+        }
+
+        if (priceRanges != null && priceRanges.length > 0) {
+            sql.append(" AND ( ");
+            for (int i = 0; i < priceRanges.length; i++) {
+                sql.append(" (p.price_first BETWEEN :min").append(i).append(" AND :max").append(i).append(") ");
+                if (i < priceRanges.length - 1) {
+                    sql.append(" OR ");
                 }
-                sql.append(" ) ");
             }
+            sql.append(" ) ");
+        }
 
-            var query = h.createQuery(sql.toString());
+        if (rating != null && !rating.trim().isEmpty()) {
+            try {
+                double minRating = Double.parseDouble(rating);
+                if (minRating == 5.0) {
+                    sql.append(" AND IFNULL(pr.ratingAvg, 0.0) = 5.0 ");
+                } else {
+                    sql.append(" AND IFNULL(pr.ratingAvg, 0.0) >= :minRating ");
+                }
+            } catch (NumberFormatException ignored) {}
+        }
 
-            if (categoryId != null && !categoryId.trim().isEmpty()) {
-                query.bind("categoryId", categoryId);
-            }
-            if (keyword != null && !keyword.trim().isEmpty()) {
-                query.bind("keyword", "%" + keyword.trim() + "%");
-            }
-            if (brands != null && brands.length > 0) {
-                query.bindList("brandNames", java.util.Arrays.asList(brands));
-            }
-            if (priceRanges != null && priceRanges.length > 0) {
-                for (int i = 0; i < priceRanges.length; i++) {
-                    String[] parts = priceRanges[i].split("-");
-                    if (parts.length == 2) {
-                        try {
-                            query.bind("min" + i, Double.parseDouble(parts[0]));
-                            query.bind("max" + i, Double.parseDouble(parts[1]));
-                        } catch (NumberFormatException e) {
-                            query.bind("min" + i, -1.0);
-                            query.bind("max" + i, -1.0);
-                        }
-                    }
+        sql.append(" ORDER BY p.id DESC ");
+
+        var query = h.createQuery(sql.toString());
+
+        if (categoryId != null && !categoryId.trim().isEmpty()) {
+            query.bind("categoryId", categoryId);
+        }
+        if (keyword != null && !keyword.trim().isEmpty()) {
+            query.bind("keyword", "%" + keyword.trim() + "%");
+        }
+        if (brands != null && brands.length > 0) {
+            query.bindList("brandNames", java.util.Arrays.asList(brands));
+        }
+        if (priceRanges != null && priceRanges.length > 0) {
+            for (int i = 0; i < priceRanges.length; i++) {
+                String[] parts = priceRanges[i].split("-");
+                if (parts.length == 2) {
+                    query.bind("min" + i, Double.parseDouble(parts[0]));
+                    query.bind("max" + i, Double.parseDouble(parts[1]));
                 }
             }
-            return query.mapToBean(Product.class).list();
-        });
-    }
+        }
+
+        if (rating != null && !rating.trim().isEmpty()) {
+            try {
+                double minRating = Double.parseDouble(rating);
+                if (minRating < 5.0) {
+                    query.bind("minRating", minRating);
+                }
+            } catch (NumberFormatException ignored) {}
+        }
+
+        return query.mapToBean(Product.class).list();
+    });
+}
 
     // tìm sản phẩm thuộc các chương trình giảm giá discountName
     public List<Product> searchByDiscountName(String discountName) {
@@ -702,6 +802,10 @@ public Product getProductFullInfo(int id) {
 
             return rowsUpdated > 0;
         });
+    }
+
+    public List<Product> getTopSellingProducts(int i) {
+        return null;
     }
 }
 

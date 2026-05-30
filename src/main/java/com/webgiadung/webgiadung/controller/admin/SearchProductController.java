@@ -47,7 +47,7 @@ public class SearchProductController extends HttpServlet {
             response.getWriter().write(json);
 
         } catch (Exception e) {
-            e.printStackTrace(); // In lỗi ra Console của IDE để theo dõi
+            e.printStackTrace();
             response.setStatus(500);
             response.getWriter().write("{\"error\": \"" + e.getMessage() + "\"}");
         }

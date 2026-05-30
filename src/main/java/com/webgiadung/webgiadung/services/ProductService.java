@@ -117,8 +117,8 @@ public class ProductService {
         return pdao.applyDiscountToCategory(categoryId, discountId);
     }
 
-    public List<Product> searchWithFilters(String keyword, String[] brands, String[] priceRanges,String categoryId) {
-        return pdao.searchWithFilters(keyword, brands, priceRanges,categoryId);
+    public List<Product> searchWithFilters(String keyword, String[] brands, String[] priceRanges,String categoryId, String rating) {
+        return pdao.searchWithFilters(keyword, brands, priceRanges,categoryId, rating);
     }
 
     public List<Product> getProductsFromIds(List<Integer> viewedIds) {
@@ -136,14 +136,20 @@ public class ProductService {
     public int getAvailableStock(int productId) {
         return pdao.getAvailableStock(productId);
     }
+
     public List<Product> getLowStockProducts() {
         return pdao.getLowStockProducts();
     }
+
     public boolean updateStockAndPrice(int productId, int quantityToAdd, double newPrice) {
         return pdao.updateStockAndPrice( productId, quantityToAdd, newPrice);
     }
     public int applyDiscountToAll(int discountId) {
         return pdao.applyDiscountToAll(discountId);
+    }
+
+    public List<Product> getTopSellingProducts(int i) {
+        return pdao.getTopSellingProducts(i);
     }
 }
 

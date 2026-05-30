@@ -80,7 +80,6 @@
 }
 
 .search-filter-reviews {
-    cursor: pointer;
     border-radius: 6px;
     transition: background-color 0.2s;
 }
@@ -93,10 +92,23 @@
     display: none;
 }
 
+.search-filter-reviews__content {
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    padding: 6px 8px;
+    border: 1px solid transparent;
+    border-radius: 6px;
+    transition: all 0.2s ease;
+}
+
+.search-filter-reviews__content:hover {
+    background-color: rgba(0, 0, 0, 0.03);
+}
+
 .search-filter-reviews__input:checked + .search-filter-reviews__content {
     background-color: rgba(0, 0, 0, .09);
     border-radius: 6px;
-    padding: 6px 8px;
 }
 
 /* product list*/

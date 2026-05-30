@@ -62,7 +62,9 @@
             <ul class="category__list">
               <c:forEach items="${parentCategories}" var="parent">
                 <li class="category__item category__item--active">
-                  <a href="#!" class="category__link">${parent.name}</a>
+                  <a href="#!" class="category__link">
+                      ${parent.name}
+                  </a>
                   <c:if test="${not empty parent.children}">
                     <ul class="category-menu">
                       <c:forEach items="${parent.children}" var="child">
