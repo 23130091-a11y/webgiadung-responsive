@@ -2,6 +2,7 @@ package com.webgiadung.webgiadung.controller;
 
 import com.webgiadung.webgiadung.dao.CartDao;
 import com.webgiadung.webgiadung.model.Cart;
+import com.webgiadung.webgiadung.model.CartItem;
 import com.webgiadung.webgiadung.model.Product;
 import com.webgiadung.webgiadung.model.User;
 import com.webgiadung.webgiadung.services.AuthService;
@@ -17,6 +18,7 @@ import java.util.Map;
 
 @WebServlet(name = "LoginController", value = "/login")
 public class LoginController extends HttpServlet {
+
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         String redirect = request.getParameter("redirect");
@@ -35,19 +37,22 @@ public class LoginController extends HttpServlet {
         String hashedInput = SecurityUtils.hashMD5(password);
         User user = authService.checkLogin(email, hashedInput);
 
-        // kt tk
         if (user == null) {
             request.setAttribute("error", "Email hoặc mật khẩu không chính xác!");
             request.setAttribute("redirect", request.getParameter("redirect"));
             request.getRequestDispatcher("/login.jsp").forward(request, response);
             return;
         }
+
         if (user.getStatus() == 0) {
             request.setAttribute("error", "Tài khoản chưa được kích hoạt hoặc đã bị khóa.");
             request.setAttribute("redirect", request.getParameter("redirect"));
             request.getRequestDispatcher("/login.jsp").forward(request, response);
             return;
         }
+
+        HttpSession oldSession = request.getSession(false);
+        Cart guestCart = (oldSession != null) ? (Cart) oldSession.getAttribute("cart") : null;
 
         HttpSession session = request.getSession(true);
         session.setAttribute("user", user);
@@ -56,10 +61,8 @@ public class LoginController extends HttpServlet {
         CartDao cartDao = new CartDao();
         ProductService productService = new ProductService();
 
-        Cart guestCart = (Cart) session.getAttribute("cart");
-
         if (guestCart != null && !guestCart.getItems().isEmpty()) {
-            for (com.webgiadung.webgiadung.model.CartItem item : guestCart.getItems()) {
+            for (CartItem item : guestCart.getItems()) {
                 if (item.getProduct() != null) {
                     cartDao.upsert(user.getId(), item.getProduct().getId(), item.getQuantity());
                 }
@@ -73,15 +76,17 @@ public class LoginController extends HttpServlet {
             int quantity  = ((Number) row.get("quantity")).intValue();
             Product product = productService.getProductFullInfo(productId);
             if (product != null) {
-                // addItem cộng dồn nên set thẳng
                 cart.addItem(product, quantity);
             }
         }
-
-
         session.setAttribute("cart", cart);
 
-        // kt redirect trang trước nếu có hoặc admin
+
+        if (user.getRole() == 1) {
+            response.sendRedirect(request.getContextPath() + "/admin/customers");
+            return;
+        }
+
         String redirect = request.getParameter("redirect");
 
         if (redirect != null) redirect = redirect.trim();
@@ -89,8 +94,10 @@ public class LoginController extends HttpServlet {
             redirect = null;
         }
         if (redirect != null) {
-            boolean isAdminPath = redirect.equals("/admin.jsp") || redirect.startsWith("/admin") || redirect.endsWith("-admin");
-            if (isAdminPath && user.getRole() != 1) {
+            boolean isAdminPath = redirect.equals("/admin.jsp")
+                    || redirect.startsWith("/admin")
+                    || redirect.endsWith("-admin");
+            if (isAdminPath) {
                 redirect = null;
             }
         }
@@ -106,10 +113,6 @@ public class LoginController extends HttpServlet {
             return;
         }
 
-        if (user.getRole() == 1) {
-            response.sendRedirect(request.getContextPath() + "/admin/customers");
-        } else {
-            response.sendRedirect(request.getContextPath() + "/list-product");
-        }
+        response.sendRedirect(request.getContextPath() + "/list-product");
     }
 }

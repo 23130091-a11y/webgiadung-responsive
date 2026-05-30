@@ -136,9 +136,9 @@ public class OrderDao extends BaseDao {
     """;
 
             int updated = handle.createUpdate(sql)
-                            .bind("id", orderId)
-                            .bind("user_id", userId)
-                            .execute();
+                    .bind("id", orderId)
+                    .bind("user_id", userId)
+                    .execute();
 
             if (updated <= 0) return false;
 
@@ -157,10 +157,10 @@ public class OrderDao extends BaseDao {
 
             // lấy ds sp và số lượng từ đơn này
             List<Map<String, Object>> items = handle.createQuery(
-                                    "SELECT product_id, quantity FROM order_items WHERE order_id = :order_id")
-                            .bind("order_id", orderId)
-                            .mapToMap()
-                            .list();
+                            "SELECT product_id, quantity FROM order_items WHERE order_id = :order_id")
+                    .bind("order_id", orderId)
+                    .mapToMap()
+                    .list();
 
             // hoàn sl và tạo giao dịch kho
             for(Map<String, Object> item : items) {
@@ -168,18 +168,18 @@ public class OrderDao extends BaseDao {
                 int quantity = (int) item.get("quantity");
 
                 handle.createUpdate("UPDATE products SET quantity = quantity + :qty WHERE id = :id")
-                                .bind("qty", quantity)
-                                .bind("id", productId)
-                                .execute();
+                        .bind("qty", quantity)
+                        .bind("id", productId)
+                        .execute();
 
                 //
                 handle.createUpdate("INSERT INTO warehouse_transactions (product_id, order_id, type, quantity, note, created_at) " +
-                                        "VALUES (:pid, :oid, 'RETURN', :qty, :note, NOW())")
-                                .bind("pid", productId)
-                                .bind("oid", orderId)
-                                .bind("qty", quantity)
-                                .bind("note", "Hủy đơn #" + orderId + ". Lý do: " + reason)
-                                .execute();
+                                "VALUES (:pid, :oid, 'RETURN', :qty, :note, NOW())")
+                        .bind("pid", productId)
+                        .bind("oid", orderId)
+                        .bind("qty", quantity)
+                        .bind("note", "Hủy đơn #" + orderId + ". Lý do: " + reason)
+                        .execute();
             }
             return true;
         });
@@ -621,6 +621,43 @@ public class OrderDao extends BaseDao {
                         .mapToMap()
                         .list()
         );
+    }
+
+    public List<OrderAdmin> filterOrders(String keyword, String statusFilter, String paymentFilter) {
+        StringBuilder sql = new StringBuilder("""
+            SELECT
+                o.id,
+                o.user_id AS userId,
+                o.customer_name AS customerName,
+                o.customer_phone AS customerPhone,
+                o.shipping_address AS shippingAddress,
+                o.status_transport AS statusTransport,
+                o.payment_method AS paymentMethod,
+                o.status_payment AS statusPayment,
+                o.total_price AS totalPrice,
+                o.shipping_fee AS shippingFee,
+                o.created_at AS createdAt
+            FROM orders o
+            WHERE 1=1
+        """);
+
+        boolean hasKeyword = keyword != null && !keyword.trim().isEmpty();
+        boolean hasStatus  = statusFilter != null && !statusFilter.trim().isEmpty();
+        boolean hasPayment = paymentFilter != null && !paymentFilter.trim().isEmpty();
+
+        if (hasKeyword)  sql.append(" AND (CAST(o.id AS CHAR) LIKE :kw OR o.customer_name LIKE :kw)");
+        if (hasStatus)   sql.append(" AND o.status_transport = :status");
+        if (hasPayment)  sql.append(" AND o.status_payment = :payment");
+
+        sql.append(" ORDER BY o.created_at DESC");
+
+        return get().withHandle(handle -> {
+            var query = handle.createQuery(sql.toString());
+            if (hasKeyword) query.bind("kw", "%" + keyword.trim() + "%");
+            if (hasStatus)  query.bind("status",  Integer.parseInt(statusFilter.trim()));
+            if (hasPayment) query.bind("payment", Integer.parseInt(paymentFilter.trim()));
+            return query.mapToBean(OrderAdmin.class).list();
+        });
     }
 
     public List<Map<String, Object>> getImportBatchSalesReport(int limit) {
