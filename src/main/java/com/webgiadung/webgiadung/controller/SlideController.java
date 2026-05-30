@@ -1,9 +1,9 @@
 package com.webgiadung.webgiadung.controller;
 
 import com.webgiadung.webgiadung.model.Product;
-import com.webgiadung.webgiadung.model.Slide; // Giả định bạn có model Slide
+import com.webgiadung.webgiadung.model.Slide;
 import com.webgiadung.webgiadung.services.ProductService;
-import com.webgiadung.webgiadung.services.SlideService; // Cần service để lấy thông tin Slide
+import com.webgiadung.webgiadung.services.SlideService;
 import jakarta.servlet.*;
 import jakarta.servlet.http.*;
 import jakarta.servlet.annotation.*;
@@ -15,31 +15,36 @@ import java.util.List;
 public class SlideController extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        // 1. Lấy ID slide từ request
         String slideIdStr = request.getParameter("id");
 
-        if (slideIdStr != null) {
+        if (slideIdStr != null && !slideIdStr.trim().isEmpty()) {
             try {
-                int slideId = Integer.parseInt(slideIdStr);
+                int slideId = Integer.parseInt(slideIdStr.trim());
 
                 SlideService slideService = new SlideService();
                 Slide slide = slideService.getById(slideId);
 
                 if (slide != null) {
+
                     String discountName = slide.getTitle();
+
                     ProductService productService = new ProductService();
                     List<Product> products = productService.searchByDiscountName(discountName);
 
-                    // 4. Gửi dữ liệu sang JSP
                     request.setAttribute("slide", slide);
                     request.setAttribute("productList", products);
+                } else {
+                    request.setAttribute("errorMessage", "Không tìm thấy chương trình khuyến mãi.");
                 }
             } catch (NumberFormatException e) {
                 e.printStackTrace();
+                request.setAttribute("errorMessage", "ID chương trình không hợp lệ.");
             }
+        } else {
+            request.setAttribute("errorMessage", "Thiếu ID chương trình khuyến mãi.");
         }
 
-        // Chuyển hướng sang trang slide.jsp
+
         request.getRequestDispatcher("/slide.jsp").forward(request, response);
     }
 }
