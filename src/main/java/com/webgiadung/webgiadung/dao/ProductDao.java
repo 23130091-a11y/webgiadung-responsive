@@ -734,8 +734,32 @@ public List<Product> searchWithFilters(String keyword, String[] brands, String[]
     // tìm sản phẩm thuộc các chương trình giảm giá discountName
     public List<Product> searchByDiscountName(String discountName) {
         return get().withHandle(h ->
-                h.createQuery(BASE_SELECT.replace("LEFT JOIN discounts d", "INNER JOIN discounts d") + """
-                AND d.name LIKE :discountName
+                h.createQuery("""
+                SELECT
+                    p.id, p.name, p.image,
+                    p.price_first AS firstPrice,
+                    p.discounts_id AS discountsId,
+                    p.categories_id AS categoriesId,
+                    p.brands_id AS brandsId,
+                    p.is_visible AS isVisible,
+                    p.status,
+                    p.quantity,
+                    p.sold_quantity AS soldQuantity,
+                    p.created_at AS createdAt,
+                    p.updated_at AS updatedAt,
+                    IFNULL(d.discount_value, 0) AS discountPercent,
+                    d.discount_type AS discountType,
+                    IFNULL(pr.ratingAvg, 0.0) AS ratingAvg
+                FROM products p
+                INNER JOIN discounts d ON p.discounts_id = d.id
+                LEFT JOIN (
+                    SELECT product_id, ROUND(AVG(rating), 1) AS ratingAvg 
+                    FROM product_reviews 
+                    GROUP BY product_id
+                ) pr ON p.id = pr.product_id
+                WHERE p.is_visible = 1 
+                  AND d.name LIKE :discountName
+                GROUP BY p.id
                 ORDER BY d.discount_value DESC
             """)
                         .bind("discountName", "%" + discountName + "%")
