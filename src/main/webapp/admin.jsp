@@ -4913,10 +4913,11 @@
         panel.classList.toggle('is-open');
     }
 </script>
-<script src="${pageContext.request.contextPath}/assets/js/script.js"></script>
-
+<script>
     window.contextPath = "${pageContext.request.contextPath}";
 </script>
+
+<script src="${pageContext.request.contextPath}/assets/js/script.js"></script>
 
 <script>
 
@@ -5052,5 +5053,4 @@
             });
     }
 </script>
-</script><script src="${pageContext.request.contextPath}/assets/js/script.js"></script>
 </html>
