@@ -3776,3 +3776,144 @@
         min-width: 38px;
     }
 }
+.rv-accordion {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding: 0 22px 22px;
+}
+
+.rv-panel {
+    border: 1px solid #ede8df;
+    border-radius: 12px;
+    background: #fff;
+    overflow: hidden;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+    transition: box-shadow 0.2s;
+}
+
+.rv-panel.is-open {
+    box-shadow: 0 6px 18px rgba(224,106,28,0.10);
+    border-color: var(--primary-color);
+}
+
+.rv-panel__head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 13px 18px;
+    cursor: pointer;
+    user-select: none;
+    background: #fafafa;
+    transition: background 0.18s;
+    gap: 10px;
+}
+
+.rv-panel.is-open .rv-panel__head {
+    background: linear-gradient(90deg, #fff8ee 0%, #fff 100%);
+    border-bottom: 1px solid #f1dfbf;
+}
+
+.rv-panel__head:hover {
+    background: #fff5e6;
+}
+
+.rv-panel__head-left {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.rv-panel__icon {
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    flex-shrink: 0;
+}
+
+.rv-panel__icon--blue   { background: #eaf4ff; color: #1d74c9; }
+.rv-panel__icon--green  { background: #eafaf0; color: #1b8f4d; }
+.rv-panel__icon--orange { background: #fff5e6; color: #e06a1c; }
+.rv-panel__icon--red    { background: #ffecec; color: #d93025; }
+.rv-panel__icon--purple { background: #f5eeff; color: #7c3aed; }
+
+.rv-panel__title {
+    font-size: 1.45rem;
+    font-weight: 700;
+    color: #333;
+}
+
+.rv-panel__meta {
+    font-size: 1.2rem;
+    color: #999;
+    margin-top: 2px;
+}
+
+.rv-panel__chevron {
+    font-size: 1.2rem;
+    color: #aaa;
+    transition: transform 0.25s ease;
+    flex-shrink: 0;
+}
+
+.rv-panel.is-open .rv-panel__chevron {
+    transform: rotate(180deg);
+    color: var(--primary-color);
+}
+
+.rv-panel__body {
+    display: none;
+    padding: 18px 18px 16px;
+    overflow-x: auto;
+}
+
+.rv-panel.is-open .rv-panel__body {
+    display: block;
+}
+
+.revenue-summary {
+    padding: 14px 22px;
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 12px;
+    border-bottom: 1px solid #f1f1f1;
+}
+
+.revenue-box {
+    border-radius: 10px;
+    padding: 12px 14px;
+}
+
+.revenue-box__value {
+    font-size: 1.8rem;
+}
+
+.rv-panel__body--grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    padding: 0;
+}
+
+.rv-panel__body--grid > div {
+    padding: 18px;
+    border-right: 1px solid #f1f1f1;
+}
+
+.rv-panel__body--grid > div:last-child {
+    border-right: none;
+}
+
+@media (max-width: 768px) {
+    .rv-panel__body--grid {
+        grid-template-columns: 1fr;
+    }
+    .rv-panel__body--grid > div {
+        border-right: none;
+        border-bottom: 1px solid #f1f1f1;
+    }
+}
