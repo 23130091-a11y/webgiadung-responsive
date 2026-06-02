@@ -930,7 +930,6 @@
 
                         <!-- Slide quảng cáo -->
                         <div class="news-table" id="news-slide">
-                            <!-- Tìm kiếm -->
                             <div class="news-search">
                                 <input type="text" placeholder="Tìm kiếm slide..." class="news-search__input" id="searchSlide">
                             </div>
@@ -938,8 +937,7 @@
                                 <button class="btn btn--default-color add-table__btn">Thêm Slide</button>
                             </div>
 
-                            <div class="news-table__inner">
-                                <!-- Header -->
+                            <div class="news-table__inner" id="slideTableContainer">
                                 <div class="news-table__row news-table__row--header">
                                     <div class="news-table__cell">Ảnh</div>
                                     <div class="news-table__cell">Tên slide</div>
@@ -952,33 +950,8 @@
                                     <div class="news-table__cell">Xóa</div>
                                 </div>
 
-                                <!-- Dữ liệu mẫu -->
-                                <article class="news-table__row">
-                                    <div class="news-table__cell"><img src="${pageContext.request.contextPath}/assets/img/hero_slide-01.jpg" class="news-table__img" alt=""></div>
-                                    <div class="news-table__cell">Slide khuyến mãi 12.12</div>
-                                    <div class="news-table__cell"><span class="status status--active">Đang post</span></div>
-                                    <div class="news-table__cell">01/12/2025</div>
-                                    <div class="news-table__cell">10/12/2025</div>
-                                    <div class="news-table__cell"><input type="checkbox" checked></div>
-                                    <div class="news-table__cell"><button class="news-table__view">Xem</button></div>
-                                    <div class="news-table__cell"><button class="news-table__edit">Sửa</button></div>
-                                    <div class="news-table__cell"><button class="news-table__delete">Xóa</button></div>
-                                </article>
-
-                                <article class="news-table__row">
-                                    <div class="news-table__cell"><img src="${pageContext.request.contextPath}/assets/img/hero_slide-02.jpg" class="news-table__img" alt=""></div>
-                                    <div class="news-table__cell">Slide Black Friday</div>
-                                    <div class="news-table__cell"><span class="status status--inactive">Chưa post</span></div>
-                                    <div class="news-table__cell">15/11/2025</div>
-                                    <div class="news-table__cell">20/11/2025</div>
-                                    <div class="news-table__cell"><input type="checkbox"></div>
-                                    <div class="news-table__cell"><button class="news-table__view">Xem</button></div>
-                                    <div class="news-table__cell"><button class="news-table__edit">Sửa</button></div>
-                                    <div class="news-table__cell"><button class="news-table__delete">Xóa</button></div>
-                                </article>
                             </div>
                         </div>
-
                         <!-- Blog tin tức -->
                         <div class="news-table hidden" id="news-blog">
                             <!-- Tìm kiếm -->
@@ -4941,4 +4914,143 @@
     }
 </script>
 <script src="${pageContext.request.contextPath}/assets/js/script.js"></script>
+
+    window.contextPath = "${pageContext.request.contextPath}";
+</script>
+
+<script>
+
+    var PURE_CONTEXT_PATH = "${pageContext.request.contextPath}";
+
+    document.addEventListener("DOMContentLoaded", function () {
+        if (document.getElementById("slideTableContainer")) {
+            loadSlideTable();
+        }
+    });
+
+    function loadSlideTable() {
+        var container = document.getElementById("slideTableContainer");
+        if (!container) return;
+
+        fetch("/WebGiaDung/api/admin/manage-slide")
+            .then(function(response) {
+                if (!response.ok) {
+                    throw new Error("Lỗi kết nối API: " + response.status);
+                }
+                return response.json();
+            })
+            .then(function(data) {
+                var headerRow = container.querySelector(".news-table__row--header");
+                container.innerHTML = "";
+                if (headerRow) container.appendChild(headerRow);
+
+                if (!data || data.length === 0) {
+                    var emptyRow = document.createElement("div");
+                    emptyRow.className = "news-table__row";
+                    emptyRow.style.cssText = "text-align: center; justify-content: center; padding: 20px; color: #666;";
+                    emptyRow.textContent = "Hiện tại chưa có slide nào trong hệ thống.";
+                    container.appendChild(emptyRow);
+                    return;
+                }
+
+                data.forEach(function(slide) {
+                    var row = document.createElement("article");
+                    row.className = "news-table__row";
+
+
+                    var cellImg = document.createElement("div");
+                    cellImg.className = "news-table__cell";
+                    var img = document.createElement("img");
+
+                    var bannerPath = slide.banner;
+                    if(bannerPath && !bannerPath.startsWith("http") && !bannerPath.startsWith("/")) {
+                        img.src = PURE_CONTEXT_PATH + "/" + bannerPath;
+                    } else {
+                        img.src = bannerPath;
+                    }
+                    img.className = "news-table__img";
+                    cellImg.appendChild(img);
+                    row.appendChild(cellImg);
+
+
+                    var cellTitle = document.createElement("div");
+                    cellTitle.className = "news-table__cell";
+                    cellTitle.textContent = slide.title;
+                    row.appendChild(cellTitle);
+
+
+                    var cellStatus = document.createElement("div");
+                    cellStatus.className = "news-table__cell";
+                    var spanStatus = document.createElement("span");
+                    spanStatus.className = slide.status === 1 ? "status status--active" : "status status--inactive";
+                    spanStatus.textContent = slide.status === 1 ? "Đang post" : "Chưa post";
+                    cellStatus.appendChild(spanStatus);
+                    row.appendChild(cellStatus);
+
+                    var cellCreate = document.createElement("div");
+                    cellCreate.className = "news-table__cell";
+                    cellCreate.textContent = slide.createdAt;
+                    row.appendChild(cellCreate);
+
+                    var cellUpdate = document.createElement("div");
+                    cellUpdate.className = "news-table__cell";
+                    cellUpdate.textContent = slide.updatedAt;
+                    row.appendChild(cellUpdate);
+
+                    var cellCheck = document.createElement("div");
+                    cellCheck.className = "news-table__cell";
+                    var checkbox = document.createElement("input");
+                    checkbox.type = "checkbox";
+                    checkbox.disabled = true;
+                    checkbox.checked = (slide.status === 1);
+                    cellCheck.appendChild(checkbox);
+                    row.appendChild(cellCheck);
+
+                    var cellView = document.createElement("div");
+                    cellView.className = "news-table__cell";
+                    var btnView = document.createElement("button");
+                    btnView.className = "news-table__view";
+                    btnView.textContent = "Xem";
+                    btnView.onclick = function() {
+                        if (typeof openSlideDetail === "function") {
+                            openSlideDetail(slide.id);
+                        }
+                    };
+                    cellView.appendChild(btnView);
+                    row.appendChild(cellView);
+
+                    var cellEdit = document.createElement("div");
+                    cellEdit.className = "news-table__cell";
+                    var btnEdit = document.createElement("button");
+                    btnEdit.className = "news-table__edit";
+                    btnEdit.textContent = "Sửa";
+                    btnEdit.onclick = function() {
+                        window.location.href = PURE_CONTEXT_PATH + "/edit-slide?id=" + slide.id;
+                    };
+                    cellEdit.appendChild(btnEdit);
+                    row.appendChild(cellEdit);
+
+
+                    var cellDelete = document.createElement("div");
+                    cellDelete.className = "news-table__cell";
+                    var btnDelete = document.createElement("button");
+                    btnDelete.className = "news-table__delete";
+                    btnDelete.textContent = "Xóa";
+                    btnDelete.onclick = function() {
+                        if (confirm("Bạn có chắc chắn muốn xóa slide này không?")) {
+                            window.location.href = PURE_CONTEXT_PATH + "/delete-slide?id=" + slide.id;
+                        }
+                    };
+                    cellDelete.appendChild(btnDelete);
+                    row.appendChild(cellDelete);
+
+                    container.appendChild(row);
+                });
+            })
+            .catch(function(error) {
+                console.error("Lỗi fetch:", error);
+            });
+    }
+</script>
+</script><script src="${pageContext.request.contextPath}/assets/js/script.js"></script>
 </html>
