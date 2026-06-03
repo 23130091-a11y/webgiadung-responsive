@@ -31,24 +31,7 @@ document.querySelectorAll('.featured').forEach(section => {
     }
 });
 
-//Click button like
-const favBtns = document.querySelectorAll('.fav-btn');
-    if (favBtns.length > 0) {
-        favBtns.forEach(favBtn => {
-            favBtn.addEventListener('click', () => {
-                favBtn.classList.toggle('active');
-                const heartIcon = favBtn.querySelector('i');
 
-                if (favBtn.classList.contains('active')) {
-                    heartIcon.classList.remove('fa-regular');
-                    heartIcon.classList.add('fa-solid');
-                } else {
-                    heartIcon.classList.remove('fa-solid');
-                    heartIcon.classList.add('fa-regular');
-                }
-            });
-        });
-    }
 
 //Click button view
 const slideWrappers = document.querySelectorAll('.slide-wrapper');

@@ -154,7 +154,9 @@
 
                     <div class="bottom">
                       <div class="star"><i class="fa-solid fa-star"></i> ${p.ratingAvg}</div>
-                      <button class="fav-btn"><i class="fa-regular fa-heart"></i> Yêu thích</button>
+                        <button class="fav-btn ${p.favorite ? 'active' : ''}" data-product-id="${p.id}">
+                            <i class="${p.favorite ? 'fa-solid' : 'fa-regular'} fa-heart"></i> Yêu thích
+                        </button>
                     </div>
                   </div>
                 </c:forEach>
@@ -210,7 +212,9 @@
 
               <div class="bottom">
                 <div class="star"><i class="fa-solid fa-star"></i> ${p.ratingAvg}</div>
-                <button class="fav-btn"><i class="fa-regular fa-heart"></i> Yêu thích</button>
+                  <button class="fav-btn ${p.favorite ? 'active' : ''}" data-product-id="${p.id}">
+                      <i class="${p.favorite ? 'fa-solid' : 'fa-regular'} fa-heart"></i> Yêu thích
+                  </button>
               </div>
             </div>
           </c:forEach>
@@ -263,7 +267,9 @@
 
               <div class="bottom">
                 <div class="star"><i class="fa-solid fa-star"></i>${p.ratingAvg}</div>
-                <button class="fav-btn"><i class="fa-regular fa-heart"></i> Yêu thích</button>
+                  <button class="fav-btn ${p.favorite ? 'active' : ''}" data-product-id="${p.id}">
+                      <i class="${p.favorite ? 'fa-solid' : 'fa-regular'} fa-heart"></i> Yêu thích
+                  </button>
               </div>
             </div>
           </c:forEach>
@@ -318,7 +324,9 @@
 
                 <div class="bottom">
                   <div class="star"><i class="fa-solid fa-star"></i> ${p.ratingAvg}</div>
-                  <button class="fav-btn"><i class="fa-regular fa-heart"></i> Yêu thích</button>
+                    <button class="fav-btn ${p.favorite ? 'active' : ''}" data-product-id="${p.id}">
+                        <i class="${p.favorite ? 'fa-solid' : 'fa-regular'} fa-heart"></i> Yêu thích
+                    </button>
                 </div>
               </div>
             </c:forEach>
@@ -372,7 +380,9 @@
 
               <div class="bottom">
                 <div class="star"><i class="fa-solid fa-star"></i> ${p.ratingAvg}</div>
-                <button class="fav-btn"><i class="fa-regular fa-heart"></i> Yêu thích</button>
+                  <button class="fav-btn ${p.favorite ? 'active' : ''}" data-product-id="${p.id}">
+                      <i class="${p.favorite ? 'fa-solid' : 'fa-regular'} fa-heart"></i> Yêu thích
+                  </button>
               </div>
             </div>
           </c:forEach>
@@ -434,5 +444,66 @@
 
 <!-- Link JS -->
 <script src="assets/js/script.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const favBtns = document.querySelectorAll('.fav-btn');
 
+        console.log("[JS CHECK] Found total favorite buttons: " + favBtns.length);
+
+        if (favBtns.length > 0) {
+            favBtns.forEach(favBtn => {
+                favBtn.addEventListener('click', function (e) {
+                    e.preventDefault();
+
+                    const productId = this.getAttribute('data-product-id');
+                    const heartIcon = this.querySelector('i');
+                    const currentButton = this;
+                    const contextPath = '${pageContext.request.contextPath}';
+
+                    console.log("[JS CLICK] Clicked! Product ID = " + productId);
+
+                    const params = new URLSearchParams();
+                    params.append('productId', productId);
+
+                    fetch(contextPath + '/api/favorite/toggle', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/x-www-form-urlencoded',
+                        },
+                        body: params.toString()
+                    })
+                        .then(response => {
+                            console.log("[JS RESPONSE] Server response HTTP status: " + response.status);
+                            if (response.status === 401) {
+                                alert("Vui lòng đăng nhập để lưu sản phẩm yêu thích!");
+                                window.location.href = contextPath + "/login";
+                                throw new Error("Unauthorized");
+                            }
+                            if (!response.ok) {
+                                throw new Error("System connection error");
+                            }
+                            return response.json();
+                        })
+                        .then(data => {
+                            console.log("[JS DATA] Result from server:", data);
+                            if (data.status === 'success') {
+                                if (data.action === 'added') {
+                                    currentButton.classList.add('active');
+                                    heartIcon.className = 'fa-solid fa-heart';
+                                } else if (data.action === 'removed') {
+                                    currentButton.classList.remove('active');
+                                    heartIcon.className = 'fa-regular fa-heart';
+                                }
+                            } else {
+                                alert(data.message || "Có lỗi xảy ra, vui lòng thử lại!");
+                            }
+                        })
+                        .catch(error => {
+                            console.error("[JS ERROR] Fetch Ajax error:", error);
+                        });
+                });
+            });
+        }
+    });
+</script>
 </html>

@@ -27,6 +27,7 @@ public class Product implements Serializable {
     private int quantity; // số lượng kho
 
     private int soldQuantity; // số lượng đã bán
+    private boolean isFavorite;
 
     private LocalDateTime createdAt; // ngày tạo
 
@@ -267,6 +268,14 @@ public class Product implements Serializable {
 
     public void setKeywords(List<Keywords> keywords) {
         this.keywords = keywords;
+    }
+
+    public boolean isFavorite() {
+        return isFavorite;
+    }
+
+    public void setFavorite(boolean favorite) {
+        isFavorite = favorite;
     }
 
     @Override
