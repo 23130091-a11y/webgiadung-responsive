@@ -276,8 +276,8 @@
                                                                 </div>
                                                                 <div class="bottom">
                                                                     <div class="star"><i class="fa-solid fa-star"></i> ${p.ratingAvg}</div>
-                                                                    <button class="fav-btn">
-                                                                        <i class="fa-regular fa-heart"></i> Yêu thích
+                                                                    <button class="fav-btn ${p.favorite ? 'active' : ''}">
+                                                                        <i class="${p.favorite ? 'fa-solid' : 'fa-regular'} fa-heart"></i> Yêu thích
                                                                     </button>
                                                                 </div>
                                                             </div>
@@ -327,8 +327,8 @@
                                                     </div>
                                                     <div class="bottom">
                                                         <div class="star"><i class="fa-solid fa-star"></i> ${p.ratingAvg}</div>
-                                                        <button class="fav-btn">
-                                                            <i class="fa-regular fa-heart"></i> Yêu thích
+                                                        <button class="fav-btn ${p.favorite ? 'active' : ''}">
+                                                            <i class="${p.favorite ? 'fa-solid' : 'fa-regular'} fa-heart"></i> Yêu thích
                                                         </button>
                                                     </div>
                                                 </div>
@@ -440,5 +440,141 @@
         }
     });
 </script>
+<script>
+    $(document).ready(function() {
+        let currentCategoryId = new URLSearchParams(window.location.search).get('categoryId') || "";
 
+        $(document).on('click', '.category-filter', function (e){
+            e.preventDefault();
+            currentCategoryId = $(this).data('id');
+
+            $('.category-filter').removeClass('active');
+            $(this).addClass('active');
+
+            searchFilter();
+        });
+
+        $(document).on('change', '.filter-checkbox', function() {
+            searchFilter();
+        });
+
+        $(document).on('change', '.filter-rating-radio', function() {
+            searchFilter();
+        });
+
+        $(document).on('click', '.fav-btn', function (e) {
+            e.preventDefault();
+
+            const currentButton = $(this);
+            const productId = currentButton.closest('.product-card').find('a').attr('href').split('id=')[1];
+            const heartIcon = currentButton.find('i');
+            const contextPath = '${pageContext.request.contextPath}';
+
+            console.log("[JS CLICK] Clicked! Product ID = " + productId);
+
+            const params = new URLSearchParams();
+            params.append('productId', productId);
+
+            fetch(contextPath + '/api/favorite/toggle', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                body: params.toString()
+            })
+                .then(response => {
+                    console.log("[JS RESPONSE] Server response HTTP status: " + response.status);
+                    if (response.status === 401) {
+                        alert("Vui lòng đăng nhập để lưu sản phẩm yêu thích!");
+                        window.location.href = contextPath + "/login";
+                        throw new Error("Unauthorized");
+                    }
+                    if (!response.ok) {
+                        throw new Error("System connection error");
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    console.log("[JS DATA] Result from server:", data);
+                    if (data.status === 'success') {
+                        if (data.action === 'added') {
+                            currentButton.addClass('active');
+                            heartIcon.removeClass('fa-regular').addClass('fa-solid');
+                        } else if (data.action === 'removed') {
+                            currentButton.removeClass('active');
+                            heartIcon.removeClass('fa-solid').addClass('fa-regular');
+                        }
+                    } else {
+                        alert(data.message || "Có lỗi xảy ra, vui lòng thử lại!");
+                    }
+                })
+                .catch(error => {
+                    console.error("[JS ERROR] Fetch Ajax error:", error);
+                });
+        });
+
+        function searchFilter() {
+            let brands = [];
+            $('input[name="brands"]:checked').each(function() {
+                brands.push($(this).val());
+            });
+
+            let priceRanges = [];
+            $('input[name="priceRanges"]:checked').each(function() {
+                priceRanges.push($(this).val());
+            });
+
+            let rating = $('input[name="rating"]:checked').val() || "";
+
+            const urlParams = new URLSearchParams(window.location.search);
+            let keyword = urlParams.get('keyword') || "";
+
+            $.ajax({
+                url: "search-product",
+                type: "GET",
+                data: {
+                    keyword: keyword,
+                    categoryId: currentCategoryId,
+                    'brands[]': brands,
+                    'priceRanges[]': priceRanges,
+                    'rating': rating
+                },
+                beforeSend: function() {
+                    $("#content-products").stop(true, true).css("opacity", "0.5");
+                },
+                success: function(data) {
+                    let $htmlResponse = $(data);
+                    let newList = $htmlResponse.find("#content-products").html();
+                    let newHeader = $htmlResponse.find(".search-header").html();
+
+                    $("#content-products").fadeOut(100, function() {
+                        $(this).html(newList).fadeIn(100).css("opacity", "1");
+                    });
+
+                    if (newHeader) {
+                        $(".search-header").html(newHeader);
+                    }
+
+                    let params = {
+                        keyword: keyword,
+                        categoryId: currentCategoryId,
+                        brands: brands,
+                        priceRanges: priceRanges
+                    };
+
+                    if(rating) {
+                        params.rating = rating;
+                    }
+
+                    let newUrl = "search-product?" + $.param(params);
+                    window.history.pushState({}, "", newUrl);
+                },
+                error: function(xhr) {
+                    $("#content-products").css("opacity", "1");
+                    console.error("Lỗi AJAX: " + xhr.status + " " + xhr.statusText);
+                }
+            });
+        }
+    });
+</script>
 </html>
