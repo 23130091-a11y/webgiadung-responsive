@@ -254,13 +254,48 @@
                                         <div class="order-empty">Bạn chưa có sản phẩm yêu thích nào.</div>
                                     </c:when>
                                     <c:otherwise>
-                                        <div class="row g-2">
+                                        <div class="row small-gutter">
                                             <c:forEach var="p" items="${favorites}">
                                                 <div class="col l-2-4 m-4 c-6">
-                                                    <div class="product-item">
-                                                        <img src="${p.image}" alt="${p.name}">
-                                                        <h3>${p.name}</h3>
-                                                        <p>${p.price}</p>
+                                                    <div class="product-card">
+                                                        <a href="${pageContext.request.contextPath}/product?id=${p.id}">
+                                                            <img src="${pageContext.request.contextPath}/assets/img/products/${p.image}" alt="${p.name}">
+                                                        </a>
+                                                        <a href="${pageContext.request.contextPath}/product?id=${p.id}">
+                                                            <p>${p.name}</p>
+                                                        </a>
+
+                                                        <div class="price-discount">
+                                                            <c:if test="${p.isDiscounted}">
+                                                                <div class="price-top">
+                                            <span class="old-price">
+                                                <fmt:formatNumber value="${p.firstPrice}" pattern="#,###"/>đ
+                                            </span>
+                                                                    <div class="discount-badge">
+                                                                        <c:choose>
+                                                                            <c:when test="${p.discountType eq 'percentage'}">
+                                                                                Giảm ${p.discountPercent}%
+                                                                            </c:when>
+                                                                            <c:otherwise>
+                                                                                Giảm <fmt:formatNumber value="${p.discountPercent}" pattern="#,###"/>đ
+                                                                            </c:otherwise>
+                                                                        </c:choose>
+                                                                    </div>
+                                                                </div>
+                                                            </c:if>
+
+                                                            <div class="price-bottom">
+                                        <span class="new-price">
+                                            <fmt:formatNumber value="${p.totalPrice}" pattern="#,###"/>đ
+                                        </span>
+                                                            </div>
+                                                        </div>
+                                                        <div class="bottom">
+                                                            <div class="star"><i class="fa-solid fa-star"></i> ${p.ratingAvg}</div>
+                                                            <button class="fav-btn active">
+                                                                <i class="fa-solid fa-heart"></i> Yêu thích
+                                                            </button>
+                                                        </div>
                                                     </div>
                                                 </div>
                                             </c:forEach>

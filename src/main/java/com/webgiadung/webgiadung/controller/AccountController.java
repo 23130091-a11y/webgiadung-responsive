@@ -16,12 +16,14 @@ import java.util.*;
 
 import com.webgiadung.webgiadung.model.Cart;
 import com.webgiadung.webgiadung.model.Product;
+import com.webgiadung.webgiadung.services.ProductFavoriteService;
 
 @WebServlet("/account")
 public class AccountController extends HttpServlet {
 
     private final OrderDao orderDao = new OrderDao();
     private final AuthDao authDao = new AuthDao();
+    private final ProductFavoriteService favoriteService = new ProductFavoriteService();
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
@@ -69,14 +71,17 @@ public class AccountController extends HttpServlet {
                 }
             }
 
-            // Map items theo orderId
             Map<Integer, List<Map<String, Object>>> orderItemsMap = new HashMap<>();
             for (Map<String, Object> o : ordersAll) {
                 int orderId = toInt(o.get("id"));
                 orderItemsMap.put(orderId, orderDao.findItemsByOrder(orderId));
             }
 
-            // Đẩy dữ liệu sang JSP
+            if ("favorite".equals(tab)) {
+                List<Product> favoriteProducts = favoriteService.getFavoriteProductsByUserId(user.getId());
+                req.setAttribute("favorites", favoriteProducts);
+            }
+
             req.setAttribute("ordersAll", ordersAll);
             req.setAttribute("ordersNew", ordersNew);
             req.setAttribute("ordersShipping", ordersShipping);
@@ -143,13 +148,12 @@ public class AccountController extends HttpServlet {
                 req.setAttribute("profileError", "Có lỗi xảy ra trong quá trình lưu dữ liệu.");
             }
 
-            // Giữ đúng tab người dùng đang đứng
             req.setAttribute("tab", currentTab);
             req.getRequestDispatcher("/account.jsp").forward(req, resp);
         }
     }
 
-    //
+
     private String trim(String s) {
         return s == null ? "" : s.trim();
     }
