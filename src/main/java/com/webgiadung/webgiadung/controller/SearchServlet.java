@@ -3,9 +3,11 @@ package com.webgiadung.webgiadung.controller;
 import com.webgiadung.webgiadung.model.Brands;
 import com.webgiadung.webgiadung.model.Categories;
 import com.webgiadung.webgiadung.model.Product;
+import com.webgiadung.webgiadung.model.User;
 import com.webgiadung.webgiadung.services.BrandService;
 import com.webgiadung.webgiadung.services.CategoriesService;
 import com.webgiadung.webgiadung.services.ProductService;
+import com.webgiadung.webgiadung.services.ProductFavoriteService;
 import jakarta.servlet.*;
 import jakarta.servlet.http.*;
 import jakarta.servlet.annotation.*;
@@ -67,8 +69,8 @@ public class SearchServlet extends HttpServlet {
             }
         }
 
+        HttpSession session = request.getSession();
         if (hasKeyword) {
-            HttpSession session = request.getSession();
             List<String> searchHistory = (List<String>) session.getAttribute("searchHistory");
             if (searchHistory == null) searchHistory = new ArrayList<>();
             searchHistory.remove(keyword);
@@ -80,12 +82,22 @@ public class SearchServlet extends HttpServlet {
         ProductService productsService = new ProductService();
         CategoriesService categoriesService = new CategoriesService();
         BrandService brandService = new BrandService();
+        ProductFavoriteService favoriteService = new ProductFavoriteService();
 
         List<Product> products = productsService.searchWithFilters(keyword, brands, priceRanges, categoryId, rating);
+        List<Product> recommendations = null;
+
         if(products == null || products.isEmpty()) {
-            List<Product> recommendations = productsService.getTopSellingProducts(10);
+            recommendations = productsService.getTopSellingProducts(10);
             request.setAttribute("recommendations", recommendations);
             request.setAttribute("isNoResult", true);
+        }
+
+        User user = (User) session.getAttribute("user");
+        if (user != null) {
+            int userId = user.getId();
+            checkFavoriteStatus(products, favoriteService, userId);
+            checkFavoriteStatus(recommendations, favoriteService, userId);
         }
 
         List<Categories> pCategories = categoriesService.getCategoriesWithChildren();
@@ -98,9 +110,16 @@ public class SearchServlet extends HttpServlet {
         request.setAttribute("products", products);
         request.setAttribute("selectedBrands", brands);
         request.setAttribute("selectedPrices", priceRanges);
-
         request.setAttribute("selectedRating", rating);
 
         request.getRequestDispatcher("/search.jsp").forward(request, response);
+    }
+
+    private void checkFavoriteStatus(List<Product> products, ProductFavoriteService service, int userId) {
+        if (products != null && !products.isEmpty()) {
+            for (Product p : products) {
+                p.setFavorite(service.isFavorite(userId, p.getId()));
+            }
+        }
     }
 }
