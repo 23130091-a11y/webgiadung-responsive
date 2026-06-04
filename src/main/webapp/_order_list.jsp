@@ -18,10 +18,12 @@
 
             <c:set var="pBadge" value="order-payment-badge badge-unpaid"/>
             <c:set var="pIcon"  value="fa-clock"/>
-            <c:if test="${order.statusPayment == 1}"><c:set var="pBadge" value="order-payment-badge badge-paid"/>       <c:set var="pIcon" value="fa-circle-check"/></c:if>
-            <c:if test="${order.statusPayment == 2}"><c:set var="pBadge" value="order-payment-badge badge-processing"/> <c:set var="pIcon" value="fa-spinner"/></c:if>
+            <c:if test="${order.statusPayment == 1}"><c:set var="pBadge" value="order-payment-badge badge-processing"/> <c:set var="pIcon" value="fa-spinner"/></c:if>
+            <c:if test="${order.statusPayment == 2}"><c:set var="pBadge" value="order-payment-badge badge-paid"/>       <c:set var="pIcon" value="fa-circle-check"/></c:if>
+            <c:if test="${order.statusPayment == 3}"><c:set var="pBadge" value="order-payment-badge badge-paid"/>       <c:set var="pIcon" value="fa-rotate-left"/></c:if>
+            <c:if test="${order.statusPayment == 4}"><c:set var="pBadge" value="order-payment-badge badge-cancel"/>     <c:set var="pIcon" value="fa-triangle-exclamation"/></c:if>
 
-            <article class="${rowClass}">
+            <article class="${rowClass}" data-order-id="${order.id}">
 
                 <div class="order-item__cell">
                     <input type="checkbox" name="orderIds" value="${order.id}" class="order-item__checkbox">
@@ -39,39 +41,45 @@
                     <span class="${tBadge}">
                         <i class="fa-solid ${tIcon}"></i> ${order.statusTransportText}
                     </span>
-                    <form action="<c:url value='/order-update-status'/>" method="post" class="form-update-status" style="width:100%;">
-                        <input type="hidden" name="orderId" value="${order.id}">
-                        <input type="hidden" name="type" value="transport">
-                        <select name="status" ${order.statusTransport == 3 || order.statusTransport == 4 ? 'disabled' : ''}>
+                    <div class="order-update-box" data-type="transport" data-order-id="${order.id}" style="width:100%;">
+                        <select name="status" class="js-order-status-select" ${order.statusTransport == 3 || order.statusTransport == 4 ? 'disabled' : ''}>
                             <option value="0" ${order.statusTransport == 0 ? 'selected' : ''}>Đơn hàng mới</option>
                             <option value="1" ${order.statusTransport == 1 ? 'selected' : ''}>Đã xác nhận</option>
                             <option value="2" ${order.statusTransport == 2 ? 'selected' : ''}>Đang giao</option>
                             <option value="3" ${order.statusTransport == 3 ? 'selected' : ''}>Đã giao</option>
                             <option value="4" ${order.statusTransport == 4 ? 'selected' : ''}>Đã hủy</option>
+                            <option value="5" ${order.statusTransport == 5 ? 'selected' : ''}>Trả hàng</option>
                         </select>
-                        <button type="submit" class="btn-save ${order.statusTransport == 3 || order.statusTransport == 4 ? 'btn-save--saved' : ''}"
-                            ${order.statusTransport == 3 || order.statusTransport == 4 ? 'disabled' : ''}>
+                        <button type="button"
+                                class="btn-save js-update-order ${order.statusTransport == 3 || order.statusTransport == 4 ? 'btn-save--saved' : ''}"
+                                data-type="transport"
+                                data-order-id="${order.id}"
+                                ${order.statusTransport == 3 || order.statusTransport == 4 ? 'disabled' : ''}>
                             <i class="fa-solid fa-floppy-disk"></i> Lưu
                         </button>
-                    </form>
+                    </div>
                 </div>
 
                 <div class="order-item__cell">
                     <span class="${pBadge}">
                         <i class="fa-solid ${pIcon}"></i> ${order.statusPaymentText}
                     </span>
-                    <form action="<c:url value='/order-update-status'/>" method="post" class="form-update-status" style="width:100%;">
-                        <input type="hidden" name="orderId" value="${order.id}">
-                        <input type="hidden" name="type" value="payment">
-                        <select name="status" ${order.statusPayment == 1 ? 'disabled' : ''}>
+                    <div class="order-update-box" data-type="payment" data-order-id="${order.id}" style="width:100%;">
+                        <select name="status" class="js-order-status-select" ${order.statusTransport == 4 || order.statusPayment == 2 ? 'disabled' : ''}>
                             <option value="0" ${order.statusPayment == 0 ? 'selected' : ''}>Chưa thanh toán</option>
-                            <option value="1" ${order.statusPayment == 1 ? 'selected' : ''}>Đã thanh toán</option>
+                            <option value="1" ${order.statusPayment == 1 ? 'selected' : ''}>Đang xử lý</option>
+                            <option value="2" ${order.statusPayment == 2 ? 'selected' : ''}>Đã thanh toán</option>
+                            <option value="3" ${order.statusPayment == 3 ? 'selected' : ''}>Đã hoàn tiền</option>
+                            <option value="4" ${order.statusPayment == 4 ? 'selected' : ''}>Thanh toán lỗi</option>
                         </select>
-                        <button type="submit" class="btn-save ${order.statusPayment == 1 ? 'btn-save--saved' : ''}"
-                            ${order.statusPayment == 1 ? 'disabled' : ''}>
+                        <button type="button"
+                                class="btn-save js-update-order ${order.statusTransport == 4 || order.statusPayment == 2 ? 'btn-save--saved' : ''}"
+                                data-type="payment"
+                                data-order-id="${order.id}"
+                                ${order.statusTransport == 4 || order.statusPayment == 2 ? 'disabled' : ''}>
                             <i class="fa-solid fa-floppy-disk"></i> Lưu
                         </button>
-                    </form>
+                    </div>
                 </div>
 
                 <div class="order-item__cell">

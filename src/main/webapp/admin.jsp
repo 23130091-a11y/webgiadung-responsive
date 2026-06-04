@@ -2043,7 +2043,7 @@
                                         <div class="ofb-chip-group" id="paymentChipGroup">
                                             <span class="ofb-chip active"      data-val="">Tất cả</span>
                                             <span class="ofb-chip chip-unpaid" data-val="0">Chưa TT</span>
-                                            <span class="ofb-chip chip-paid"   data-val="1">Đã TT</span>
+                                            <span class="ofb-chip chip-paid"   data-val="2">Đã TT</span>
                                         </div>
                                     </div>
                                 </div>
@@ -2179,16 +2179,61 @@
                             rebindCheckAll();
                             updateCount();
 
-                            mainContent && mainContent.addEventListener('submit', function(e) {
-                                var f = e.target;
-                                if (!f.classList.contains('form-update-status')) return;
+                            mainContent && mainContent.addEventListener('click', function(e) {
+                                var btn = e.target.closest('.js-update-order');
+                                if (!btn || !mainContent.contains(btn)) return;
+
                                 e.preventDefault();
-                                fetch(f.action, {
+                                e.stopPropagation();
+
+                                var row = btn.closest('.order-item');
+                                var box = btn.closest('.order-update-box');
+                                var select = box ? box.querySelector('select[name="status"]') : null;
+
+                                var orderId = btn.dataset.orderId || (box ? box.dataset.orderId : '') || (row ? row.dataset.orderId : '');
+                                var type = btn.dataset.type || (box ? box.dataset.type : '');
+                                var status = select ? select.value : '';
+
+                                if (!orderId || !type || status === '') {
+                                    alert('Thiếu dữ liệu cập nhật: orderId=' + orderId + ', type=' + type + ', status=' + status);
+                                    return;
+                                }
+
+                                var params = new URLSearchParams();
+                                params.set('orderId', orderId);
+                                params.set('type', type);
+                                params.set('status', status);
+
+                                btn.disabled = true;
+                                btn.classList.add('btn-save--saved');
+
+                                fetch('${pageContext.request.contextPath}/order-update-status', {
                                     method: 'POST',
-                                    body: new FormData(f),
-                                    headers: { 'X-Requested-With': 'XMLHttpRequest' }
-                                }).then(function(r){ return r.text(); })
-                                  .then(function(html){ mainContent.innerHTML = html; updateCount(); rebindCheckAll(); });
+                                    body: params.toString(),
+                                    headers: {
+                                        'X-Requested-With': 'XMLHttpRequest',
+                                        'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8'
+                                    }
+                                })
+                                .then(function(r) {
+                                    if (!r.ok) {
+                                        return r.text().then(function(msg) {
+                                            throw new Error(msg || 'Cập nhật thất bại');
+                                        });
+                                    }
+                                    return r.text();
+                                })
+                                .then(function(html) {
+                                    mainContent.innerHTML = html;
+                                    updateCount();
+                                    rebindCheckAll();
+                                    alert('Cập nhật thành công!');
+                                })
+                                .catch(function(err) {
+                                    alert('Lỗi cập nhật: ' + err.message);
+                                    btn.disabled = false;
+                                    btn.classList.remove('btn-save--saved');
+                                });
                             });
                         })();
                         </script>
@@ -4352,21 +4397,6 @@
             }
         });
 
-        // 4. AJAX CẬP NHẬT TRẠNG THÁI (Cả vận chuyển và thanh toán)
-        $(document).on('submit', '.form-update-status', function(e) {
-            e.preventDefault();
-            let form = $(this);
-            $.ajax({
-                url: form.attr('action'),
-                type: 'POST',
-                data: form.serialize(),
-                headers: { "X-Requested-With": "XMLHttpRequest" },
-                success: function(response) {
-                    $('#order-main-content').html(response);
-                    alert("Cập nhật thành công!");
-                }
-            });
-        });
     });
 
     $(document).on('click', '#btnReloadAll', function() {
@@ -4915,13 +4945,11 @@
 </script>
 <script>
     window.contextPath = "${pageContext.request.contextPath}";
+    var PURE_CONTEXT_PATH = "${pageContext.request.contextPath}";
 </script>
-
 <script src="${pageContext.request.contextPath}/assets/js/script.js"></script>
 
 <script>
-
-    var PURE_CONTEXT_PATH = "${pageContext.request.contextPath}";
 
     document.addEventListener("DOMContentLoaded", function () {
         if (document.getElementById("slideTableContainer")) {
