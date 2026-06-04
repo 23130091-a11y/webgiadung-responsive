@@ -15,12 +15,11 @@ import java.util.List;
 @WebServlet("/api/admin/manage-slide")
 public class ManageSlideController extends HttpServlet {
 
-    private final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+    private final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss");
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-
 
         response.setContentType("application/json");
         response.setCharacterEncoding("UTF-8");
@@ -39,7 +38,6 @@ public class ManageSlideController extends HttpServlet {
             out.print("{\"status\":\"error\", \"message\": \"Lỗi hệ thống: " + escapeJson(e.getMessage()) + "\"}");
         }
     }
-
 
     private void getAllSlidesList(PrintWriter out) {
 
@@ -80,23 +78,30 @@ public class ManageSlideController extends HttpServlet {
             out.print("{\"status\":\"error\", \"message\": \"ID slide không hợp lệ\"}");
             return;
         }
+        try {
+            int id = Integer.parseInt(idParam.trim());
+            Slide slide = SlideDao.getById(id);
 
-        int id = Integer.parseInt(idParam.trim());
-        Slide slide = SlideDao.getById(id);
-
-        if (slide != null) {
-            StringBuilder json = new StringBuilder();
-            json.append("{");
-            json.append("\"status\": \"success\",");
-            json.append("\"id\": ").append(slide.getId()).append(",");
-            json.append("\"title\": \"").append(escapeJson(slide.getTitle())).append("\",");
-            json.append("\"banner\": \"").append(escapeJson(slide.getBanner())).append("\",");
-            json.append("\"description\": \"").append(escapeJson(slide.getDescription())).append("\",");
-            json.append("\"statusSlide\": ").append(slide.getStatus());
-            json.append("}");
-            out.print(json.toString());
-        } else {
-            out.print("{\"status\":\"error\", \"message\": \"Không tìm thấy slide yêu cầu\"}");
+            if (slide != null) {
+                String createdAtStr = (slide.getCreatedAt() != null) ? slide.getCreatedAt().format(formatter) : "Chưa cập nhật";
+                String updatedAtStr = (slide.getUpdatedAt() != null) ? slide.getUpdatedAt().format(formatter) : "Chưa cập nhật";
+                StringBuilder json = new StringBuilder();
+                json.append("{");
+                json.append("\"status\": \"success\",");
+                json.append("\"id\": ").append(slide.getId()).append(",");
+                json.append("\"title\": \"").append(escapeJson(slide.getTitle())).append("\",");
+                json.append("\"banner\": \"").append(escapeJson(slide.getBanner())).append("\",");
+                json.append("\"description\": \"").append(escapeJson(slide.getDescription())).append("\",");
+                json.append("\"statusValue\": ").append(slide.getStatus()).append(",");
+                json.append("\"createdAt\": \"").append(createdAtStr).append("\",");
+                json.append("\"updatedAt\": \"").append(updatedAtStr).append("\"");
+                json.append("}");
+                out.print(json.toString());
+            } else {
+                out.print("{\"status\":\"error\", \"message\": \"Không tìm thấy slide yêu cầu\"}");
+            }
+        } catch (NumberFormatException e) {
+                out.print("{\"status\":\"error\", \"message\": \"Định dạng ID phải là số lẻ\"}");
         }
     }
 

@@ -12,15 +12,31 @@ public class FileUtils {
 
         if (part == null || part.getSubmittedFileName().isEmpty()) return null;
 
-        String fileName = System.currentTimeMillis() + "_" +
-                Paths.get(part.getSubmittedFileName()).getFileName();
+        String originalName = Paths.get(part.getSubmittedFileName()).getFileName().toString();
+        String safeName = originalName.replaceAll("[\\s+]", "-").replaceAll("[^a-zA-Z0-9._-]", "");
 
-        String uploadDir = realPath + "assets/img/" + subFolder;
+        String fileName = System.currentTimeMillis() + "_" + safeName;
+        if ("slides".equals(subFolder) || "reviews".equals(subFolder) || "details".equals(subFolder) || "products".equals(subFolder)) {
 
-        File dir = new File(uploadDir);
-        if (!dir.exists()) dir.mkdirs();
+            String baseDir = "C:\\webgiadung_data\\uploads\\";
+            String uploadDir = baseDir + "assets\\img\\" + subFolder;
 
-        part.write(uploadDir + File.separator + fileName);
-        return fileName;
+            File dir = new File(uploadDir);
+            if (!dir.exists()) dir.mkdirs();
+
+            part.write(uploadDir + File.separator + fileName);
+
+            return "assets/img/" + subFolder + "/" + fileName;
+
+        } else {
+            String uploadDir = realPath + "assets/img/" + subFolder;
+
+            File dir = new File(uploadDir);
+            if (!dir.exists()) dir.mkdirs();
+
+            part.write(uploadDir + File.separator + fileName);
+
+            return fileName;
+        }
     }
 }

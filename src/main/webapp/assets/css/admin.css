@@ -506,7 +506,7 @@
 
 .manage__heading {
     margin: 0;
-    color: var(--primary-color, #4e73df);
+    color: var(--white-color);
     font-size: 2.2rem;
     font-weight: 700;
 }
@@ -2740,7 +2740,7 @@
     gap:16px;
     margin-bottom:16px;
     padding:18px 20px;
-    background:#fff;
+    background: var(--primary-color);
     border:1px solid #e5e7eb;
     border-radius:12px;
     box-shadow:0 4px 14px rgba(0,0,0,0.04);
@@ -2750,7 +2750,7 @@
     margin:0;
     font-size:2rem;
     font-weight:700;
-    color:var(--text-color);
+    color:var(--white-color);
 }
 
 .customer-search{
@@ -3170,7 +3170,7 @@
 
 .sub-tab-container {
     display: flex;
-    background: #fff;
+    background: var(--primary-color);
     border-bottom: 2px solid #eee;
     margin-bottom: 20px;
 }
@@ -3186,12 +3186,13 @@
 
 .sub-tab-item {
     cursor: pointer;
+    color: var(--white-color);
     padding: 10px 20px;
     border-bottom: 2px solid transparent;
 }
 
 .sub-tab-item.active {
-    color: var(--primary-color);
+    color: var(--white-color);
     border-bottom: 2px solid var(--primary-color);
     font-weight: bold;
 }
@@ -3916,4 +3917,8 @@
         border-right: none;
         border-bottom: 1px solid #f1f1f1;
     }
+}
+
+.slide-table__save {
+    cursor: pointer;
 }
