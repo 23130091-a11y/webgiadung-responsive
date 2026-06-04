@@ -30,31 +30,34 @@ public class AddSlideController extends HttpServlet {
         resp.setCharacterEncoding("UTF-8");
 
         try {
-            // Kiểm tra dữ liệu đầu vào cơ bản
-            String name = req.getParameter("name");
-            if (name == null || name.trim().isEmpty()) {
+            String name = req.getParameter("name").trim();
+            if (name == null || name.isEmpty()) {
                 resp.getWriter().write("{\"status\":\"error\", \"message\":\"Tên slide không được để trống\"}");
                 return;
             }
 
             Slide s = new Slide();
             s.setTitle(name);
+
             s.setDescription(req.getParameter("text"));
 
             s.setCreatedAt(LocalDateTime.now());
+
             s.setUpdatedAt(LocalDateTime.now());
 
             String statusRaw = req.getParameter("status");
-            s.setStatus(("1".equals(statusRaw) || "active".equals(statusRaw)) ? 1 : 0);
+
+            s.setStatus(("1".equals(statusRaw)) ? 1 : 0);
 
             // Xử lý File
             String realPath = getServletContext().getRealPath("/");
+
             Part filePart = req.getPart("avatar");
             if (filePart != null && filePart.getSize() > 0) {
                 String filePath = FileUtils.saveFile(filePart, realPath, "slides");
+
                 s.setBanner(filePath);
             } else {
-
                 resp.getWriter().write("{\"status\":\"error\", \"message\":\"Vui lòng chọn ảnh cho slide\"}");
                 return;
             }
