@@ -2259,6 +2259,7 @@
 </body>
 
 <script>
+
     const sectionWarehouse = document.getElementById("warehouse");
     const sectionConfig = document.getElementById("config");
     const sectionProduct = document.getElementById("product");
@@ -2288,11 +2289,11 @@
     const sectionEventAdd = document.getElementById("add-event-page");
     const btnAddEventTrigger = document.querySelector(".event-header__btn");
 
-    const slideSelect = document.getElementById('eventSlideSelect');
-    const selectedBox = slideSelect.querySelector('.event-select__selected');
-    const optionsBox = slideSelect.querySelector('.event-select__options');
+    slideSelect = document.getElementById('eventSlideSelect');
+    const selectedBox = slideSelect ? slideSelect.querySelector('.event-select__selected') : null;
+    const optionsBox = slideSelect ? slideSelect.querySelector('.event-select__options') : null;
     const hiddenInput = document.getElementById('eventSlideTargetHidden');
-    const options = slideSelect.querySelectorAll('.event-option')
+    const options = slideSelect ? slideSelect.querySelectorAll('.event-option') : [];
     const uploadGroup = document.getElementById('eventUploadGroup');
     const editScopeRadios = document.querySelectorAll('input[name="editApplyScope"]');
     const editBoxCategory = document.getElementById('editScopeCategory');
@@ -2580,8 +2581,7 @@
         });
     });
 
-    if (slideSelect) {
-
+    if (slideSelect && selectedBox && optionsBox) {
         selectedBox.addEventListener('click', (e) => {
             e.stopPropagation();
             slideSelect.classList.toggle('active');
@@ -2600,7 +2600,7 @@
                 const val = option.getAttribute('data-value')
                 selectedBox.innerHTML = option.innerHTML;
 
-                hiddenInput.value = val;
+                if(hiddenInput) hiddenInput.value = val;
 
                 slideSelect.classList.remove('active');
                 optionsBox.style.display = 'none';
@@ -2754,18 +2754,7 @@
         window.scrollTo({ top: 0, behavior: "smooth" });
     }
 
-    // Hàm Đóng dùng chung (CHỈ GIỮ LẠI 1 HÀM NÀY)
-    function closeModal(id) {
-        if (id === 'viewProductModal') {
-            backToList();
-        } else if (id === 'editProductPage') {
-            backFromEdit();
-        } else {
-            // Xử lý cho các modal khác nếu có (như brandModal, tagModal)
-            const modal = document.getElementById(id);
-            if (modal) modal.style.display = "none";
-        }
-    }
+
     // Xử lý submit form
     const formInline = document.getElementById("addProductFormInline");
     formInline.addEventListener("submit", (e) => {
@@ -3141,7 +3130,6 @@
 <%--</script>--%>
 
 <script>
-    let quill;
     document.addEventListener("DOMContentLoaded", function() {
         quill = new Quill('#editor', {
             theme: 'snow',
@@ -3170,11 +3158,21 @@
     function closeModal(id) {
         const modal = document.getElementById(id);
         if (modal) {
+            modal.style.display = 'none';
         }
 
-        if (id === 'brandModal') document.getElementById('brandSelect').value = '';
-        if (id === 'tagModal') document.getElementById('tagSelect').value = '';
-        if (id === 'cateModal') document.getElementById('cateSelect').value = '';
+        if (id === 'brandModal') {
+            const brandSelect = document.getElementById('brandSelect');
+            if (brandSelect) brandSelect.value = '';
+        }
+        if (id === 'tagModal') {
+            const tagSelect = document.getElementById('tagSelect');
+            if (tagSelect) tagSelect.value = '';
+        }
+        if (id === 'cateModal') {
+            const cateSelect = document.getElementById('cateSelect');
+            if (cateSelect) cateSelect.value = '';
+        }
     }
 
     window.onclick = function(event) {
@@ -3427,6 +3425,8 @@
             });
     }
 
+    let selectedProductFiles = [];
+
     async function saveFullProduct() {
         const form = document.getElementById('addProductFormInline');
         if (!form || !form.reportValidity()) return;
@@ -3444,6 +3444,9 @@
 
         const formData = new FormData(form);
 
+        selectedProductFiles.forEach(file => {
+            formData.append('productImages[]', file);
+        });
 
         const postCheckbox = document.getElementById('postStatus');
         const isPostValue = (postCheckbox && postCheckbox.checked) ? "1" : "0";
@@ -3467,17 +3470,72 @@
             });
 
             const result = await response.json();
-
             if (result.status === "success") {
                 alert("Lưu sản phẩm, mô tả và chi tiết thành công!");
-                window.location.reload();
+
+                form.reset();
+                selectedProductFiles = [];
+
+                const mainImgList = document.getElementById('mainImageStatusList');
+                if (mainImgList) mainImgList.innerHTML = "";
+
+                const descList = document.getElementById('descriptionList');
+                if (descList) descList.innerHTML = "";
+                const detailList = document.getElementById('detailList');
+                if (detailList) detailList.innerHTML = "";
+
+                loadProducts(0);
             } else {
                 alert("Lỗi từ server: " + result.message);
             }
+
         } catch (error) {
             console.error("Chi tiết lỗi:", error);
             alert("Lỗi hệ thống: " + error.message);
         }
+    }
+
+
+    function addMainImage() {
+        const fileInput = document.getElementById('mainImgTemp');
+        if (!fileInput || fileInput.files.length === 0) {
+            alert("Vui lòng chọn một file ảnh trước!");
+            return;
+        }
+
+        const file = fileInput.files[0];
+        selectedProductFiles.push(file);
+
+        const statusList = document.getElementById('mainImageStatusList');
+        const itemIndex = selectedProductFiles.length - 1;
+
+        const textLabel = (itemIndex === 0) ? '[Ảnh đại diện] ' : '[Ảnh phụ] ';
+
+        const itemHtml = '<div class="added-item" id="img-item-' + itemIndex + '" style="display:flex; justify-content:space-between; margin-bottom:5px; background:#f4f4f4; padding:5px 10px; border-radius:4px;">' +
+            '<span>' + textLabel + file.name + '</span>' +
+            '<button type="button" style="color:red; border:none; background:none; cursor:pointer;" onclick="removeTempImage(' + itemIndex + ')">Xóa</button>' +
+            '</div>';
+
+        statusList.insertAdjacentHTML('beforeend', itemHtml);
+        fileInput.value = "";
+    }
+
+
+    function removeTempImage(index) {
+        selectedProductFiles.splice(index, 1);
+        document.getElementById('mainImageStatusList').innerHTML = "";
+
+        selectedProductFiles.forEach((file, idx) => {
+            const statusList = document.getElementById('mainImageStatusList');
+            const textLabel = (idx === 0) ? ' [Ảnh đại diện] ' : '[Ảnh phụ] ';
+
+            const itemHtml = '<div class="added-item" id="img-item-' + idx + '" style="display:flex; justify-content:space-between; margin-bottom:5px; background:#f4f4f4; padding:5px 10px; border-radius:4px;">' +
+                '<span>' + textLabel + file.name + '</span>' +
+                '<button type="button" style="color:red; border:none; background:none; cursor:pointer;" onclick="removeTempImage(' + idx + ')">Xóa</button>' +
+                '</div>';
+
+            statusList.insertAdjacentHTML('beforeend', itemHtml);
+        });
     }
 </script>
 
@@ -3932,7 +3990,6 @@
         if (isUpdating) return;
 
         var btnSave = document.querySelector("#editProductPage .btn-save");
-        if (btnSave) { btnSave.innerText = "Đang lưu..."; btnSave.disabled = true; }
         isUpdating = true;
 
         var formData = new FormData();
@@ -4097,16 +4154,47 @@
         document.getElementById('edit-newPrice').value = Math.round(newPrice);
     }
 
-    // Set select value
+
     function setSelectValue(id, value) {
         var select = document.getElementById(id);
         if(select) select.value = value;
     }
 
     function closeEditModal() {
-        document.getElementById('editProductPage').style.display = 'none';
-        var listSection = document.getElementById('product-manage-section');
-        if(listSection) listSection.style.display = 'block';
+        const editPage = document.getElementById('editProductPage');
+        if (editPage) editPage.style.display = 'none';
+
+        const productMainSection = document.getElementById('product');
+        if (productMainSection) {
+            productMainSection.style.display = 'block';
+        }
+
+        const productListSub = document.getElementById('product-list-section');
+        if (productListSub) {
+            productListSub.style.display = 'block';
+        }
+        const productEventSub = document.getElementById('product-event-section');
+        if (productEventSub) {
+            productEventSub.style.display = 'none';
+        }
+
+        const sidebar = document.querySelector(".product-sidebar");
+        if (sidebar) {
+            sidebar.style.display = "block";
+        }
+
+        const menuButtons = document.querySelectorAll(".product-menu__btn");
+        if (menuButtons.length > 0) {
+            menuButtons.forEach(btn => {
+                if (btn.getAttribute("data-target") === "product-list") {
+                    btn.classList.add("active");
+                } else {
+                    btn.classList.remove("active");
+                }
+            });
+        }
+
+        window.scrollTo({ top: 0, behavior: "smooth" });
     }
 
     function loadBrandOptions() {
