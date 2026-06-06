@@ -2,17 +2,26 @@ package com.webgiadung.webgiadung.controller.admin;
 
 import com.webgiadung.webgiadung.dao.SlideDao;
 import com.webgiadung.webgiadung.model.Slide;
+import com.webgiadung.webgiadung.utils.FileUtils;
 import jakarta.servlet.ServletException;
+import jakarta.servlet.annotation.MultipartConfig;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.Part;
 
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 @WebServlet("/api/admin/manage-slide")
+
+@MultipartConfig(
+        fileSizeThreshold = 1024 * 1024 * 2,  // 2MB
+        maxFileSize = 1024 * 1024 * 10,       // 10MB
+        maxRequestSize = 1024 * 1024 * 50     // 50MB
+)
 public class ManageSlideController extends HttpServlet {
 
     private final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss");
@@ -36,6 +45,87 @@ public class ManageSlideController extends HttpServlet {
         } catch (Exception e) {
             response.setStatus(500);
             out.print("{\"status\":\"error\", \"message\": \"Lỗi hệ thống: " + escapeJson(e.getMessage()) + "\"}");
+        }
+    }
+
+    @Override
+    protected void doPost(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+
+        request.setCharacterEncoding("UTF-8");
+        response.setContentType("application/json");
+        response.setCharacterEncoding("UTF-8");
+        PrintWriter out = response.getWriter();
+
+        String action = request.getParameter("action");
+        try {
+            if("update".equals(action)) {
+                handleUpdateSlide(request, out);
+            } else if("delete".equals(action)) {
+                handleDeleteSlide(request, out);
+            } else {
+                response.setStatus(400);
+                out.print("{\"status\":\"error\", \"message\": \"Hành động không hợp lệ\"}");
+            }
+        } catch (Exception e) {
+            response.setStatus(500);
+            out.print("{\"status\":\"error\", \"message\": \"Lỗi xử lý dữ liệu: " + escapeJson(e.getMessage()) + "\"}");
+        }
+    }
+
+    private void handleDeleteSlide(HttpServletRequest request, PrintWriter out) {
+        String idParam = request.getParameter("id");
+        if (idParam == null || idParam.trim().isEmpty()) {
+            out.print("{\"status\":\"error\", \"message\": \"ID xóa không hợp lệ\"}");
+            return;
+        }
+
+        int id = Integer.parseInt(idParam.trim());
+
+        boolean isSuccess = SlideDao.deleteSlide(id);
+        if (isSuccess) {
+            out.print("{\"status\":\"success\"}");
+        } else {
+            out.print("{\"status\":\"error\", \"message\": \"Xóa slide thất bại trong cơ sở dữ liệu\"}");
+        }
+    }
+
+    private void handleUpdateSlide(HttpServletRequest request, PrintWriter out) throws ServletException, IOException {
+        String idParam = request.getParameter("slideId");
+        String title = request.getParameter("title");
+        String statusParam = request.getParameter("status");
+
+        if (idParam == null || idParam.trim().isEmpty()) {
+            out.print("{\"status\":\"error\", \"message\": \"Không tìm thấy ID slide cần cập nhật\"}");
+            return;
+        }
+
+        int id = Integer.parseInt(idParam.trim());
+        int status = Integer.parseInt(statusParam);
+
+        Slide slide = SlideDao.getById(id);
+        if (slide == null) {
+            out.print("{\"status\":\"error\", \"message\": \"Slide không tồn tại trên hệ thống\"}");
+            return;
+        }
+
+        Part filePart = request.getPart("banner");
+        String bannerPart = slide.getBanner();
+        if(filePart != null && filePart.getSize() > 0) {
+            String realPath = getServletContext().getRealPath("/");
+            bannerPart = FileUtils.saveFile(filePart, realPath, "slides");
+        }
+
+        slide.setTitle(title);
+        slide.setStatus(status);
+        slide.setBanner(bannerPart);
+
+        boolean isSuccess = SlideDao.updateSlide(slide);
+
+        if (isSuccess) {
+            out.print("{\"status\":\"success\"}");
+        } else {
+            out.print("{\"status\":\"error\", \"message\": \"Cập nhật cơ sở dữ liệu thất bại\"}");
         }
     }
 

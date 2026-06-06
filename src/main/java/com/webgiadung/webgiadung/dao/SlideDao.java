@@ -46,4 +46,20 @@ public class SlideDao extends BaseDao{
         });
     }
 
+    public static boolean updateSlide(Slide slide) {
+        return get().withHandle(handle -> {
+            int rowsUpdated = handle.createUpdate("UPDATE slides SET title = :title, status = :status, " +
+                    "banner = :banner, updated_at = NOW() WHERE id = :id").bindBean(slide).execute();
+            return rowsUpdated > 0;
+        });
+    }
+
+    public static boolean deleteSlide(int id) {
+        return get().withHandle(handle -> {
+            int rowDeleted = handle.createUpdate("DELETE FROM slides WHERE id = :id")
+                    .bind("id", id)
+                    .execute();
+            return rowDeleted > 0;
+        });
+    }
 }

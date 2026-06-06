@@ -1093,49 +1093,50 @@
                     </section>
 
                     <!-- Sửa Slide -->
-                    <section id="slide-edit" class="slide-detail hidden">
+                    <section id="slide-edit" class="slide-detail" style="display: none">
                         <h2 class="manage__heading">Sửa Slide</h2>
 
                         <div class="slide-detail__card">
                             <!-- Hình Slide -->
                             <div class="slide-detail__image">
-                                <img src="${pageContext.request.contextPath}/assets/img/slide1.jpg" alt="Slide Image">
-                                <span class="slide-detail__status active">Đang post</span>
+                                <img src="" alt="Slide Image" id="editSlideImg">
+                                <span class="slide-detail__status" id="editSlideStatusSpan">Đang post</span>
                             </div>
 
                             <!-- Form thông tin -->
-                            <form class="slide-detail__info" id="slideEditForm">
+                            <form class="slide-detail__info" id="slideEditForm" enctype="multipart/form-data">
+                                <input type="hidden" id="editSlideId" name="slideId">
                                 <div class="slide-detail__row">
                                     <label class="label">Tên slide:</label>
-                                    <input type="text" class="input" value="Slide khuyến mãi 12.12">
+                                    <input type="text" class="input" name="title" id="editSlideTitle">
                                 </div>
 
                                 <div class="slide-detail__row">
                                     <label class="label">Trạng thái:</label>
-                                    <select class="input">
-                                        <option value="active" selected>Đang post</option>
-                                        <option value="inactive">Chưa post</option>
+                                    <select class="input" id="editSlideStatus" name="status">
+                                        <option value="1">Đang post</option>
+                                        <option value="0">Chưa post</option>
                                     </select>
                                 </div>
 
                                 <div class="slide-detail__row">
                                     <label class="label">Ngày tạo:</label>
-                                    <input type="text" class="input" value="01/12/2025" disabled>
+                                    <input type="text" class="input" id="editSlideCreatedAt" disabled>
                                 </div>
 
                                 <div class="slide-detail__row">
                                     <label class="label">Ngày cập nhật:</label>
-                                    <input type="text" class="input" value="10/12/2025" disabled>
+                                    <input type="text" class="input" id="editSlideUpdatedAt" disabled>
                                 </div>
 
                                 <div class="slide-detail__row">
                                     <label class="label">Hình ảnh mới:</label>
-                                    <input type="file" class="input">
+                                    <input type="file" class="input" name="banner">
                                 </div>
 
                                 <!-- Action -->
                                 <div class="slide-detail__actions">
-                                    <button type="submit" class="btn btn--default-color">Lưu thay đổi</button>
+                                    <button type="submit" class="btn btn--default-color" id="btnUpdateSlide">Lưu thay đổi</button>
                                     <button type="button" class="btn btn--default-color" onclick="hideSlideEdit()">Hủy</button>
                                 </div>
                             </form>
@@ -5055,13 +5056,12 @@
 
 <script>
     window.contextPath = "${pageContext.request.contextPath}";
-    var PURE_CONTEXT_PATH = "${pageContext.request.contextPath}";
+    const PURE_CONTEXT_PATH = "${pageContext.request.contextPath}";
 </script>
 <script src="${pageContext.request.contextPath}/assets/js/script.js"></script>
 
 <script>
     // add slide
-    const PURE_CONTEXT_PATH = "${pageContext.request.contextPath}";
 
     document.addEventListener("DOMContentLoaded", function () {
         if (document.getElementById("slideTableContainer")) {
@@ -5135,7 +5135,7 @@
         var container = document.getElementById("slideTableContainer");
         if (!container) return;
 
-        fetch("/WebGiaDung/api/admin/manage-slide")
+        fetch(PURE_CONTEXT_PATH + "/api/admin/manage-slide")
             .then(function(response) {
                 if (!response.ok) {
                     throw new Error("Lỗi kết nối API: " + response.status);
@@ -5235,7 +5235,9 @@
                     btnEdit.className = "news-table__edit";
                     btnEdit.textContent = "Sửa";
                     btnEdit.onclick = function() {
-                        window.location.href = PURE_CONTEXT_PATH + "/edit-slide?id=" + slide.id;
+                        if(typeof openSlideEdit === "function") {
+                            openSlideEdit(slide.id);
+                        }
                     };
                     cellEdit.appendChild(btnEdit);
                     row.appendChild(cellEdit);
@@ -5247,8 +5249,8 @@
                     btnDelete.className = "news-table__delete";
                     btnDelete.textContent = "Xóa";
                     btnDelete.onclick = function() {
-                        if (confirm("Bạn có chắc chắn muốn xóa slide này không?")) {
-                            window.location.href = PURE_CONTEXT_PATH + "/delete-slide?id=" + slide.id;
+                        if(typeof deleteSlide === "function") {
+                            deleteSlide(slide.id, row);
                         }
                     };
                     cellDelete.appendChild(btnDelete);
@@ -5336,6 +5338,176 @@
                 console.error("Lỗi AJAX lấy chi tiết slide:", error);
                 alert("Đã xảy ra lỗi hệ thống khi tải thông tin slide!");
             });
+    }
+
+    // sửa slide
+    window.openSlideEdit = function(slideId) {
+        const sectionSlideEdit = document.getElementById("slide-edit");
+        const sectionNewsSlideList = document.getElementById("news-slide");
+        const newsMenu = document.querySelector(".news-menu");
+
+        if(!sectionSlideEdit) return;
+
+        fetch(PURE_CONTEXT_PATH + "/api/admin/manage-slide?action=detail&id=" + slideId)
+            .then(function (response) {
+                if (!response.ok) throw new Error("Lỗi kết nối API: " + response.status);
+                return response.json();
+            })
+            .then(function (data) {
+                if(data.status === "success") {
+                    document.getElementById("editSlideId").value = data.id;
+                    document.getElementById("editSlideTitle").value = data.title;
+                    document.getElementById("editSlideStatus").value = data.statusValue; // Chọn 1 hoặc 0
+                    document.getElementById("editSlideCreatedAt").value = data.createdAt;
+                    document.getElementById("editSlideUpdatedAt").value = data.updatedAt;
+
+                    // Cập nhật Badge hiển thị trạng thái bên cạnh ảnh
+                    const statusSpan = document.getElementById("editSlideStatusSpan");
+                    if(data.statusValue === 1) {
+                        statusSpan.textContent = "Đang post";
+                        statusSpan.className = "slide-detail__status active";
+                    } else {
+                        statusSpan.textContent = "Chưa post";
+                        statusSpan.className = "slide-detail__status inactive";
+                    }
+
+                    // ảnh cũ
+                    const imgTag = document.getElementById("editSlideImg");
+                    if(imgTag) {
+                        var bannerPath = data.banner;
+                        if(bannerPath && !bannerPath.startsWith("http") && !bannerPath.startsWith("/")) {
+                            imgTag.src = PURE_CONTEXT_PATH + "/" + bannerPath;
+                        } else {
+                            imgTag.src = bannerPath || "";
+                        }
+                    }
+
+                    // ẩn
+                    if (typeof hideAllNewsViews === "function") {
+                        hideAllNewsViews();
+                    } else {
+                        if (sectionNewsSlideList) sectionNewsSlideList.style.display = "none";
+                    }
+                    if (newsMenu) newsMenu.style.display = "none";
+
+                    // hiện
+                    sectionSlideEdit.style.display = "block";
+                    window.scrollTo({ top: 0, behavior: "smooth" });
+                } else {
+                    alert("Không thể tải thông tin slide: " + data.message);
+                }
+        })
+            .catch(function(error) {
+                console.error("Lỗi lấy thông tin sửa slide:", error);
+                alert("Đã xảy ra lỗi hệ thống!");
+            });
+    }
+
+    // lắng nghe sự kiện submit gửi form để gửi dl đã sửa lên server ngầm
+    document.addEventListener("DOMContentLoaded", function () {
+        const slideEditForm = document.getElementById("slideEditForm");
+        const sectionSlideEdit = document.getElementById("slide-edit");
+        const sectionNewsSlideList = document.getElementById("news-slide");
+
+        if(slideEditForm) {
+            slideEditForm.addEventListener("submit", function (e) {
+                e.preventDefault();
+
+                const formData = new FormData(slideEditForm);
+                const btnUpdate = document.getElementById("btnUpdateSlide");
+                let oldBtnHtml = btnUpdate ? btnUpdate.innerHTML : "Lưu thay đổi";
+
+                if(btnUpdate) {
+                    btnUpdate.disabled = true;
+                    btnUpdate.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Đang lưu...';
+                }
+
+                // gọi api
+                fetch(PURE_CONTEXT_PATH + "/api/admin/manage-slide?action=update", {
+                    method: "POST",
+                    body: formData
+                })
+                    .then(function (response) {
+                        if (!response.ok) throw new Error("Lỗi kết nối Server: " + response.status);
+                        return response.json();
+                })
+                    .then(function (data) {
+                        if(btnUpdate) {
+                            btnUpdate.disabled = false;
+                            btnUpdate.innerHTML = oldBtnHtml;
+                        }
+                        if(data.status === "success") {
+                            alert("Cập nhật slide thành công!");
+                            slideEditForm.reset(); // xóa trống dl file vừa chọn
+
+                            // ẩn
+                            if (sectionSlideEdit) sectionSlideEdit.style.display = "none";
+                            // hiện
+                            if (sectionNewsSlideList) sectionNewsSlideList.style.display = "block";
+
+                            const newsMenu = document.querySelector(".news-menu");
+                            if (newsMenu) newsMenu.style.display = "flex";
+
+                            // Gọi lại hàm load danh sách để bảng tự động cập nhật tên/ảnh mới ngầm
+                            loadSlideTable();
+                            window.scrollTo({ top: 0, behavior: "smooth" });
+                        } else {
+                            alert("Thất bại: " + data.message);
+                        }
+                    })
+                    .catch(function (error) {
+                        if (btnUpdate) {
+                            btnUpdate.disabled = false;
+                            btnUpdate.innerHTML = oldBtnHtml;
+                        }
+                        console.error("Lỗi AJAX cập nhật slide:", error);
+                        alert("Đã xảy ra lỗi hệ thống khi lưu dữ liệu!");
+                    });
+            })
+        }
+    })
+
+    // xóa slide
+    window.deleteSlide = function (slideId, rowElement) {
+        if(!confirm("Bạn có chắc muốn xóa slide này không? Khôi phục sẽ không khả thi!")) {
+            return;
+        }
+
+        fetch(PURE_CONTEXT_PATH + "/api/admin/manage-slide?action=delete&id=" + slideId, {
+            method: "POST"
+        })
+            .then(function (response) {
+                if(!response.ok) {
+                    throw new Error("Lỗi kết nối với server: " + response.status);
+                }
+                return response.json();
+            })
+            .then(function (data) {
+                if(data.status === "success") {
+                    alert("Xóa slide thành công!");
+
+                // thêm hiệu ứng làm mờ dòng rồi xóa
+                if(rowElement) {
+                    rowElement.style.transition = "all 0.5s ease";
+                    rowElement.style.opacity = "0";
+                    rowElement.style.transform = "translateX(30px)";
+
+
+                    // đợi hiệu ứng chạy xong 500ms thì xóa hẳn
+                    setTimeout(function () {
+                        rowElement.remove();
+                        loadSlideTable();
+                    }, 500);
+                } else {
+                    loadSlideTable();
+                }
+                } else {
+                    alert("Xóa thất bại: " + (data.message || "Lỗi không xác định từ cơ sở dữ liệu."));
+                }
+            }) .catch(function (error) {
+            console.error("Lỗi hệ thống khi thực hiện xóa slide:", error);
+            alert("Đã xảy ra lỗi hệ thống, không thể thực hiện lệnh xóa!");
+        });
     }
 </script>
 
