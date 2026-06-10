@@ -32,7 +32,7 @@
     <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/grid.css">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/base.css">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/style.css">
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/admin.css?v=99">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/admin.css?v=200">
     <!-- Include stylesheet -->
     <link href="https://cdn.jsdelivr.net/npm/quill@2.0.3/dist/quill.snow.css" rel="stylesheet" />
 </head>
@@ -655,106 +655,150 @@
                     </section>
 
 
-                    <section id="customer" class="admin-section">
-                        <div class="section-header">
-                            <h2>Quản lý khách hàng</h2>
+                    <section id="customer" class="admin-section customer-admin-page">
+                        <div class="customer-admin-card customer-admin-card--header">
+                            <div class="customer-admin-title">
+                                <div class="customer-admin-title__icon">
+                                    <i class="fa-solid fa-users"></i>
+                                </div>
+                                <div>
+                                    <span class="customer-admin-title__label"></span>
+                                    <h2>Quản lý khách hàng</h2>
+                                </div>
+                            </div>
 
-
-                            <form class="customer-search" method="get" action="${pageContext.request.contextPath}/admin/customers">
-                                <input type="text" name="q" placeholder="Tìm kiếm (tên/email/sđt)..." value="${param.q}">
-                                <button type="submit">Tìm</button>
+                            <form class="customer-search customer-search--admin" method="get" action="${pageContext.request.contextPath}/admin/customers">
+                                <div class="customer-search__box">
+                                    <i class="fa-solid fa-magnifying-glass"></i>
+                                    <input type="text" name="q" placeholder="Tìm kiếm theo tên, email hoặc số điện thoại..." value="${param.q}">
+                                </div>
+                                <button type="submit">
+                                    <i class="fa-solid fa-search"></i>
+                                    <span>Tìm</span>
+                                </button>
                             </form>
                         </div>
 
-                        <div class="customer-table-wrap">
-                            <table class="customer-table">
-                                <thead>
-                                <tr>
-                                    <th>Avatar</th>
-                                    <th>Tên</th>
-                                    <th>Email</th>
-                                    <th>Địa chỉ</th>
-                                    <th>Xem</th>
-                                    <th>Sửa</th>
-                                    <th>Xóa</th>
-                                </tr>
-                                </thead>
-                                <tbody>
-                                <c:choose>
-                                    <c:when test="${empty users}">
-                                        <tr>
-                                            <td colspan="7" style="text-align:center;padding:14px;">Không có khách hàng.</td>
-                                        </tr>
-                                    </c:when>
-                                    <c:otherwise>
-                                        <c:forEach var="u" items="${users}">
+                        <div class="customer-admin-card customer-admin-card--table">
+                            <div class="customer-table-toolbar">
+                                <div>
+                                    <h3>Danh sách khách hàng</h3>
+                                    <p>Tổng cộng <strong>${fn:length(users)}</strong> tài khoản khách hàng trong hệ thống.</p>
+                                </div>
+                                <span class="customer-table-toolbar__badge">
+                                    <i class="fa-solid fa-database"></i>
+                                    ${fn:length(users)} khách hàng
+                                </span>
+                            </div>
+
+                            <div class="customer-table-wrap customer-table-wrap--admin">
+                                <table class="customer-table customer-table--admin">
+                                    <thead>
+                                    <tr>
+                                        <th>Khách hàng</th>
+                                        <th>Email</th>
+                                        <th>Địa chỉ</th>
+                                        <th>Xem</th>
+                                        <th>Sửa</th>
+                                        <th>Xóa</th>
+                                    </tr>
+                                    </thead>
+                                    <tbody>
+                                    <c:choose>
+                                        <c:when test="${empty users}">
                                             <tr>
-                                                <td>
-                                                    <img class="customer-table__img customer-avatar"
-                                                         src="${pageContext.request.contextPath}/${empty u.avatar ? 'assets/img/default-avatar.png' : u.avatar}"
-                                                         alt="avatar"
-                                                         onerror="this.src='${pageContext.request.contextPath}/assets/img/default-avatar.png'">
-                                                </td>
-                                                <td>${fn:escapeXml(u.name)}</td>
-                                                <td>${fn:escapeXml(u.email)}</td>
-                                                <td>${fn:escapeXml(u.address)}</td>
-
-
-                                                <td>
-                                                    <button type="button"
-                                                            class="customer-table__view"
-                                                            data-id="${u.id}"
-                                                            data-name="${fn:escapeXml(u.name)}"
-                                                            data-email="${fn:escapeXml(u.email)}"
-                                                            data-phone="${fn:escapeXml(u.phone)}"
-                                                            data-address="${fn:escapeXml(u.address)}"
-                                                            data-role="${u.role}"
-                                                            data-status="${u.status}"
-                                                            data-created="${u.createdAt}"
-                                                            data-updated="${u.updatedAt}"
-                                                            data-avatar="${empty u.avatar ? '' : u.avatar}">
-                                                        Xem
-                                                    </button>
-                                                </td>
-
-
-                                                <td>
-                                                    <button type="button"
-                                                            class="customer-table__edit"
-                                                            data-id="${u.id}"
-                                                            data-name="${fn:escapeXml(u.name)}"
-                                                            data-email="${fn:escapeXml(u.email)}"
-                                                            data-phone="${fn:escapeXml(u.phone)}"
-                                                            data-address="${fn:escapeXml(u.address)}"
-                                                            data-role="${u.role}"
-                                                            data-status="${u.status}"
-                                                            data-created="${u.createdAt}"
-                                                            data-updated="${u.updatedAt}">
-                                                        Sửa
-                                                    </button>
-                                                </td>
-
-
-                                                <td>
-                                                    <form method="post" action="${pageContext.request.contextPath}/admin/customers/lock"
-                                                          onsubmit="return confirm('Khóa khách hàng này?');">
-                                                        <input type="hidden" name="id" value="${u.id}">
-                                                        <button type="submit" class="customer-table__delete">Xóa</button>
-                                                    </form>
+                                                <td colspan="6">
+                                                    <div class="customer-empty-state">
+                                                        <i class="fa-regular fa-folder-open"></i>
+                                                        <p>Không có khách hàng.</p>
+                                                    </div>
                                                 </td>
                                             </tr>
-                                        </c:forEach>
-                                    </c:otherwise>
-                                </c:choose>
-                                </tbody>
-                            </table>
+                                        </c:when>
+                                        <c:otherwise>
+                                            <c:forEach var="u" items="${users}">
+                                                <tr>
+                                                    <td>
+                                                        <div class="customer-profile-cell">
+                                                            <img class="customer-table__img customer-avatar"
+                                                                 src="${pageContext.request.contextPath}/${empty u.avatar ? 'assets/img/default-avatar.png' : u.avatar}"
+                                                                 alt="avatar"
+                                                                 onerror="this.src='${pageContext.request.contextPath}/assets/img/default-avatar.png'">
+                                                            <div class="customer-profile-cell__info">
+                                                                <strong>${fn:escapeXml(u.name)}</strong>
+                                                                <span>
+                                                                    <i class="fa-solid fa-phone"></i>
+                                                                    ${empty u.phone ? 'Chưa cập nhật SĐT' : fn:escapeXml(u.phone)}
+                                                                </span>
+                                                            </div>
+                                                        </div>
+                                                    </td>
+                                                    <td>
+                                                        <div class="customer-info-line">
+                                                            <i class="fa-regular fa-envelope"></i>
+                                                            <span>${fn:escapeXml(u.email)}</span>
+                                                        </div>
+                                                    </td>
+                                                    <td>
+                                                        <div class="customer-info-line customer-info-line--address">
+                                                            <i class="fa-solid fa-location-dot"></i>
+                                                            <span>${empty u.address ? 'Chưa cập nhật địa chỉ' : fn:escapeXml(u.address)}</span>
+                                                        </div>
+                                                    </td>
+
+                                                    <td>
+                                                        <button type="button"
+                                                                class="customer-table__view customer-action-btn customer-action-btn--view"
+                                                                data-id="${u.id}"
+                                                                data-name="${fn:escapeXml(u.name)}"
+                                                                data-email="${fn:escapeXml(u.email)}"
+                                                                data-phone="${fn:escapeXml(u.phone)}"
+                                                                data-address="${fn:escapeXml(u.address)}"
+                                                                data-role="${u.role}"
+                                                                data-status="${u.status}"
+                                                                data-created="${u.createdAt}"
+                                                                data-updated="${u.updatedAt}"
+                                                                data-avatar="${empty u.avatar ? '' : u.avatar}">
+                                                            <i class="fa-regular fa-eye"></i>
+                                                            Xem
+                                                        </button>
+                                                    </td>
+
+                                                    <td>
+                                                        <button type="button"
+                                                                class="customer-table__edit customer-action-btn customer-action-btn--edit"
+                                                                data-id="${u.id}"
+                                                                data-name="${fn:escapeXml(u.name)}"
+                                                                data-email="${fn:escapeXml(u.email)}"
+                                                                data-phone="${fn:escapeXml(u.phone)}"
+                                                                data-address="${fn:escapeXml(u.address)}"
+                                                                data-role="${u.role}"
+                                                                data-status="${u.status}"
+                                                                data-created="${u.createdAt}"
+                                                                data-updated="${u.updatedAt}">
+                                                            <i class="fa-regular fa-pen-to-square"></i>
+                                                            Sửa
+                                                        </button>
+                                                    </td>
+
+                                                    <td>
+                                                        <form method="post" action="${pageContext.request.contextPath}/admin/customers/lock"
+                                                              onsubmit="return confirm('Khóa khách hàng này?');">
+                                                            <input type="hidden" name="id" value="${u.id}">
+                                                            <button type="submit" class="customer-table__delete customer-action-btn customer-action-btn--delete">
+                                                                <i class="fa-solid fa-user-lock"></i>
+                                                                Xóa
+                                                            </button>
+                                                        </form>
+                                                    </td>
+                                                </tr>
+                                            </c:forEach>
+                                        </c:otherwise>
+                                    </c:choose>
+                                    </tbody>
+                                </table>
+                            </div>
                         </div>
-
-
-
-
-
-
                     </section>
 
 
