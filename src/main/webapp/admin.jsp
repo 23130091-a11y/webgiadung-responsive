@@ -3650,7 +3650,7 @@
 
         products.forEach(function(p) {
             var formattedPrice = new Intl.NumberFormat('vi-VN').format(p.price) + ' đ';
-            var imgUrl = contextPath + '/assets/img/products/' + p.image;
+            var imgUrl = contextPath + '/assets/img/products/' + p.image + '?v=' + new Date().getTime();
 
             var checkStatus = (p.post == 1) ? 'checked' : '';
 
@@ -3804,7 +3804,7 @@
     function fillProductModal(p) {
         '${pageContext.request.contextPath}';
 
-        var imgPath = p.image ? (contextPath + '/assets/img/products/' + p.image) : (contextPath + '/assets/img/no-image.png');
+        var imgPath = contextPath + '/assets/img/products/' + p.image + '?v=' + new Date().getTime();
 
         var elImg = document.getElementById('v-image');
         if(elImg) elImg.src = imgPath;
