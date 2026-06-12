@@ -85,7 +85,7 @@
                 <button type="submit" class="btn-login">ĐĂNG NHẬP</button>
 
                 <div class="forgot-password">
-                    <a href="#">Quên mật khẩu?</a>
+                    <a href="${pageContext.request.contextPath}/requestPassword">Quên mật khẩu?</a>
                 </div>
 
                 <div class="register-link">

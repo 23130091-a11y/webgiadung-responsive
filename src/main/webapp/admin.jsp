@@ -3637,6 +3637,7 @@
             });
     }
 
+    // list sp
     function renderProductTable(products) {
         var container = document.getElementById('product-list-container');
         if (!container) return;
@@ -3650,7 +3651,14 @@
 
         products.forEach(function(p) {
             var formattedPrice = new Intl.NumberFormat('vi-VN').format(p.price) + ' đ';
-            var imgUrl = contextPath + '/assets/img/products/' + p.image;
+            var imgUrl = '';
+            if (p.image) {
+                if (p.image.startsWith("assets/img/")) {
+                    imgUrl = contextPath + '/' + p.image;
+                } else {
+                    imgUrl = contextPath + '/assets/img/products/' + p.image;
+                }
+            }
 
             var checkStatus = (p.post == 1) ? 'checked' : '';
 
@@ -3800,11 +3808,18 @@
             });
     }
 
-
+    // hiển thị thông tin sp chi tiết
     function fillProductModal(p) {
         '${pageContext.request.contextPath}';
 
-        var imgPath = p.image ? (contextPath + '/assets/img/products/' + p.image) : (contextPath + '/assets/img/no-image.png');
+        var imgPath = contextPath + '/assets/img/no-image.png';
+        if (p.image) {
+            if (p.image.startsWith("assets/img/")) {
+                imgPath = contextPath + '/' + p.image;
+            } else {
+                imgPath = contextPath + '/assets/img/products/' + p.image;
+            }
+        }
 
         var elImg = document.getElementById('v-image');
         if(elImg) elImg.src = imgPath;
@@ -3884,7 +3899,14 @@
             if (p.details && p.details.length > 0) {
                 var htmlDetail = '';
                 p.details.forEach(function(dt) {
-                    var dtImgSrc = dt.image ? (contextPath + '/assets/img/details/' + dt.image) : '';
+                    var dtImgSrc = '';
+                    if (dt.image) {
+                        if (dt.image.startsWith("assets/img/")) {
+                            dtImgSrc = contextPath + '/' + dt.image;
+                        } else {
+                            dtImgSrc = contextPath + '/assets/img/details/' + dt.image;
+                        }
+                    }
 
                     var imgTag = dtImgSrc ? '<img src="' + dtImgSrc + '" alt="Detail">' : '';
 
