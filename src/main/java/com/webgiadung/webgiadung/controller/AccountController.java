@@ -17,6 +17,7 @@ import java.util.*;
 import com.webgiadung.webgiadung.model.Cart;
 import com.webgiadung.webgiadung.model.Product;
 import com.webgiadung.webgiadung.services.ProductFavoriteService;
+import com.webgiadung.webgiadung.utils.SecurityUtils;
 
 @WebServlet("/account")
 public class AccountController extends HttpServlet {
@@ -150,7 +151,49 @@ public class AccountController extends HttpServlet {
 
             req.setAttribute("tab", currentTab);
             req.getRequestDispatcher("/account.jsp").forward(req, resp);
+            return;
         }
+
+        if ("changePassword".equals(action)) {
+            String oldPassword = req.getParameter("oldPassword");
+            String newPassword = req.getParameter("newPassword");
+            String confirmPassword = req.getParameter("confirmPassword");
+
+            boolean success = false;
+
+            if (oldPassword == null || oldPassword.trim().isEmpty()
+                    || newPassword == null || newPassword.trim().isEmpty()
+                    || confirmPassword == null || confirmPassword.trim().isEmpty()) {
+                req.setAttribute("passError", "Vui lòng nhập đầy đủ thông tin mật khẩu.");
+            } else if (!newPassword.equals(confirmPassword)) {
+                req.setAttribute("passError", "Mật khẩu mới và xác nhận mật khẩu không khớp.");
+            } else if (newPassword.length() < 6) {
+                req.setAttribute("passError", "Mật khẩu mới phải có ít nhất 6 ký tự.");
+            } else {
+                String oldPasswordHash = SecurityUtils.hashMD5(oldPassword);
+                String newPasswordHash = SecurityUtils.hashMD5(newPassword);
+
+                if (!authDao.checkPassword(user.getId(), oldPasswordHash)) {
+                    req.setAttribute("passError", "Mật khẩu hiện tại không đúng.");
+                } else {
+                    success = authDao.updatePassword(user.getId(), newPasswordHash);
+                    if (success) {
+                        user.setPassword(newPasswordHash);
+                        req.setAttribute("passMsg", "Đổi mật khẩu thành công!");
+                    }
+                }
+            }
+
+            if (!success && req.getAttribute("passError") == null) {
+                req.setAttribute("passError", "Có lỗi xảy ra trong quá trình đổi mật khẩu.");
+            }
+
+            req.setAttribute("tab", "password");
+            req.getRequestDispatcher("/account.jsp").forward(req, resp);
+            return;
+        }
+
+        resp.sendRedirect(req.getContextPath() + "/account");
     }
 
 
