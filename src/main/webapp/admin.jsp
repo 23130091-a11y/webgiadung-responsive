@@ -350,8 +350,19 @@
                                         <input type="month" name="monthB" value="${monthB}">
                                     </div>
 
+                                    <c:url var="revenueExportUrl" value="/admin/revenue/export">
+                                        <c:param name="fromDate" value="${fromDate}" />
+                                        <c:param name="toDate" value="${toDate}" />
+                                        <c:param name="status" value="${status}" />
+                                        <c:param name="monthA" value="${monthA}" />
+                                        <c:param name="monthB" value="${monthB}" />
+                                    </c:url>
+
                                     <div class="revenue-filter__actions">
                                         <button type="submit" class="btn-ui btn-ui--primary">Lọc dữ liệu</button>
+                                        <a href="${revenueExportUrl}" class="btn-ui btn-ui--primary">
+                                            <i class="fa-solid fa-file-excel"></i> Xuất Excel
+                                        </a>
                                         <a href="${pageContext.request.contextPath}/admin/revenue" class="btn-ui btn-ui--ghost">Đặt lại</a>
                                     </div>
                                 </form>
