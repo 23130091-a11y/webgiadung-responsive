@@ -10,6 +10,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.time.YearMonth;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
@@ -40,6 +41,13 @@ public class AdminRevenueExportServlet extends HttpServlet {
         List<Map<String, Object>> topSellingProducts = orderDao.getTopSellingProducts(fromDate, toDate, status, 10);
         List<Map<String, Object>> productMonthCompareList = orderDao.getProductMonthComparison(monthA, monthB, 20);
         List<Map<String, Object>> importBatchSalesList = orderDao.getImportBatchSalesReport(50);
+        Object totalRangeRevenueForExport = revenueSummary.get("total_range_revenue");
+        if (totalRangeRevenueForExport == null) {
+            totalRangeRevenueForExport = dailyRevenueList.stream()
+                    .map(row -> row.get("net_revenue"))
+                    .mapToDouble(this::toDouble)
+                    .sum();
+        }
 
         response.setCharacterEncoding("UTF-8");
         response.setContentType("application/vnd.ms-excel; charset=UTF-8");
@@ -51,7 +59,7 @@ public class AdminRevenueExportServlet extends HttpServlet {
             writeWorkbookStart(out);
             writeStyles(out);
 
-            writeOverviewSheet(out, fromDate, toDate, status, monthA, monthB, revenueSummary, orderStatusStats);
+            writeOverviewSheet(out, fromDate, toDate, status, monthA, monthB, revenueSummary, orderStatusStats, totalRangeRevenueForExport);
             writeDailyRevenueSheet(out, dailyRevenueList);
             writeTopProductSheet(out, topSellingProducts);
             writeProductCompareSheet(out, monthA, monthB, productMonthCompareList);
@@ -200,13 +208,14 @@ public class AdminRevenueExportServlet extends HttpServlet {
     private void writeOverviewSheet(PrintWriter out, String fromDate, String toDate, String status,
                                     String monthA, String monthB,
                                     Map<String, Object> revenueSummary,
-                                    Map<String, Object> orderStatusStats) {
+                                    Map<String, Object> orderStatusStats,
+                                    Object totalRangeRevenueForExport) {
         startSheet(out, "Tong quan");
         columns(out, 160, 160, 160, 160, 160, 160);
 
         titleRow(out, "BÁO CÁO DOANH THU CỬA HÀNG", 5);
-        subtitleRow(out, "Từ ngày: " + emptyDash(fromDate)
-                + " | Đến ngày: " + emptyDash(toDate)
+        subtitleRow(out, "Từ ngày: " + formatDateText(emptyDash(fromDate))
+                + " | Đến ngày: " + formatDateText(emptyDash(toDate))
                 + " | Trạng thái: " + statusText(status)
                 + " | Tháng A: " + formatMonthLabel(monthA)
                 + " | Tháng B: " + formatMonthLabel(monthB), 5);
@@ -214,7 +223,7 @@ public class AdminRevenueExportServlet extends HttpServlet {
 
         sectionRow(out, "1. Tổng quan doanh thu", 5);
         out.println("<Row ss:Height=\"26\">");
-        cell(out, "Doanh thu hôm nay", "KpiLabel");
+        cell(out, todayLabel(), "KpiLabel");
         cell(out, "Doanh thu " + formatMonthLabel(monthA), "KpiLabel");
         cell(out, "Doanh thu " + formatMonthLabel(monthB), "KpiLabel");
         cell(out, "Tổng số đơn", "KpiLabel");
@@ -223,9 +232,9 @@ public class AdminRevenueExportServlet extends HttpServlet {
         out.println("</Row>");
 
         out.println("<Row ss:Height=\"34\">");
-        cellNumber(out, revenueSummary.get("today_revenue"), "KpiValue");
-        cellNumber(out, revenueSummary.get("month_a_revenue"), "KpiValue");
-        cellNumber(out, revenueSummary.get("month_b_revenue"), "KpiValue");
+        cellMoney(out, revenueSummary.get("today_revenue"), "KpiValue");
+        cellMoney(out, revenueSummary.get("month_a_revenue"), "KpiValue");
+        cellMoney(out, revenueSummary.get("month_b_revenue"), "KpiValue");
         cellNumber(out, revenueSummary.get("total_orders"), "KpiValue");
         cellNumber(out, revenueSummary.get("cancelled_orders"), "KpiValue");
         cellPercent(out, revenueSummary.get("cancel_rate"), "KpiValue");
@@ -259,10 +268,10 @@ public class AdminRevenueExportServlet extends HttpServlet {
                 out.println("<Row>");
                 cell(out, formatDateText(r.get("order_date")), "TextCenter");
                 cellNumber(out, r.get("total_orders"), "Number");
-                cellNumber(out, r.get("gross_revenue"), "Money");
+                cellMoney(out, r.get("gross_revenue"), "Money");
                 cellNumber(out, r.get("cancelled_orders"), "Number");
-                cellNumber(out, r.get("cancelled_value"), "DangerText");
-                cellNumber(out, r.get("net_revenue"), "Money");
+                cellMoney(out, r.get("cancelled_value"), "DangerText");
+                cellMoney(out, r.get("net_revenue"), "Money");
                 out.println("</Row>");
             }
         }
@@ -288,7 +297,7 @@ public class AdminRevenueExportServlet extends HttpServlet {
                 cellNumber(out, r.get("product_id"), "Number");
                 cell(out, r.get("product_name"), "Text");
                 cellNumber(out, r.get("sold_qty"), "Number");
-                cellNumber(out, r.get("revenue"), "Money");
+                cellMoney(out, r.get("revenue"), "Money");
                 out.println("</Row>");
             }
         }
@@ -323,8 +332,8 @@ public class AdminRevenueExportServlet extends HttpServlet {
                 cell(out, r.get("product_name"), "Text");
                 cellNumber(out, r.get("month_a_qty"), "Number");
                 cellNumber(out, r.get("month_b_qty"), "Number");
-                cellNumber(out, r.get("month_a_revenue"), "Money");
-                cellNumber(out, r.get("month_b_revenue"), "Money");
+                cellMoney(out, r.get("month_a_revenue"), "Money");
+                cellMoney(out, r.get("month_b_revenue"), "Money");
                 out.println("</Row>");
             }
         }
@@ -356,8 +365,8 @@ public class AdminRevenueExportServlet extends HttpServlet {
                 cell(out, r.get("product_name"), "Text");
                 cellNumber(out, r.get("pre_stock_qty"), "Number");
                 cellNumber(out, r.get("import_qty"), "Number");
-                cellNumber(out, r.get("unit_cost"), "Money");
-                cellNumber(out, r.get("total_price"), "Money");
+                cellMoney(out, r.get("unit_cost"), "Money");
+                cellMoney(out, r.get("total_price"), "Money");
                 cell(out, formatDateText(r.get("imported_at")), "TextCenter");
                 cellNumber(out, r.get("sold_qty_since_import"), "Number");
                 cellNumber(out, r.get("sold_order_count"), "Number");
@@ -449,9 +458,25 @@ public class AdminRevenueExportServlet extends HttpServlet {
         out.println("<Cell ss:StyleID=\"" + styleId + "\"><Data ss:Type=\"Number\">" + plainNumber(number) + "</Data></Cell>");
     }
 
+
+    private void cellMoney(PrintWriter out, Object value, String styleId) {
+        out.println("<Cell ss:StyleID=\"" + styleId + "\"><Data ss:Type=\"String\">" + esc(formatMoney(value)) + "</Data></Cell>");
+    }
+
     private void cellPercent(PrintWriter out, Object value, String styleId) {
         double number = toDouble(value) / 100.0;
         out.println("<Cell ss:StyleID=\"" + styleId + "\"><Data ss:Type=\"Number\">" + plainNumber(number) + "</Data></Cell>");
+    }
+
+
+
+    private String todayLabel() {
+        return "Doanh thu hôm nay (" + formatDateText(LocalDate.now().toString()) + ")";
+    }
+
+    private String formatMoney(Object value) {
+        long amount = Math.round(toDouble(value));
+        return String.format("%,d", amount).replace(",", ".") + " đ";
     }
 
     private String trim(String value) {
@@ -465,7 +490,7 @@ public class AdminRevenueExportServlet extends HttpServlet {
     private String formatMonthLabel(String ym) {
         try {
             YearMonth yearMonth = YearMonth.parse(ym);
-            return yearMonth.format(DateTimeFormatter.ofPattern("MM/yyyy"));
+            return "Tháng " + yearMonth.getMonthValue() + "/" + yearMonth.getYear();
         } catch (Exception e) {
             return ym == null ? "" : ym;
         }
@@ -484,9 +509,12 @@ public class AdminRevenueExportServlet extends HttpServlet {
 
     private String formatDateText(Object value) {
         if (value == null) return "";
-        return value.toString()
-                .replace("T", " ")
-                .replace(".0", "");
+        String text = value.toString().trim();
+        if (text.length() >= 10 && text.charAt(4) == '-' && text.charAt(7) == '-') {
+            String date = text.substring(8, 10) + "/" + text.substring(5, 7) + "/" + text.substring(0, 4);
+            return text.length() > 10 ? date + text.substring(10).replace("T", " ") : date;
+        }
+        return text;
     }
 
     private String limitSheetName(String name) {
