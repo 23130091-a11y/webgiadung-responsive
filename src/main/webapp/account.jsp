@@ -32,7 +32,7 @@
     <link rel="stylesheet" href="assets/css/base.css">
     <link rel="stylesheet" href="assets/css/style.css">
     <link rel="stylesheet" href="assets/css/search.css">
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/account.css?v=20260403">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/account.css?v=99">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.21.1/axios.min.js"></script>
 </head>
 
@@ -131,116 +131,193 @@
                 <div class="col l-10 m-12 c-12">
                     <c:choose>
                         <c:when test="${tab == 'info'}">
-                            <section class="account__content">
-                                <h2 class="account__heading">Thông tin cá nhân</h2>
+                            <section class="account__content account-profile-card account-profile-card--info">
+                                <div class="account-profile-card__heading">
+                                    <div class="account-profile-card__icon">
+                                        <i class="fa-solid fa-user-pen"></i>
+                                    </div>
+                                    <div>
+                                        <h2>Thông tin cá nhân</h2>
+                                        <p>Cập nhật họ tên và số điện thoại để đơn hàng được xử lý nhanh hơn.</p>
+                                    </div>
+                                </div>
 
-                                <form class="account__form" action="${pageContext.request.contextPath}/account" method="post">
+                                <form class="account__form account-profile-form" action="${pageContext.request.contextPath}/account" method="post">
                                     <input type="hidden" name="action" value="updateProfile">
                                     <input type="hidden" name="tab" value="info">
 
-                                    <div class="account__form-group">
-                                        <label for="fullname" class="account__label">Họ và tên</label>
-                                        <input type="text" id="fullname" name="name" class="account__input"
-                                               value="${sessionScope.user.name}" required>
-                                    </div>
+                                    <div class="account-profile-form__grid">
+                                        <div class="account__form-group">
+                                            <label for="fullname" class="account__label">
+                                                <i class="fa-regular fa-user"></i>
+                                                Họ và tên
+                                            </label>
+                                            <input type="text" id="fullname" name="name" class="account__input"
+                                                   value="${sessionScope.user.name}" required>
+                                        </div>
 
-                                    <div class="account__form-group">
-                                        <label for="phone" class="account__label">Số điện thoại</label>
-                                        <input type="tel" id="phone" name="phone" class="account__input"
-                                               value="${sessionScope.user.phone}">
+                                        <div class="account__form-group">
+                                            <label for="phone" class="account__label">
+                                                <i class="fa-solid fa-phone"></i>
+                                                Số điện thoại
+                                            </label>
+                                            <input type="tel" id="phone" name="phone" class="account__input"
+                                                   value="${sessionScope.user.phone}" placeholder="Nhập số điện thoại">
+                                        </div>
                                     </div>
 
                                     <c:if test="${not empty profileMsg}">
-                                        <p style="color:green;margin:8px 0;">${profileMsg}</p>
+                                        <p class="account-alert account-alert--success">
+                                            <i class="fa-solid fa-circle-check"></i>
+                                            ${profileMsg}
+                                        </p>
                                     </c:if>
                                     <c:if test="${not empty profileError}">
-                                        <p style="color:red;margin:8px 0;">${profileError}</p>
+                                        <p class="account-alert account-alert--error">
+                                            <i class="fa-solid fa-triangle-exclamation"></i>
+                                            ${profileError}
+                                        </p>
                                     </c:if>
 
-                                    <button type="submit" class="account__btn btn btn--default-color">Lưu thông tin</button>
+                                    <button type="submit" class="account__btn account-profile-btn btn btn--default-color">
+                                        <i class="fa-solid fa-floppy-disk"></i>
+                                        Lưu thông tin
+                                    </button>
                                 </form>
                             </section>
                         </c:when>
 
                         <c:when test="${tab == 'address'}">
-                            <section class="account__content">
-                                <h2 class="account__heading">Địa chỉ</h2>
+                            <section class="account__content account-profile-card account-profile-card--address">
+                                <div class="account-profile-card__heading">
+                                    <div class="account-profile-card__icon">
+                                        <i class="fa-solid fa-location-dot"></i>
+                                    </div>
+                                    <div>
+                                        <h2>Địa chỉ</h2>
+                                        <p>Cập nhật địa chỉ nhận hàng để quá trình giao hàng chính xác hơn.</p>
+                                    </div>
+                                </div>
 
-                                <form id="addressForm" class="account__form" action="${pageContext.request.contextPath}/account" method="post">
+                                <form id="addressForm" class="account__form account-profile-form" action="${pageContext.request.contextPath}/account" method="post">
                                     <input type="hidden" name="action" value="updateProfile">
                                     <input type="hidden" name="tab" value="address">
                                     <input type="hidden" name="provinceName" id="provinceName">
 
-                                    <div class="account__form-group">
-                                        <label for="province" class="account__label">Tỉnh/thành phố</label>
-                                        <select id="province" name="province" class="account__select" required>
-                                            <option value="">Chọn tỉnh/thành phố</option>
-                                        </select>
+                                    <div class="account-profile-form__grid">
+                                        <div class="account__form-group">
+                                            <label for="province" class="account__label">
+                                                <i class="fa-solid fa-city"></i>
+                                                Tỉnh/thành phố
+                                            </label>
+                                            <select id="province" name="province" class="account__select" required>
+                                                <option value="">Chọn tỉnh/thành phố</option>
+                                            </select>
+                                        </div>
+
+                                        <div class="account__form-group">
+                                            <label for="district" class="account__label">
+                                                <i class="fa-solid fa-map-location-dot"></i>
+                                                Quận/huyện
+                                            </label>
+                                            <select id="district" name="district" class="account__select" required>
+                                                <option value="">Chọn quận/huyện</option>
+                                            </select>
+                                        </div>
                                     </div>
 
-                                    <!-- Quận/huyện -->
                                     <div class="account__form-group">
-                                        <label for="district" class="account__label">Quận/huyện</label>
-                                        <select id="district" name="district" class="account__select" required>
-                                            <option value="">Chọn quận/huyện</option>
-                                        </select>
-                                    </div>
-
-                                    <div class="account__form-group">
-                                        <label for="detailAddress" class="account__label">Địa chỉ</label>
+                                        <label for="detailAddress" class="account__label">
+                                            <i class="fa-regular fa-map"></i>
+                                            Địa chỉ chi tiết
+                                        </label>
                                         <input type="text" id="detailAddress" name="detailAddress" class="account__input"
-                                               value="${sessionScope.user.address}" required>
+                                               value="${sessionScope.user.address}" placeholder="Số nhà, tên đường, phường/xã..." required>
                                     </div>
 
                                     <c:if test="${not empty profileMsg}">
-                                        <p style="color:green;margin:8px 0;">${profileMsg}</p>
+                                        <p class="account-alert account-alert--success">
+                                            <i class="fa-solid fa-circle-check"></i>
+                                            ${profileMsg}
+                                        </p>
                                     </c:if>
                                     <c:if test="${not empty profileError}">
-                                        <p style="color:red;margin:8px 0;">${profileError}</p>
+                                        <p class="account-alert account-alert--error">
+                                            <i class="fa-solid fa-triangle-exclamation"></i>
+                                            ${profileError}
+                                        </p>
                                     </c:if>
 
-                                    <button type="submit" class="account__btn btn btn--default-color">Lưu thông tin</button>
+                                    <button type="submit" class="account__btn account-profile-btn btn btn--default-color">
+                                        <i class="fa-solid fa-floppy-disk"></i>
+                                        Lưu thông tin
+                                    </button>
                                 </form>
                             </section>
                         </c:when>
 
                         <c:when test="${tab == 'password'}">
-                            <section class="account__content">
-                                <h2 class="account__heading">Đổi mật khẩu</h2>
+                            <section class="account__content account-profile-card account-profile-card--password">
+                                <div class="account-profile-card__heading">
+                                    <div class="account-profile-card__icon">
+                                        <i class="fa-solid fa-key"></i>
+                                    </div>
+                                    <div>
+                                        <h2>Đổi mật khẩu</h2>
+                                        <p>Tạo mật khẩu mới để tăng bảo mật cho tài khoản của bạn.</p>
+                                    </div>
+                                </div>
 
-                                <form class="account__form" action="${pageContext.request.contextPath}/account" method="post">
+                                <form class="account__form account-profile-form" action="${pageContext.request.contextPath}/account" method="post">
                                     <input type="hidden" name="action" value="changePassword">
                                     <input type="hidden" name="tab" value="password">
 
-                                    <!-- Mật khẩu hiện tại -->
                                     <div class="account__form-group">
-                                        <label for="current-password" class="account__label">Mật khẩu hiện tại</label>
+                                        <label for="current-password" class="account__label">
+                                            <i class="fa-solid fa-lock"></i>
+                                            Mật khẩu hiện tại
+                                        </label>
                                         <input type="password" id="current-password" name="oldPassword"
-                                               class="account__input" required>
+                                               class="account__input" placeholder="Nhập mật khẩu hiện tại" required>
                                     </div>
 
-                                    <!-- Mật khẩu mới -->
-                                    <div class="account__form-group">
-                                        <label for="new-password" class="account__label">Mật khẩu mới</label>
-                                        <input type="password" id="new-password" name="newPassword"
-                                               class="account__input" required>
-                                    </div>
+                                    <div class="account-profile-form__grid">
+                                        <div class="account__form-group">
+                                            <label for="new-password" class="account__label">
+                                                <i class="fa-solid fa-shield-halved"></i>
+                                                Mật khẩu mới
+                                            </label>
+                                            <input type="password" id="new-password" name="newPassword"
+                                                   class="account__input" placeholder="Nhập mật khẩu mới" required>
+                                        </div>
 
-                                    <!-- Xác nhận mật khẩu mới -->
-                                    <div class="account__form-group">
-                                        <label for="confirm-password" class="account__label">Xác nhận mật khẩu mới</label>
-                                        <input type="password" id="confirm-password" name="confirmPassword"
-                                               class="account__input" required>
+                                        <div class="account__form-group">
+                                            <label for="confirm-password" class="account__label">
+                                                <i class="fa-solid fa-circle-check"></i>
+                                                Xác nhận mật khẩu mới
+                                            </label>
+                                            <input type="password" id="confirm-password" name="confirmPassword"
+                                                   class="account__input" placeholder="Nhập lại mật khẩu mới" required>
+                                        </div>
                                     </div>
 
                                     <c:if test="${not empty passMsg}">
-                                        <p style="color:green;margin:8px 0;">${passMsg}</p>
+                                        <p class="account-alert account-alert--success">
+                                            <i class="fa-solid fa-circle-check"></i>
+                                            ${passMsg}
+                                        </p>
                                     </c:if>
                                     <c:if test="${not empty passError}">
-                                        <p style="color:red;margin:8px 0;">${passError}</p>
+                                        <p class="account-alert account-alert--error">
+                                            <i class="fa-solid fa-triangle-exclamation"></i>
+                                            ${passError}
+                                        </p>
                                     </c:if>
 
-                                    <button type="submit" class="account__btn btn btn--default-color">Lưu thông tin</button>
+                                    <button type="submit" class="account__btn account-profile-btn btn btn--default-color">
+                                        <i class="fa-solid fa-floppy-disk"></i>
+                                        Lưu thông tin
+                                    </button>
                                 </form>
                             </section>
                         </c:when>
