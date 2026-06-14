@@ -4,6 +4,7 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonPrimitive;
 import com.google.gson.JsonSerializer;
+import com.webgiadung.webgiadung.dao.WarehouseTransactionDao;
 import com.webgiadung.webgiadung.model.InboundDetails;
 import com.webgiadung.webgiadung.services.InboundDetailsService;
 import com.webgiadung.webgiadung.services.ProductService;
@@ -23,6 +24,7 @@ import java.util.Map;
 public class WarehouseImportController extends HttpServlet {
     private final InboundDetailsService inboundService = new InboundDetailsService();
     private final ProductService productService = new ProductService();
+    private final WarehouseTransactionDao transactionDao = new WarehouseTransactionDao();
 
     private final Gson gson = new GsonBuilder()
             .registerTypeAdapter(LocalDateTime.class, (JsonSerializer<LocalDateTime>) (src, typeOfSrc, context) ->
@@ -56,17 +58,28 @@ public class WarehouseImportController extends HttpServlet {
                 );
 
                 if (isProductUpdated) {
+
+                    transactionDao.get().useTransaction(handle -> {
+                        transactionDao.insert(
+                                handle,
+                                details.getProductId(),
+                                null,
+                                "IMPORT",
+                                details.getImportQty(),
+                                "Nhập hàng từ phiếu: " + details.getReceiptCode()
+                        );
+                    });
+
                     resultMap.put("success", true);
-                    resultMap.put("message", "Nhập kho và cập nhật sản phẩm thành công!");
+                    resultMap.put("message", "Nhập kho, cập nhật sản phẩm và ghi sổ kho thành công!");
                 } else {
                     resultMap.put("success", false);
-                    resultMap.put("message", "Lưu lịch sử thành công nhưng cập nhật kho thất bại.");
+                    resultMap.put("message", "Cập nhật kho thất bại.");
                 }
             } else {
                 resultMap.put("success", false);
                 resultMap.put("message", "Không thể lưu thông tin phiếu nhập.");
             }
-
         } catch (Exception e) {
             e.printStackTrace();
             response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
