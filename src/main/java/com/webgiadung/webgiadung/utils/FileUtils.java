@@ -4,7 +4,9 @@ import jakarta.servlet.http.Part;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 
 public class FileUtils {
 
@@ -18,14 +20,13 @@ public class FileUtils {
         String fileName = System.currentTimeMillis() + "_" + safeName;
         if ("slides".equals(subFolder) || "reviews".equals(subFolder) || "details".equals(subFolder) || "products".equals(subFolder)) {
 
-            String baseDir = "C:\\webgiadung_data\\uploads\\";
+            String baseDir = "D:\\DoAnLapTrinh\\DoAn\\DoAnWeb\\src\\main\\webapp\\";
             String uploadDir = baseDir + "assets\\img\\" + subFolder;
 
             File dir = new File(uploadDir);
             if (!dir.exists()) dir.mkdirs();
 
             part.write(uploadDir + File.separator + fileName);
-
             return "assets/img/" + subFolder + "/" + fileName;
 
         } else {
