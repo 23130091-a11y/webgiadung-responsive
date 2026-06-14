@@ -2,6 +2,7 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <%@ taglib prefix="c" uri="jakarta.tags.core" %>
 <%@ taglib prefix="fmt" uri="jakarta.tags.fmt" %>
+<%@ taglib prefix="fn" uri="jakarta.tags.functions" %>
 <html lang="en">
 
 <head>
@@ -54,20 +55,34 @@
                     <!-- Media Details -->
                     <div class="product-image-wrapper">
                      <figure class="media-details">
-                        <img src="${pageContext.request.contextPath}/assets/img/products/${product.image}"
-                             alt="${product.name}"
-                             class="media-details__img"
-                             id="main-product-image">
+                         <c:choose>
+                             <c:when test="${fn:startsWith(product.image, 'assets/img/')}">
+                                 <img src="${pageContext.request.contextPath}/${product.image}" alt="${product.name}" class="media-details__img"
+                                      id="main-product-image">
+                             </c:when>
+                             <c:otherwise>
+                                 <img src="${pageContext.request.contextPath}/assets/img/products/${product.image}" alt="${product.name}" class="media-details__img"
+                                      id="main-product-image">
+                             </c:otherwise>
+                         </c:choose>
                      </figure>
 
                      <div class="media-thumbnails">
 
                         <c:if test="${not empty product.images}">
                             <c:forEach var="imgObj" items="${product.images}">
-                                <img src="${pageContext.request.contextPath}/assets/img/products/${imgObj.path}"
-                                     alt="Thumbnail"
-                                     class="media-thumbnails__img"
-                                     onclick="changeMainImage(this)">
+                                <c:choose>
+                                    <c:when test="${fn:startsWith(imgObj.path, 'assets/img/')}">
+                                        <img src="${pageContext.request.contextPath}/${imgObj.path}" alt="Thumbnail"
+                                             class="media-thumbnails__img"
+                                             onclick="changeMainImage(this)">
+                                    </c:when>
+                                    <c:otherwise>
+                                        <img src="${pageContext.request.contextPath}/assets/img/products/${imgObj.path}" alt="Thumbnail"
+                                             class="media-thumbnails__img"
+                                             onclick="changeMainImage(this)">
+                                    </c:otherwise>
+                                </c:choose>
                             </c:forEach>
                         </c:if>
 
@@ -178,10 +193,17 @@
                                     </p>
 
                                     <figure class="product-desc__thumb">
-                                        <img class="product-desc__img"
-                                             src="${pageContext.request.contextPath}/assets/img/details/${detail.image}"
-                                             alt="${detail.title}"
-                                        />
+                                        <c:choose>
+                                            <c:when test="${fn:startsWith(detail.image, 'assets/img/')}">
+                                                <img src="${pageContext.request.contextPath}/${detail.image}" alt="${detail.title}"
+                                                     class="product-desc__img">
+                                            </c:when>
+
+                                            <c:otherwise>
+                                                <img src="${pageContext.request.contextPath}/assets/img/details/${detail.image}" alt="${detail.title}"
+                                                     class="product-desc__img">
+                                            </c:otherwise>
+                                        </c:choose>
                                     </figure>
                                 </c:forEach>
                             </c:if>

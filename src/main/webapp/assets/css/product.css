@@ -34,10 +34,11 @@
     border-radius: 2px;
 }
 
-.more-details {
+.media-thumbnails {
     margin-top: 10px;
     display: flex;
     column-gap: 5px;
+    flex-wrap: wrap;
 }
 
 .more-details__thumb {
@@ -49,11 +50,14 @@
     padding: 0;
 }
 
-.more-details__img {
+.media-thumbnails__img {
     padding: 4px;
     width: 82px;
     height: 82px;
     object-fit: cover;
+    border: 1px solid #ddd;
+    border-radius: 2px;
+    cursor: pointer;
 }
 
 .content-details {
@@ -551,6 +555,7 @@
     font-size: 1.2rem;
     color: #ccc;
 }
+
 .media-thumbnails {
     display: flex;
     gap: 5px;

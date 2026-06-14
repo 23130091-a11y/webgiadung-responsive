@@ -2,6 +2,7 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <%@ taglib prefix="c" uri="jakarta.tags.core" %>
 <%@ taglib prefix="fmt" uri="jakarta.tags.fmt" %>
+<%@ taglib prefix="fn" uri="jakarta.tags.functions" %>
 
 <!DOCTYPE html>
 <html lang="en">
@@ -117,7 +118,14 @@
                 <c:forEach items="${historyProducts}" var="p">
                   <div class="product-card">
                     <a href="product?id=${p.id}">
-                      <img src="${pageContext.request.contextPath}/assets/img/products/${p.image}" alt="${p.name}">
+                      <c:choose>
+                        <c:when test="${fn:startsWith(p.image, 'assets/img/')}">
+                          <img src="${pageContext.request.contextPath}/${p.image}" alt="${p.name}">
+                        </c:when>
+                        <c:otherwise>
+                          <img src="${pageContext.request.contextPath}/assets/img/products/${p.image}" alt="${p.name}">
+                        </c:otherwise>
+                      </c:choose>
                     </a>
 
                     <a href="product?id=${p.id}">
@@ -175,7 +183,14 @@
           <c:forEach items="${featuredProducts}" var="p">
             <div class="product-card">
               <a href="product?id=${p.id}">
-                <img src="${pageContext.request.contextPath}/assets/img/products/${p.image}" alt="${p.name}">
+                <c:choose>
+                  <c:when test="${fn:startsWith(p.image, 'assets/img/')}">
+                    <img src="${pageContext.request.contextPath}/${p.image}" alt="${p.name}">
+                  </c:when>
+                  <c:otherwise>
+                    <img src="${pageContext.request.contextPath}/assets/img/products/${p.image}" alt="${p.name}">
+                  </c:otherwise>
+                </c:choose>
               </a>
 
               <a href="product?id=${p.id}">
@@ -230,7 +245,14 @@
           <c:forEach items="${promotionProducts}" var="p">
             <div class="product-card">
               <a href="product?id=${p.id}">
-                <img src="${pageContext.request.contextPath}/assets/img/products/${p.image}" alt="${p.name}">
+                <c:choose>
+                  <c:when test="${fn:startsWith(p.image, 'assets/img/')}">
+                    <img src="${pageContext.request.contextPath}/${p.image}" alt="${p.name}">
+                  </c:when>
+                  <c:otherwise>
+                    <img src="${pageContext.request.contextPath}/assets/img/products/${p.image}" alt="${p.name}">
+                  </c:otherwise>
+                </c:choose>
               </a>
 
               <a href="product?id=${p.id}">
@@ -287,7 +309,14 @@
             <c:forEach items="${suggestedProducts}" var="p">
               <div class="product-card">
                 <a href="product?id=${p.id}">
-                  <img src="${pageContext.request.contextPath}/assets/img/products/${p.image}" alt="${p.name}">
+                  <c:choose>
+                    <c:when test="${fn:startsWith(p.image, 'assets/img/')}">
+                      <img src="${pageContext.request.contextPath}/${p.image}" alt="${p.name}">
+                    </c:when>
+                    <c:otherwise>
+                      <img src="${pageContext.request.contextPath}/assets/img/products/${p.image}" alt="${p.name}">
+                    </c:otherwise>
+                  </c:choose>
                 </a>
 
                 <a href="product?id=${p.id}">
@@ -343,7 +372,14 @@
           <c:forEach items="${limitedProducts}" var="p">
             <div class="product-card">
               <a href="product?id=${p.id}">
-                <img src="${pageContext.request.contextPath}/assets/img/products/${p.image}" alt="${p.name}">
+                <c:choose>
+                  <c:when test="${fn:startsWith(p.image, 'assets/img/')}">
+                    <img src="${pageContext.request.contextPath}/${p.image}" alt="${p.name}">
+                  </c:when>
+                  <c:otherwise>
+                    <img src="${pageContext.request.contextPath}/assets/img/products/${p.image}" alt="${p.name}">
+                  </c:otherwise>
+                </c:choose>
               </a>
 
               <a href="product?id=${p.id}">
