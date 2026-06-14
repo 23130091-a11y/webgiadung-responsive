@@ -27,22 +27,7 @@ public class FileUtils {
             if (!dir.exists()) dir.mkdirs();
 
             part.write(uploadDir + File.separator + fileName);
-            try {
-                String tomcatUploadDir = realPath + "assets" + File.separator + "img" + File.separator + subFolder;
-                File tomcatDir = new File(tomcatUploadDir);
-                if (!tomcatDir.exists()) tomcatDir.mkdirs();
-
-                java.nio.file.Path tomcatTargetPath = Paths.get(tomcatUploadDir, fileName);
-
-                java.nio.file.Path srcPath = Paths.get(uploadDir, fileName);
-                Files.copy(srcPath, tomcatTargetPath, StandardCopyOption.REPLACE_EXISTING);
-
-                System.out.println("--- Đã đồng bộ ảnh thành công sang thư mục Server! ---");
-            } catch (Exception e) {
-                System.out.println("Lỗi đồng bộ sang Tomcat: " + e.getMessage());
-            }
-
-            return fileName;
+            return "assets/img/" + subFolder + "/" + fileName;
 
         } else {
             String uploadDir = realPath + "assets/img/" + subFolder;

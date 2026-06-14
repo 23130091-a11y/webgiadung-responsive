@@ -32,7 +32,7 @@
     <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/grid.css">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/base.css">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/style.css">
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/admin.css?v=200">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/admin.css?v=220">
     <!-- Include stylesheet -->
     <link href="https://cdn.jsdelivr.net/npm/quill@2.0.3/dist/quill.snow.css" rel="stylesheet" />
 </head>
@@ -287,12 +287,9 @@
                                                 <thead>
                                                 <tr>
                                                     <th>Ngày báo cáo</th>
-                                                    <th>Tên SP / Mã ĐH</th>
+                                                    <th>Tên SP</th>
                                                     <th>Số lượng</th>
-                                                    <th>Hiện trạng</th>
-                                                    <th>Lý do</th>
-                                                    <th>Phục hồi</th> <th>Thao tác</th>
-                                                </tr>
+                                                    <th>Lý do</th> </tr>
                                                 </thead>
                                                 <tbody id="damage-table-body">
                                                 </tbody>
@@ -301,7 +298,6 @@
                                     </div>
                                 </div>
                             </div>
-                            <div id="tab-transactions" class="sub-tab-content"><h3>Sổ kho (Transactions)</h3></div>
                         </div>
                     </section>
                     <section id="config" class="manage-detail">
@@ -4932,7 +4928,24 @@
                 .then(result => {
                     if (result.success) {
                         alert("Nhập kho thành công!");
-                        location.reload();
+                        selectedProductId = null;
+
+                        // Xóa trống các ô nhập liệu nhập vào
+                        if(document.getElementById('search-prod')) document.getElementById('search-prod').value = '';
+                        if(document.getElementById('import-qty')) document.getElementById('import-qty').value = '';
+                        if(document.getElementById('unit-cost')) document.getElementById('unit-cost').value = '';
+                        if(document.getElementById('total-price-display')) document.getElementById('total-price-display').value = '0';
+
+
+                        if(document.getElementById('display-name')) document.getElementById('display-name').innerText = 'Chưa chọn sản phẩm';
+                        if(document.getElementById('display-pre-stock')) document.getElementById('display-pre-stock').innerText = '0';
+                        if(document.getElementById('display-img')) document.getElementById('display-img').src = contextPath + '/assets/img/products/default.png';
+
+                        generateReceiptCode();
+                        loadLowStockProducts();
+                        if (typeof loadInboundHistory === 'function' && document.getElementById('inbound-table-body')) {
+                            loadInboundHistory();
+                        }
                     } else {
                         alert("Lỗi: " + result.message);
                     }
@@ -5575,6 +5588,204 @@
             alert("Đã xảy ra lỗi hệ thống, không thể thực hiện lệnh xóa!");
         });
     }
+</script>
+<script>
+
+    // Xử lý lưu sp hư hỏng
+    let selectedDmgProductId = null;
+    let searchDmgTimeout = null;
+
+
+    function handleDamageSearch(query) {
+        var dropdown = document.getElementById('search-dmg-dropdown');
+        var contextPath = '${pageContext.request.contextPath}';
+
+        if (query.trim().length === 0) {
+            dropdown.style.display = 'none';
+            return;
+        }
+
+        clearTimeout(searchDmgTimeout);
+        searchDmgTimeout = setTimeout(function() {
+            fetch(contextPath + '/api/search-products?query=' + encodeURIComponent(query.trim()))
+                .then(res => res.json())
+                .then(data => {
+                    dropdown.innerHTML = '';
+                    if (data && data.length > 0) {
+                        dropdown.style.display = 'block';
+                        data.forEach(function(p) {
+                            var displayImg = contextPath + '/assets/img/products/' + p.image;
+                            var safeName = p.name.replace(/'/g, "\\'");
+
+                            var itemHtml = '<div class="search-item" style="display: flex; align-items: center; padding: 10px; cursor: pointer; border-bottom: 1px solid #eee;" ' +
+                                'onclick="onSelectDamageProduct(' + p.id + ', \'' + safeName + '\', \'' + displayImg + '\')">' +
+                                '<img src="' + displayImg + '" style="width: 45px; height: 45px; object-fit: cover; border-radius: 4px; margin-right: 12px;" alt="img">' +
+                                '<div style="flex-grow: 1;">' +
+                                '<div style="font-weight: bold; font-size: 14px; color: #333; margin-bottom: 4px;">' + p.name + '</div>' +
+                                '<div style="font-size: 12px; color: #666;">Tồn: <strong style="color: #d9534f;">' + p.quantity + '</strong></div>' +
+                                '</div>' +
+                                '</div>';
+
+                            dropdown.insertAdjacentHTML('beforeend', itemHtml);
+                        });
+                    } else {
+                        dropdown.innerHTML = '<div style="padding:15px; text-align:center; color:#888;">Không thấy sản phẩm!</div>';
+                        dropdown.style.display = 'block';
+                    }
+                })
+                .catch(err => console.error("Lỗi tìm kiếm hư hỏng: ", err));
+        }, 300);
+    }
+
+
+    function onSelectDamageProduct(id, name, imgUrl) {
+        selectedDmgProductId = id;
+
+
+        document.getElementById('dmg-preview-name').innerText = name;
+        document.getElementById('dmg-preview-img').src = imgUrl;
+
+        // Ẩn dropdown
+        var dropdown = document.getElementById('search-dmg-dropdown');
+        if (dropdown) dropdown.style.display = 'none';
+
+
+        var searchInput = document.getElementById('search-dmg-input');
+        if (searchInput) searchInput.value = name;
+
+
+        document.getElementById('dmg-qty-input').focus();
+    }
+
+
+    document.addEventListener('DOMContentLoaded', function() {
+        const btnDmgSubmit = document.querySelector('.dmg-btn-submit');
+        if (btnDmgSubmit) {
+            btnDmgSubmit.addEventListener('click', function(e) {
+                e.preventDefault();
+
+                const dmgQty = parseInt(document.getElementById('dmg-qty-input').value) || 0;
+                const dmgNote = document.getElementById('dmg-note-area').value.trim();
+                var contextPath = '${pageContext.request.contextPath}';
+
+                if (!selectedDmgProductId) {
+                    alert("Vui lòng tìm kiếm và nhấp chọn sản phẩm bị hư hỏng trước!");
+                    return;
+                }
+                if (dmgQty <= 0) {
+                    alert("Số lượng hư hỏng báo cáo phải lớn hơn 0!");
+                    document.getElementById('dmg-qty-input').focus();
+                    return;
+                }
+
+                const dataPayload = {
+                    productId: selectedDmgProductId,
+                    quantity: dmgQty,
+                    note: dmgNote
+                };
+
+
+                fetch(contextPath + '/api/admin/warehouse/damage', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json; charset=UTF-8' },
+                    body: JSON.stringify(dataPayload)
+                })
+                    .then(res => res.json())
+                    .then(result => {
+                        if (result.success) {
+                            alert(result.message);
+                            if (document.getElementById('search-dmg-input')) document.getElementById('search-dmg-input').value = '';
+                            if (document.getElementById('dmg-qty-input')) document.getElementById('dmg-qty-input').value = '';
+                            if (document.getElementById('dmg-note-area')) document.getElementById('dmg-note-area').value = '';
+
+                            if (document.getElementById('dmg-preview-name')) document.getElementById('dmg-preview-name').innerText = 'Chưa chọn sản phẩm';
+                            if (document.getElementById('dmg-preview-img')) {
+                                document.getElementById('dmg-preview-img').src = contextPath + '/assets/img/products/default.png';
+                            }
+                            if (typeof loadDamageTable === 'function') {
+                                loadDamageTable();
+                            }
+                        } else {
+                            alert("Thao tác thất bại: " + result.message);
+                        }
+                    })
+                    .catch(err => {
+                        console.error("Lỗi đường truyền API:", err);
+                        alert("Đã xảy ra lỗi hệ thống, không thể kết nối tới máy chủ.");
+                    });
+            });
+        }
+    });
+
+    document.addEventListener('click', function(event) {
+        var dmgWrapper = document.querySelector('.dmg-input-group');
+        var dmgDropdown = document.getElementById('search-dmg-dropdown');
+        if (dmgWrapper && !dmgWrapper.contains(event.target)) {
+            if (dmgDropdown) dmgDropdown.style.display = 'none';
+        }
+    });
+
+</script>
+<script>
+  // load bảng danh sách sp hư hỏng
+    function loadDamageTable() {
+        var contextPath = '${pageContext.request.contextPath}';
+        var tableBody = document.getElementById('damage-table-body');
+
+        if (!tableBody) {
+            console.warn("Không tìm thấy thẻ tBody với ID: damage-table-body");
+            return;
+        }
+
+        fetch(contextPath + '/api/admin/warehouse/damage')
+            .then(function(res) {
+                if (!res.ok) {
+                    throw new Error("Lỗi máy chủ trả về mã: " + res.status);
+                }
+                return res.json();
+            })
+            .then(function(data) {
+                tableBody.innerHTML = '';
+
+                if (!data || data.length === 0) {
+                    tableBody.innerHTML = '<tr><td colspan="4" style="text-align:center; color:#888; font-style:italic;">Chưa có báo cáo hư hỏng nào trong sổ kho.</td></tr>';
+                    return;
+                }
+
+                data.forEach(function(item) {
+
+                    var normalizedItem = {};
+                    for (var key in item) {
+                        if (item.hasOwnProperty(key)) {
+                            normalizedItem[key.toLowerCase()] = item[key];
+                        }
+                    }
+
+                    // Lấy dữ liệu an toàn từ object đã chuẩn hóa chữ thường
+                    var reportDate = normalizedItem['reportdate'] || 'N/A';
+                    var productName = normalizedItem['productname'] || 'Không rõ SP';
+                    var quantity = normalizedItem['quantity'] || 0;
+                    var note = normalizedItem['note'] || 'hư hỏng';
+
+                    var rowHtml = '<tr>' +
+                        '<td>' + reportDate + '</td>' +
+                        '<td>' + productName + '</td>' +
+                        '<td>' + quantity + '</td>' +
+                        '<td>' + (note.trim() !== '' ? note : 'hư hỏng') + '</td>' +
+                        '</tr>';
+
+                    tableBody.insertAdjacentHTML('beforeend', rowHtml);
+                });
+            })
+            .catch(function(err) {
+                console.error("Lỗi trong quá trình nạp danh sách hư hỏng:", err);
+            });
+    }
+
+
+    document.addEventListener('DOMContentLoaded', function() {
+        loadDamageTable();
+    });
 </script>
 
 </html>
