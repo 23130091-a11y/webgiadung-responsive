@@ -7,55 +7,35 @@ import java.util.List;
 
 public class Product implements Serializable {
     private int id; // id p
-
     private String name; // tên sp
-
     private String image; // ảnh chính
-
     private double firstPrice; // giá gốc
-
     private int discountsId; // id giảm giá (bảng discounts)
-
     private int categoriesId; // id danh mục
-
     private int brandsId; // id thương hiệu
-
     private int isVisible; // 0 - không hiển thị, 1 - hiển thị sp trên trang
-
     private int status; // 0 - tạm ngừng / ngừng bán hẳn, 1 - đang bán, 2 - hết hàng
-
     private int quantity; // số lượng kho
-
     private int soldQuantity; // số lượng đã bán
     private boolean isFavorite;
-
     private LocalDateTime createdAt; // ngày tạo
-
     private LocalDateTime updatedAt; // ngày update
-
     // Liên kết các bảng phụ
     private List<ProductDescriptions> descriptions = new ArrayList<>(); // mô tả sp
-
     private List<ProductDetails> details = new ArrayList<>(); // chi tiết sp
-
     private List<ProductImage> images = new ArrayList<>(); // Các ảnh khác của sp
-
     private List<ProductReview> reviews = new ArrayList<>(); // Đánh giá
-
     private List<Keywords> keywords = new ArrayList<>();
 
     // rating tính sẵn từ SQL (dùng cho trang list)
-
     private Double ratingAvg;
 
     public Double getRatingAvg() {
         return (ratingAvg != null) ? ratingAvg : 0.0;
-
     }
 
     public void setRatingAvg(Double ratingAvg) {
         this.ratingAvg = ratingAvg;
-
     }
 
     // Tính toán lại dùng đến sau
@@ -69,22 +49,18 @@ public class Product implements Serializable {
 
     public Double getDiscountPercent() {
         return discountPercent != null ? discountPercent : 0.0;
-
     }
 
     public void setDiscountPercent(Double discountPercent) {
         this.discountPercent = discountPercent;
-
     }
 
     public String getDiscountType() {
         return discountType;
-
     }
 
     public void setDiscountType(String discountType) {
         this.discountType = discountType;
-
     }
 
     public int getStatus() {
@@ -107,12 +83,10 @@ public class Product implements Serializable {
     // làm tròn để hiển thị sao
     public int getRatingInt() {
         return (int) Math.round(getRating());
-
     }
 
     public boolean getIsDiscounted() {
         return discountPercent != null && discountPercent > 0;
-
     }
 
     public Product() {}
@@ -131,7 +105,6 @@ public class Product implements Serializable {
         this.soldQuantity = soldQuantity;
         this.createdAt = createdAt;
         this.updatedAt = updatedAt;
-
     }
 
     public int getId() {

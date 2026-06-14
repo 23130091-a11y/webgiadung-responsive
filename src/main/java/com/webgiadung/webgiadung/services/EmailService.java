@@ -37,9 +37,6 @@ public class EmailService {
                     + "<h3>Cảm ơn bạn đã đăng ký!</h3>"
                     + "<p>Vui lòng nhấn vào nút bên dưới để kích hoạt tài khoản của bạn:</p>"
                     + "<a href=\"" + verifyLink + "\" style=\"display:inline-block; padding:12px 25px; background-color:#28a745; color:#ffffff; text-decoration:none; border-radius:5px; font-weight:bold;\">KÍCH HOẠT NGAY</a>"
-                    + "<br><br>"
-                    + "<p>Nếu nút trên không hoạt động, bạn hãy <b>copy và dán</b> liên kết này vào trình duyệt:</p>"
-                    + "<p style=\"color: #007bff; word-break: break-all;\">" + verifyLink + "</p>"
                     + "<hr>"
                     + "<p style=\"font-size: 12px; color: #777;\">Đây là email tự động, vui lòng không phản hồi email này.</p>"
                     + "</div>";
