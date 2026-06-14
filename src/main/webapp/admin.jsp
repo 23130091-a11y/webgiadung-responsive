@@ -4671,6 +4671,7 @@
             .catch(err => console.error("Không tải được giảm giá:", err));
     }
 
+
     function renderDiscountTable(discounts) {
         var container = document.getElementById('discount-list-container');
         if (!container) return;
@@ -4688,7 +4689,8 @@
 
         if (discounts && discounts.length > 0) {
             discounts.forEach(function (d) {
-                var discountDisplay = d.discount + "%";
+
+                var discountDisplay = d.displayValue;
 
                 html += '<article class="event-table__row">';
                 html += '    <div class="event-table__cell event-col-name">';
