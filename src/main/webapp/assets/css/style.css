@@ -1197,3 +1197,59 @@
     font-size: 1.4rem;
     color: #737373;
 }
+
+/* Khoảng cách cho phần tất cả sản phẩm */
+.all-products-section {
+    margin-top: 40px;
+    margin-bottom: 40px;
+}
+
+.section-title-all {
+    font-size: 2rem;
+    color: #333;
+    margin-bottom: 20px;
+    text-transform: uppercase;
+    font-weight: bold;
+}
+
+/* Thêm khoảng cách dưới cho mỗi block sản phẩm khi xuống hàng */
+.margin-bottom-20 {
+    margin-bottom: 20px;
+}
+
+/* Định dạng lại card riêng cho phần danh sách này để đảm bảo hiển thị dạng khối dọc chỉn chu */
+.product-card-all {
+    background-color: #fff;
+    border-radius: 4px;
+    padding: 10px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    transition: transform 0.2s;
+    height: 100%; /* Giúp các card cao bằng nhau trong cùng 1 hàng */
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.product-card-all:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+}
+
+.product-card-all img {
+    width: 100%;
+    height: auto;
+    object-fit: cover;
+    border-radius: 4px;
+}
+
+.product-card-all .product-name {
+    font-size: 1.4rem;
+    color: #333;
+    line-height: 1.8rem;
+    height: 3.6rem; /* Giới hạn hiển thị 2 dòng tên sản phẩm */
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+    margin: 10px 0;
+}

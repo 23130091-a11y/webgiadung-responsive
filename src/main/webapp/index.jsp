@@ -473,6 +473,70 @@
 <%--      </div>--%>
 <%--    </div>--%>
 <%--  </section>--%>
+
+  <section class="all-products-section">
+    <div class="grid wide">
+    <h2 class="section-title-all">Tất cả sản phẩm</h2>
+
+    <div class="row small-gutter">
+
+      <c:forEach items="${list}" var="p">
+        <div class="col l-3 m-4 c-6 margin-bottom-20">
+
+          <div class="product-card-all">
+            <a href="product?id=${p.id}" class="product-card-img-link">
+              <c:choose>
+                <c:when test="${fn:startsWith(p.image, 'assets/img/')}">
+                  <img src="${pageContext.request.contextPath}/${p.image}" alt="${p.name}">
+                </c:when>
+                <c:otherwise>
+                  <img src="${pageContext.request.contextPath}/assets/img/products/${p.image}" alt="${p.name}">
+                </c:otherwise>
+              </c:choose>
+            </a>
+
+            <a href="product?id=${p.id}">
+              <p class="product-name">${p.name}</p>
+            </a>
+
+            <div class="price-discount">
+              <c:if test="${p.isDiscounted}">
+                <div class="price-top">
+                      <span class="old-price">
+                        <fmt:formatNumber value="${p.firstPrice}" pattern="#,###"/>đ
+                      </span>
+                  <div class="discount-badge">
+                    <c:choose>
+                      <c:when test="${p.discountType eq 'percentage'}">
+                        Giảm ${p.discountPercent}%
+                      </c:when>
+                      <c:otherwise>
+                        Giảm <fmt:formatNumber value="${p.discountPercent}" pattern="#,###"/>đ
+                      </c:otherwise>
+                    </c:choose>
+                  </div>
+                </div>
+              </c:if>
+
+              <div class="price-bottom">
+                    <span class="new-price">
+                      <fmt:formatNumber value="${p.totalPrice}" pattern="#,###"/>đ
+                    </span>
+              </div>
+            </div>
+
+            <div class="bottom">
+              <div class="star"><i class="fa-solid fa-star"></i> ${p.ratingAvg}</div>
+              <button class="fav-btn ${p.favorite ? 'active' : ''}" data-product-id="${p.id}">
+                <i class="${p.favorite ? 'fa-solid' : 'fa-regular'} fa-heart"></i> Yêu thích
+              </button>
+            </div>
+          </div> </div>
+      </c:forEach>
+
+    </div>
+    </div>
+  </section>
 </main>
 <!-- Footer -->
 <jsp:include page="/common/footer.jsp" />
